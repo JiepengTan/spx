@@ -393,7 +393,6 @@ func (p *Game) loadIndex(g reflect.Value, proj *projConfig) (err error) {
 	if debugLoad {
 		log.Println("==> SetWorldSize", p.worldWidth_, p.worldHeight_)
 	}
-	p.world = ebiten.NewImage(p.worldWidth_, p.worldHeight_)
 	p.mapMode = toMapMode(proj.Map.Mode)
 
 	inits := make([]Spriter, 0, len(proj.Zorder))
@@ -412,17 +411,7 @@ func (p *Game) loadIndex(g reflect.Value, proj *projConfig) (err error) {
 	}
 
 	p.doWindowSize() // set window size
-	if debugLoad {
-		log.Println("==> SetWindowSize", p.windowWidth_, p.windowHeight_)
-	}
-	ebiten.SetWindowSize(p.windowWidth_, p.windowHeight_)
-	if p.windowWidth_ > p.worldWidth_ {
-		p.windowWidth_ = p.worldWidth_
-	}
-	if p.windowHeight_ > p.worldHeight_ {
-		p.windowHeight_ = p.worldHeight_
-	}
-	p.Camera.init(p, float64(p.windowWidth_), float64(p.windowHeight_), float64(p.worldWidth_), float64(p.worldHeight_))
+	p.onWindowSizeChanged()
 
 	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeOnlyFullscreenEnabled)
 	if proj.Camera != nil && proj.Camera.On != "" {
@@ -596,12 +585,19 @@ func (p *Game) checkWindowSize() {
 		winW, winH = ebiten.Monitor().Size()
 	}
 	if p.windowWidth_ != winW || p.windowHeight_ != winH {
-		//p.windowWidth_ = winW
-		//p.windowHeight_ = winH
+		p.windowWidth_ = winW
+		p.windowHeight_ = winH
 		p.onWindowSizeChanged()
 	}
 }
 func (p *Game) onWindowSizeChanged() {
+	if debugLoad {
+		log.Println("==> SetWindowSize", p.windowWidth_, p.windowHeight_)
+	}
+	ebiten.SetWindowSize(p.windowWidth_, p.windowHeight_)
+	p.world = ebiten.NewImage(p.windowWidth_, p.windowHeight_)
+	p.Camera.init(p, float64(p.windowWidth_), float64(p.windowHeight_), float64(p.worldWidth_), float64(p.worldHeight_))
+
 	println("window size changed to", p.windowWidth_, p.windowHeight_)
 }
 
