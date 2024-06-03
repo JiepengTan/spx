@@ -578,6 +578,8 @@ func (p *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeigh
 }
 
 func (p *Game) Update() error {
+	p.checkWindowSize()
+
 	if !p.isLoaded {
 		return nil
 	}
@@ -586,6 +588,21 @@ func (p *Game) Update() error {
 	p.sounds.update()
 	p.tickMgr.update()
 	return nil
+}
+
+func (p *Game) checkWindowSize() {
+	winW, winH := ebiten.WindowSize()
+	if winW == 0 || winH == 0 {
+		winW, winH = ebiten.Monitor().Size()
+	}
+	if p.windowWidth_ != winW || p.windowHeight_ != winH {
+		//p.windowWidth_ = winW
+		//p.windowHeight_ = winH
+		p.onWindowSizeChanged()
+	}
+}
+func (p *Game) onWindowSizeChanged() {
+	println("window size changed to", p.windowWidth_, p.windowHeight_)
 }
 
 // startTick creates tickHandler to handle `onTick` event.
