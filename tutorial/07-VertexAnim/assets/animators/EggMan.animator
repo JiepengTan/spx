@@ -1,0 +1,12 @@
+{
+	"type": "vertex",
+	"defaultClip": "run",
+	"clips": [
+		{
+			"name": "run",
+			"loop": true,
+			"frameRate": 30,
+			"path": "animations/EggMan@Run.anim"
+		}
+	]
+}

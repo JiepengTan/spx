@@ -1,0 +1,13 @@
+{
+	"type": "vertex",
+	"image": "avatars/EggMan.png",
+	"mesh": "avatars/EggMan.vtxmesh",
+	"scale": {
+		"x": 200,
+		"y": 200
+	},
+	"offset": {
+		"x": 0,
+		"y": 0.35
+	}
+}
