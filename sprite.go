@@ -97,9 +97,10 @@ type Sprite struct {
 	hasOnCloned  bool
 	hasOnTouched bool
 
-	gamer             reflect.Value
-	lastAnim          *anim.Anim
-	isWaitingStopAnim bool
+	gamer               reflect.Value
+	lastAnim            *anim.Anim
+	isWaitingStopAnim   bool
+	defaultCostumeIndex int
 }
 
 func (p *Sprite) SetDying() { // dying: visible but can't be touched
@@ -523,6 +524,7 @@ func (p *Sprite) SetCostume(costume interface{}) {
 		log.Println("SetCostume", p.name, costume)
 	}
 	p.goSetCostume(costume)
+	p.defaultCostumeIndex = p.costumeIndex_
 }
 
 func (p *Sprite) NextCostume() {
@@ -530,6 +532,7 @@ func (p *Sprite) NextCostume() {
 		log.Println("NextCostume", p.name)
 	}
 	p.goNextCostume()
+	p.defaultCostumeIndex = p.costumeIndex_
 }
 
 func (p *Sprite) PrevCostume() {
@@ -537,6 +540,7 @@ func (p *Sprite) PrevCostume() {
 		log.Println("PrevCostume", p.name)
 	}
 	p.goPrevCostume()
+	p.defaultCostumeIndex = p.costumeIndex_
 }
 
 // -----------------------------------------------------------------------------
@@ -882,13 +886,21 @@ func (p *Sprite) Step__2(step float64, animname string) {
 
 func (p *Sprite) playDefaultAnim() {
 	animName := p.defaultAnimation
-	if animName != "" && p.isVisible {
-		if ani, ok := p.animations[animName]; ok {
-			anicopy := *ani
-			anicopy.IsLoop = true
-			p.goAnimate(animName, &anicopy)
+	if p.isVisible {
+		isPlayAnim := false
+		if animName != "" {
+			if ani, ok := p.animations[animName]; ok {
+				isPlayAnim = true
+				anicopy := *ani
+				anicopy.IsLoop = true
+				p.goAnimate(animName, &anicopy)
+			}
+		}
+		if !isPlayAnim {
+			p.goSetCostume(p.defaultCostumeIndex)
 		}
 	}
+
 }
 
 // Goto func:
@@ -1103,8 +1115,8 @@ func (p *Sprite) setDirection(dir float64, change bool) bool {
 
 func (p *Sprite) doTurnTogether(ti *TurningInfo) {
 	/*
-		x’ = x0 + cos * (x-x0) + sin * (y-y0)
-		y’ = y0 - sin * (x-x0) + cos * (y-y0)
+	 x’ = x0 + cos * (x-x0) + sin * (y-y0)
+	 y’ = y0 - sin * (x-x0) + cos * (y-y0)
 	*/
 	x0, y0 := ti.Obj.x, ti.Obj.y
 	dir := ti.Dir()
@@ -1461,16 +1473,16 @@ func (p *Sprite) Bounds() *math32.RotatedRect {
 }
 
 /*
-func (p *Sprite) Pixel(x, y float64) color.Color {
-	c2 := p.costumes[p.costumeIndex_]
-	img, cx, cy := c2.needImage(p.g.fs)
-	geo := p.getDrawInfo().getPixelGeo(cx, cy)
-	color1, p1 := p.getDrawInfo().getPixel(math32.NewVector2(x, y), img, geo)
-	if debugInstr {
-		log.Printf("<<<< getPixel x, y(%f,%F) p1(%v) color1(%v) geo(%v)  ", x, y, p1, color1, geo)
-	}
-	return color1
-}
+ func (p *Sprite) Pixel(x, y float64) color.Color {
+	 c2 := p.costumes[p.costumeIndex_]
+	 img, cx, cy := c2.needImage(p.g.fs)
+	 geo := p.getDrawInfo().getPixelGeo(cx, cy)
+	 color1, p1 := p.getDrawInfo().getPixel(math32.NewVector2(x, y), img, geo)
+	 if debugInstr {
+		 log.Printf("<<<< getPixel x, y(%f,%F) p1(%v) color1(%v) geo(%v)  ", x, y, p1, color1, geo)
+	 }
+	 return color1
+ }
 */
 
 // -----------------------------------------------------------------------------
