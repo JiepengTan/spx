@@ -37,6 +37,8 @@ github.com/qiniu/oksvg v0.2.0-no-charset/go.mod h1:YCAOS1HFo2kMxfcFCjrJMeo93KGFY
 github.com/qiniu/x v1.11.5/go.mod h1:03Ni9tj+N2h2aKnAz+6N0Xfl8FwMEDRC2PAlxekASDs=
 github.com/qiniu/x v1.13.10 h1:J4Z3XugYzAq85SlyAfqlKVrbf05glMbAOh+QncsDQpE=
 github.com/qiniu/x v1.13.10/go.mod h1:INZ2TSWSJVWO/RuELQROERcslBwVgFG7MkTfEdaQz9E=
+github.com/realdream-ai/gdspx v0.0.0-20240920103647-dea90e6145f5 h1:wCCRyRz940NM1IuYm5Fja+U7Dri38pgppYHlnU/yGBI=
+github.com/realdream-ai/gdspx v0.0.0-20240920103647-dea90e6145f5/go.mod h1:Z6e8IbPneejA965az5InKOJJ6zndCFv02nDQwe5cLdo=
 github.com/srwiley/rasterx v0.0.0-20200120212402-85cb7272f5e9/go.mod h1:mvWM0+15UqyrFKqdRjY6LuAVJR0HOVhJlEgZ5JWtSWU=
 github.com/srwiley/rasterx v0.0.0-20210519020934-456a8d69b780 h1:oDMiXaTMyBEuZMU53atpxqYsSB3U1CHkeAu2zr6wTeY=
 github.com/srwiley/rasterx v0.0.0-20210519020934-456a8d69b780/go.mod h1:mvWM0+15UqyrFKqdRjY6LuAVJR0HOVhJlEgZ5JWtSWU=

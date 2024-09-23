@@ -20,9 +20,7 @@ import (
 	"flag"
 	"fmt"
 	"image"
-	"image/color"
 	"log"
-	"math"
 	"math/rand"
 	"os"
 	"path/filepath"
@@ -33,9 +31,9 @@ import (
 
 	"github.com/goplus/spx/internal/audiorecord"
 	"github.com/goplus/spx/internal/coroutine"
+	"github.com/goplus/spx/internal/engine"
 	"github.com/goplus/spx/internal/gdi"
 	"github.com/goplus/spx/internal/math32"
-	"github.com/hajimehoshi/ebiten/v2"
 
 	spxfs "github.com/goplus/spx/fs"
 	_ "github.com/goplus/spx/fs/asset"
@@ -93,7 +91,6 @@ type Game struct {
 	worldWidth_  int
 	worldHeight_ int
 	mapMode      int
-	world        *ebiten.Image
 
 	// window
 	windowWidth_  int
@@ -182,6 +179,7 @@ func (p *Game) initGame(sprites []Spriter) *Game {
 
 // Gopt_Game_Main is required by Go+ compiler as the entry of a .gmx project.
 func Gopt_Game_Main(game Gamer, sprites ...Spriter) {
+	engine.GdspxMain()
 	g := game.initGame(sprites)
 	if me, ok := game.(interface{ MainEntry() }); ok {
 		me.MainEntry()
@@ -241,7 +239,7 @@ func Gopt_Game_Run(game Gamer, resource interface{}, gameConf ...*Config) {
 		key = os.Getenv("SPX_SCREENSHOT_KEY")
 	}
 	if key != "" {
-		err := os.Setenv("EBITEN_SCREENSHOT_KEY", key)
+		err := os.Setenv("engine_SCREENSHOT_KEY", key)
 		if err != nil {
 			panic(err)
 		}
@@ -422,7 +420,6 @@ func (p *Game) loadIndex(g reflect.Value, proj *projConfig) (err error) {
 	if debugLoad {
 		log.Println("==> SetWorldSize", p.worldWidth_, p.worldHeight_)
 	}
-	p.world = ebiten.NewImage(p.worldWidth_, p.worldHeight_)
 	p.mapMode = toMapMode(proj.Map.Mode)
 
 	inits := make([]Spriter, 0, len(proj.Zorder))
@@ -450,7 +447,7 @@ func (p *Game) loadIndex(g reflect.Value, proj *projConfig) (err error) {
 	if debugLoad {
 		log.Println("==> SetWindowSize", p.windowWidth_, p.windowHeight_)
 	}
-	ebiten.SetWindowSize(p.windowWidth_, p.windowHeight_)
+	engine.SetWindowSize(p.windowWidth_, p.windowHeight_)
 	if p.windowWidth_ > p.worldWidth_ {
 		p.windowWidth_ = p.worldWidth_
 	}
@@ -459,7 +456,6 @@ func (p *Game) loadIndex(g reflect.Value, proj *projConfig) (err error) {
 	}
 	p.Camera.init(p, float64(p.windowWidth_), float64(p.windowHeight_), float64(p.worldWidth_), float64(p.worldHeight_))
 
-	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeOnlyFullscreenEnabled)
 	if proj.Camera != nil && proj.Camera.On != "" {
 		p.Camera.On(proj.Camera.On)
 	}
@@ -598,15 +594,15 @@ func (p *Game) runLoop(cfg *Config) (err error) {
 		log.Println("==> RunLoop")
 	}
 	if !cfg.DontRunOnUnfocused {
-		ebiten.SetRunnableOnUnfocused(true)
+		engine.SetRunnableOnUnfocused(true)
 	}
 	if cfg.FullScreen {
-		ebiten.SetFullscreen(true)
+		engine.SetFullscreen(true)
 	}
 	p.isRunned = true
 	p.initEventLoop()
-	ebiten.SetWindowTitle(cfg.Title)
-	return ebiten.RunGame(p)
+	engine.SetWindowTitle(cfg.Title)
+	return engine.RunGame(p)
 }
 
 func (p *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
@@ -634,12 +630,6 @@ func (p *Game) startTick(duration int64, onTick func(tick int64)) *tickHandler {
 // that represents how many update function is called in a second.
 func (p *Game) currentTPS() float64 {
 	return p.tickMgr.currentTPS
-}
-
-func (p *Game) Draw(screen *ebiten.Image) {
-	dc := drawContext{Image: p.world}
-	p.onDraw(dc)
-	p.Camera.render(dc.Image, screen)
 }
 
 type clicker interface {
@@ -1003,102 +993,6 @@ func (p *Game) findSprite(name string) *Sprite {
 }
 
 // -----------------------------------------------------------------------------
-
-func (p *Game) drawBackground(dc drawContext) {
-	c := p.costumes[p.costumeIndex_]
-	img, _, _ := c.needImage(p.fs)
-	options := new(ebiten.DrawTrianglesOptions)
-	options.Filter = ebiten.FilterLinear
-
-	if p.mapMode == mapModeRepeat {
-		bgImage := img.Ebiten()
-		imgW := float64(img.Bounds().Dx())
-		imgH := float64(img.Bounds().Dy())
-		winW := float64(p.windowWidth_)
-		winH := float64(p.windowHeight_)
-		numW := int(math.Ceil(winW/imgW/2 - 0.5))
-		numH := int(math.Ceil(winH/imgH/2 - 0.5))
-		rawOffsetW := float64(p.worldWidth_-p.windowWidth_) / 2.0
-		rawOffsetH := float64(p.worldHeight_-p.windowHeight_) / 2.0
-		offsetW := rawOffsetW + winW*0.5 - imgW*0.5 // draw from center
-		offsetH := rawOffsetH + winH*0.5 - imgH*0.5
-		for w := -numW; w <= numW; w++ {
-			for h := -numH; h <= numH; h++ {
-				op := &ebiten.DrawImageOptions{}
-				op.GeoM.Translate(imgW*float64(w)+offsetW, imgH*float64(h)+offsetH)
-				dc.DrawImage(bgImage, op)
-			}
-		}
-
-	} else {
-		var imgW, imgH, dstW, dstH float32
-		imgW = float32(img.Bounds().Dx())
-		imgH = float32(img.Bounds().Dy())
-		worldW := float32(p.worldWidth_)
-		worldH := float32(p.worldHeight_)
-
-		options.Address = ebiten.AddressClampToZero
-		imgRadio := (imgW / imgH)
-		worldRadio := (worldW / worldH)
-		// scale image's height to fit world's height
-		isScaleHeight := imgRadio > worldRadio
-		switch p.mapMode {
-		default:
-			dstW = worldW
-			dstH = worldH
-		case mapModeFillCut:
-			if isScaleHeight {
-				dstW = worldW
-				dstH = dstW / imgRadio
-			} else {
-				dstH = worldH
-				dstW = dstH * imgRadio
-			}
-		case mapModeFillRatio:
-			if isScaleHeight {
-				dstH = worldH
-				dstW = dstH * imgRadio
-			} else {
-				dstW = worldW
-				dstH = dstW / imgRadio
-			}
-		}
-
-		var cx, cy float32
-		cx = (worldW - dstW) / 2.0
-		cy = (worldH - dstH) / 2.0
-		vs := []ebiten.Vertex{
-			{
-				DstX: cx, DstY: cy, SrcX: 0, SrcY: 0,
-				ColorR: 1, ColorG: 1, ColorB: 1, ColorA: 1,
-			},
-			{
-				DstX: dstW + cx, DstY: cy, SrcX: imgW, SrcY: 0,
-				ColorR: 1, ColorG: 1, ColorB: 1, ColorA: 1,
-			},
-			{
-				DstX: cx, DstY: dstH + cy, SrcX: 0, SrcY: imgH,
-				ColorR: 1, ColorG: 1, ColorB: 1, ColorA: 1,
-			},
-			{
-				DstX: dstW + cx, DstY: dstH + cy, SrcX: imgW, SrcY: imgH,
-				ColorR: 1, ColorG: 1, ColorB: 1, ColorA: 1,
-			},
-		}
-		dc.DrawTriangles(vs, []uint16{0, 1, 2, 1, 2, 3}, img.Ebiten(), options)
-	}
-}
-
-func (p *Game) onDraw(dc drawContext) {
-	dc.Fill(color.White)
-	p.drawBackground(dc)
-	p.getTurtle().draw(dc, p.fs)
-
-	items := p.getItems()
-	for _, item := range items {
-		item.draw(dc)
-	}
-}
 
 func (p *Game) onHit(hc hitContext) (hr hitResult, ok bool) {
 	items := p.getItems()
