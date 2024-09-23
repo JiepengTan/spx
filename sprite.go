@@ -24,7 +24,8 @@ import (
 	"sync"
 
 	"github.com/goplus/spx/internal/anim"
-	"github.com/goplus/spx/internal/gdi/clrutil"
+	"github.com/goplus/spx/internal/engine"
+	"github.com/goplus/spx/internal/gdi"
 	"github.com/goplus/spx/internal/math32"
 	"github.com/goplus/spx/internal/tools"
 )
@@ -71,6 +72,7 @@ type Sprite struct {
 	x, y          float64
 	scale         float64
 	direction     float64
+	initDirection float64
 	rotationStyle RotationStyle
 	rRect         *math32.RotatedRect
 	pivot         math32.Vector2
@@ -101,6 +103,21 @@ type Sprite struct {
 	lastAnim            *anim.Anim
 	isWaitingStopAnim   bool
 	defaultCostumeIndex int
+
+	collisionMask  int64
+	collisionLayer int64
+	triggerMask    int64
+	triggerLayer   int64
+
+	colliderType   int64
+	colliderCenter math32.Vector2
+	colliderSize   math32.Vector2
+	colliderRadius float64
+
+	triggerType   int64
+	triggerCenter math32.Vector2
+	triggerSize   math32.Vector2
+	triggerRadius float64
 }
 
 func (p *Sprite) SetDying() { // dying: visible but can't be touched
@@ -116,11 +133,11 @@ func (p *Sprite) getAllShapes() []Shape {
 }
 
 func (p *Sprite) init(
-	base string, g *Game, name string, sprite *spriteConfig, gamer reflect.Value, shared *sharedImages) {
+	base string, g *Game, name string, sprite *spriteConfig, gamer reflect.Value) {
 	if sprite.Costumes != nil {
 		p.baseObj.init(base, sprite.Costumes, sprite.getCostumeIndex())
 	} else {
-		p.baseObj.initWith(base, sprite, shared)
+		p.baseObj.initWith(base, sprite)
 	}
 	p.defaultCostumeIndex = p.baseObj.costumeIndex_
 	p.eventSinks.init(&g.sinkMgr, p)
@@ -130,6 +147,7 @@ func (p *Sprite) init(
 	p.x, p.y = sprite.X, sprite.Y
 	p.scale = sprite.Size
 	p.direction = sprite.Heading
+	p.initDirection = sprite.Heading
 	p.rotationStyle = toRotationStyle(sprite.RotationStyle)
 	p.isVisible = sprite.Visible
 	p.pivot = sprite.Pivot
@@ -138,6 +156,22 @@ func (p *Sprite) init(
 	for key, val := range sprite.AnimBindings {
 		p.animBindings[key] = val
 	}
+
+	// bind physic config
+	p.collisionMask = sprite.CollisionMask
+	p.collisionLayer = sprite.CollisionLayer
+	p.triggerMask = sprite.TriggerMask
+	p.triggerLayer = sprite.TriggerLayer
+
+	p.colliderType = paserColliderType(sprite.ColliderType)
+	p.colliderCenter = sprite.ColliderCenter
+	p.colliderSize = sprite.ColliderSize
+	p.colliderRadius = sprite.ColliderRadius
+
+	p.triggerType = paserColliderType(sprite.TriggerType)
+	p.triggerCenter = sprite.TriggerCenter
+	p.triggerSize = sprite.TriggerSize
+	p.triggerRadius = sprite.TriggerRadius
 
 	p.defaultAnimation = sprite.DefaultAnimation
 	p.animations = make(map[string]*aniConfig)
@@ -225,6 +259,7 @@ func (p *Sprite) init(
 		p.animations[key] = ani
 	}
 }
+
 func (p *Sprite) awake() {
 	p.playDefaultAnim()
 }
@@ -325,11 +360,11 @@ func cloneSprite(out reflect.Value, outPtr Spriter, in reflect.Value, v specsp) 
 	return dest
 }
 
-func Gopt_Sprite_Clone__0(sprite Spriter) {
-	Gopt_Sprite_Clone__1(sprite, nil)
+func Gopt_Sprite_Clone__0(sprite Spriter) *Sprite {
+	return Gopt_Sprite_Clone__1(sprite, nil)
 }
 
-func Gopt_Sprite_Clone__1(sprite Spriter, data interface{}) {
+func Gopt_Sprite_Clone__1(sprite Spriter, data interface{}) *Sprite {
 	src := spriteOf(sprite)
 	if debugInstr {
 		log.Println("Clone", src.name)
@@ -342,9 +377,11 @@ func Gopt_Sprite_Clone__1(sprite Spriter, data interface{}) {
 	if dest.hasOnCloned {
 		dest.doWhenCloned(dest, data)
 	}
+	return dest
 }
 
 func (p *Sprite) OnCloned__0(onCloned func(data interface{})) {
+	p.proxy = nil
 	p.hasOnCloned = true
 	p.allWhenCloned = &eventSink{
 		prev:  p.allWhenCloned,
@@ -357,6 +394,7 @@ func (p *Sprite) OnCloned__0(onCloned func(data interface{})) {
 }
 
 func (p *Sprite) OnCloned__1(onCloned func()) {
+	p.proxy = nil
 	p.OnCloned__0(func(interface{}) {
 		onCloned()
 	})
@@ -509,6 +547,7 @@ func (p *Sprite) Destroy() { // destroy sprite, whether prototype or cloned
 	if p == gco.Current().Obj {
 		gco.Abort()
 	}
+	p.HasDestroyed = true
 }
 
 // delete only cloned sprite, no effect on prototype sprite.
@@ -585,7 +624,6 @@ func (p *Sprite) getFromAnToForAni(anitype aniTypeEnum, from interface{}, to int
 	if anitype == aniTypeFrame {
 		return p.getFromAnToForAniFrames(from, to)
 	}
-
 	return from, to
 
 }
@@ -659,8 +697,8 @@ func (p *Sprite) goAnimateInternal(name string, ani *aniConfig, isBlocking bool)
 	} else {
 		if ani.AniType != aniTypeGlide {
 			// glide animation, the type of value is vector2, not float
-			fromvalf = fromval.(float64)
-			tovalf = toval.(float64)
+			fromvalf, _ = tools.GetFloat(fromval)
+			tovalf, _ = tools.GetFloat(toval)
 		}
 	}
 
@@ -895,7 +933,11 @@ func (p *Sprite) doMoveToForAnim(x, y float64, ani *anim.Anim) {
 		p.g.movePen(p, x, y)
 	}
 	p.x, p.y = x, y
-	p.getDrawInfo().updateMatrix()
+	p.updateMatrix()
+}
+
+func (p *Sprite) updateMatrix() {
+	// TODO(tanjp) update matrix, ps:remove this function
 }
 
 func (p *Sprite) goMoveForward(step float64) {
@@ -1059,6 +1101,9 @@ func (p *Sprite) SetRotationStyle(style RotationStyle) {
 func (p *Sprite) Heading() float64 {
 	return p.direction
 }
+func (p *Sprite) Name() string {
+	return p.name
+}
 
 // Turn func:
 //
@@ -1165,7 +1210,7 @@ func (p *Sprite) setDirection(dir float64, change bool) bool {
 		p.doWhenTurning(p, &TurningInfo{NewDir: dir, OldDir: p.direction, Obj: p})
 	}
 	p.direction = dir
-	p.getDrawInfo().updateMatrix()
+	p.updateMatrix()
 	return true
 }
 
@@ -1193,7 +1238,7 @@ func (p *Sprite) SetSize(size float64) {
 		log.Println("SetSize", p.name, size)
 	}
 	p.scale = size
-	p.getDrawInfo().updateMatrix()
+	p.updateMatrix()
 }
 
 func (p *Sprite) ChangeSize(delta float64) {
@@ -1201,7 +1246,7 @@ func (p *Sprite) ChangeSize(delta float64) {
 		log.Println("ChangeSize", p.name, delta)
 	}
 	p.scale += delta
-	p.getDrawInfo().updateMatrix()
+	p.updateMatrix()
 }
 
 // -----------------------------------------------------------------------------
@@ -1239,15 +1284,7 @@ func (p *Sprite) ClearGraphEffects() {
 type Color = color.RGBA
 
 func (p *Sprite) TouchingColor(color Color) bool {
-	for _, item := range p.g.items {
-		if sp, ok := item.(*Sprite); ok && sp != p {
-			ret := p.touchedColor_(sp, color)
-			if ret {
-				return true
-			}
-		}
-	}
-	return false
+	panic("todo gdspx")
 }
 
 // Touching func:
@@ -1267,7 +1304,6 @@ func (p *Sprite) Touching(obj interface{}) bool {
 	switch v := obj.(type) {
 	case string:
 		if o := p.g.touchingSpriteBy(p, v); o != nil {
-			o.fireTouched(p)
 			return true
 		}
 		return false
@@ -1345,47 +1381,11 @@ func checkTouchingDirection(dir float64) int {
 }
 
 func (p *Sprite) checkTouchingScreen(where int) (touching int) {
-	rect := p.getRotatedRect()
-	if rect == nil {
-		return
+	value := engine.SyncPhysicCheckTouchedCameraBoundary(p.proxy.Id, int64(where))
+	if value {
+		return where
 	}
-	plist := rect.Points()
-	w, h := p.g.worldSize_()
-
-	edge := 2.0
-
-	for _, val := range plist {
-		if val.X < float64(-w/2) && (where&touchingScreenLeft) != 0 {
-			//w/2-edge,-h/2   edge,h
-			rect := math32.NewRotatedRect1(math32.NewRect(float64(-w/2)-edge, float64(-h/2), edge, float64(h)))
-			if p.touchRotatedRect(rect) {
-				return touchingScreenLeft
-			}
-		}
-		if val.Y > float64(h/2) && (where&touchingScreenTop) != 0 {
-			//w/2,h/2+edge   w,edge
-			rect := math32.NewRotatedRect1(math32.NewRect(float64(-w/2), float64(h/2)+edge, float64(w), edge))
-			if p.touchRotatedRect(rect) {
-				return touchingScreenTop
-			}
-		}
-		if val.X > float64(w/2) && (where&touchingScreenRight) != 0 {
-			//w/2,-h/2   edge,h
-			rect := math32.NewRotatedRect1(math32.NewRect(float64(w/2), float64(-h/2), edge, float64(h)))
-			if p.touchRotatedRect(rect) {
-				return touchingScreenRight
-			}
-		}
-		if val.Y < float64(-h/2) && (where&touchingScreenBottom) != 0 {
-			//w/2,-h/2  w, edge
-			rect := math32.NewRotatedRect1(math32.NewRect(float64(-w/2), float64(-h/2), float64(w), edge))
-			if p.touchRotatedRect(rect) {
-				return touchingScreenBottom
-			}
-		}
-	}
-
-	return
+	return 0
 }
 
 // -----------------------------------------------------------------------------
@@ -1405,7 +1405,7 @@ func (p *Sprite) GotoBack() {
 // -----------------------------------------------------------------------------
 
 func (p *Sprite) Stamp() {
-	p.g.stampCostume(p.getDrawInfo())
+	p.g.stampCostume(p)
 }
 
 func (p *Sprite) PenUp() {
@@ -1417,7 +1417,7 @@ func (p *Sprite) PenDown() {
 }
 
 func (p *Sprite) SetPenColor(color Color) {
-	h, _, v := clrutil.RGB2HSV(color.R, color.G, color.B)
+	h, _, v := gdi.RGB2HSV(color.R, color.G, color.B)
 	p.penHue = (200 * h) / 360
 	p.penShade = 50 * v
 	p.penColor = color
@@ -1468,15 +1468,15 @@ func (p *Sprite) setPenShade(v float64, change bool) {
 }
 
 func (p *Sprite) doUpdatePenColor() {
-	r, g, b := clrutil.HSV2RGB((p.penHue*180)/100, 1, 1)
+	r, g, b := gdi.HSV2RGB((p.penHue*180)/100, 1, 1)
 	shade := p.penShade
 	if shade > 100 { // range 0..100
 		shade = 200 - shade
 	}
 	if shade < 50 {
-		r, g, b = clrutil.MixRGB(0, 0, 0, r, g, b, (10+shade)/60)
+		r, g, b = gdi.MixRGB(0, 0, 0, r, g, b, (10+shade)/60)
 	} else {
-		r, g, b = clrutil.MixRGB(r, g, b, 255, 255, 255, (shade-50)/60)
+		r, g, b = gdi.MixRGB(r, g, b, 255, 255, 255, (shade-50)/60)
 	}
 	p.penColor = color.RGBA{R: r, G: g, B: b, A: p.penColor.A}
 }
@@ -1511,68 +1511,26 @@ func (p *Sprite) ShowVar(name string) {
 // CostumeWidth returns width of sprite current costume.
 func (p *Sprite) CostumeWidth() float64 {
 	c := p.costumes[p.costumeIndex_]
-	img, _, _ := c.needImage(p.g.fs)
-	w, _ := img.Size()
-	return float64(w / c.bitmapResolution)
+	w, _ := c.getSize()
+	return float64(w)
 }
 
 // CostumeHeight returns height of sprite current costume.
 func (p *Sprite) CostumeHeight() float64 {
 	c := p.costumes[p.costumeIndex_]
-	img, _, _ := c.needImage(p.g.fs)
-	_, h := img.Size()
-	return float64(h / c.bitmapResolution)
+	_, h := c.getSize()
+	return float64(h)
 }
 
 func (p *Sprite) Bounds() *math32.RotatedRect {
-	return p.getRotatedRect()
+	if !p.isVisible {
+		return nil
+	}
+	return nil // TODO(tanjp) fixed by engine api
 }
-
-/*
- func (p *Sprite) Pixel(x, y float64) color.Color {
-	 c2 := p.costumes[p.costumeIndex_]
-	 img, cx, cy := c2.needImage(p.g.fs)
-	 geo := p.getDrawInfo().getPixelGeo(cx, cy)
-	 color1, p1 := p.getDrawInfo().getPixel(math32.NewVector2(x, y), img, geo)
-	 if debugInstr {
-		 log.Printf("<<<< getPixel x, y(%f,%F) p1(%v) color1(%v) geo(%v)  ", x, y, p1, color1, geo)
-	 }
-	 return color1
- }
-*/
 
 // -----------------------------------------------------------------------------
 
 func (p *Sprite) fixWorldRange(x, y float64) (float64, float64) {
-	rect := p.getDrawInfo().getUpdateRotateRect(x, y)
-	if rect == nil {
-		return x, y
-	}
-	plist := rect.Points()
-	for _, val := range plist {
-		if p.g.isWorldRange(val) {
-			return x, y
-		}
-	}
-
-	worldW, worldH := p.g.worldSize_()
-	maxW := float64(worldW)/2.0 + float64(rect.Size.Width)
-	maxH := float64(worldH)/2.0 + float64(rect.Size.Height)
-
-	if x < -maxW {
-		x = -maxW
-	}
-	if x > maxW {
-		x = maxW
-	}
-	if y < -maxH {
-		y = -maxH
-	}
-	if y > maxH {
-		y = maxH
-	}
-
 	return x, y
 }
-
-// -----------------------------------------------------------------------------
