@@ -28,6 +28,7 @@ import (
 	"github.com/pkg/errors"
 
 	spxfs "github.com/goplus/spx/fs"
+	"github.com/goplus/spx/internal/engine"
 	"github.com/goplus/spx/internal/gdi"
 )
 
@@ -178,6 +179,7 @@ type costume struct {
 	img              delayloadImage
 	faceRight        float64
 	bitmapResolution int
+	path             string
 }
 
 func newCostumeWithSize(width, height int) *costume {
@@ -201,12 +203,14 @@ func newCostumeWith(name string, img *costumeSetImage, faceRight float64, i, bit
 }
 
 func newCostume(base string, c *costumeConfig) *costume {
-	loader := imageLoaderByPath(path.Join(base, c.Path))
+	path := path.Join(base, c.Path)
+	loader := imageLoaderByPath(path)
 	return &costume{
 		name:             c.Name,
 		img:              delayloadImage{loader: loader, pt: imagePoint{c.X, c.Y}},
 		faceRight:        c.FaceRight,
 		bitmapResolution: toBitmapResolution(c.BitmapResolution),
+		path:             path,
 	}
 }
 
@@ -229,6 +233,7 @@ func (p *costume) needImage(fs spxfs.Dir) (gdi.Image, float64, float64) {
 type baseObj struct {
 	costumes      []*costume
 	costumeIndex_ int
+	proxy         *engine.ProxySprite
 }
 
 func (p *baseObj) initWith(base string, sprite *spriteConfig, shared *sharedImages) {
@@ -245,6 +250,7 @@ func (p *baseObj) initWith(base string, sprite *spriteConfig, shared *sharedImag
 		costumeIndex = 0
 	}
 	p.costumeIndex_ = costumeIndex
+	p.onCostumeChange()
 }
 
 func initWithCMPS(p *baseObj, base string, cmps *costumeMPSet, shared *sharedImages) {
@@ -310,6 +316,7 @@ func (p *baseObj) initBackdrops(base string, costumes []*backdropConfig, costume
 		costumeIndex = 0
 	}
 	p.costumeIndex_ = costumeIndex
+	p.onCostumeChange()
 }
 
 func (p *baseObj) init(base string, costumes []*costumeConfig, costumeIndex int) {
@@ -321,6 +328,7 @@ func (p *baseObj) init(base string, costumes []*costumeConfig, costumeIndex int)
 		costumeIndex = 0
 	}
 	p.costumeIndex_ = costumeIndex
+	p.onCostumeChange()
 }
 
 func (p *baseObj) initWithSize(width, height int) {
@@ -369,11 +377,15 @@ func (p *baseObj) setCostumeByIndex(idx int) bool {
 	}
 	if p.costumeIndex_ != idx {
 		p.costumeIndex_ = idx
+		p.onCostumeChange()
 		return true
 	}
 	return false
 }
-
+func (p *baseObj) onCostumeChange() {
+	path := p.getCostumePath()
+	p.proxy.OnCustomeChanged(path)
+}
 func (p *baseObj) setCostumeByName(name string) bool {
 	if idx := p.findCostume(name); idx >= 0 {
 		return p.setCostumeByIndex(idx)
@@ -395,6 +407,9 @@ func (p *baseObj) getCostumeIndex() int {
 
 func (p *baseObj) getCostumeName() string {
 	return p.costumes[p.costumeIndex_].name
+}
+func (p *baseObj) getCostumePath() string {
+	return p.costumes[p.costumeIndex_].path
 }
 
 // -------------------------------------------------------------------------------------

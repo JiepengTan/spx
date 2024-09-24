@@ -24,6 +24,7 @@ import (
 	"sync"
 
 	"github.com/goplus/spx/internal/anim"
+	"github.com/goplus/spx/internal/engine"
 	"github.com/goplus/spx/internal/gdi/clrutil"
 	"github.com/goplus/spx/internal/math32"
 	"github.com/goplus/spx/internal/tools"
@@ -117,6 +118,7 @@ func (p *Sprite) getAllShapes() []Shape {
 
 func (p *Sprite) init(
 	base string, g *Game, name string, sprite *spriteConfig, gamer reflect.Value, shared *sharedImages) {
+	p.proxy = engine.NewSpriteProxy()
 	if sprite.Costumes != nil {
 		p.baseObj.init(base, sprite.Costumes, sprite.getCostumeIndex())
 	} else {
@@ -509,6 +511,7 @@ func (p *Sprite) Destroy() { // destroy sprite, whether prototype or cloned
 	if p == gco.Current().Obj {
 		gco.Abort()
 	}
+	p.proxy.Destroy()
 }
 
 // delete only cloned sprite, no effect on prototype sprite.
@@ -527,6 +530,7 @@ func (p *Sprite) Hide() {
 	}
 	p.doStopSay()
 	p.isVisible = false
+	p.proxy.SetVisible(false)
 }
 
 func (p *Sprite) Show() {
@@ -534,6 +538,7 @@ func (p *Sprite) Show() {
 		log.Println("Show", p.name)
 	}
 	p.isVisible = true
+	p.proxy.SetVisible(true)
 }
 
 func (p *Sprite) Visible() bool {

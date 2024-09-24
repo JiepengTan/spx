@@ -182,9 +182,21 @@ func RegisterSpriteType[T any]() {
 	engine.RegisterSpriteType[T]()
 }
 
+var (
+	gGamer Gamer
+	gGame  *Game
+)
+
 func (p *Game) OnEngineStart() {
+	if me, ok := gGamer.(interface{ MainEntry() }); ok {
+		me.MainEntry()
+	}
+	if !gGame.isRunned {
+		Gopt_Game_Run(gGamer, "assets")
+	}
 	println("OnEngineStart")
 }
+
 func (p *Game) OnEngineDestroy() {
 	println("OnEngineDestroy")
 }
@@ -194,14 +206,10 @@ func (p *Game) OnEngineUpdate(delta float32) {
 
 // Gopt_Game_Main is required by Go+ compiler as the entry of a .gmx project.
 func Gopt_Game_Main(game Gamer, sprites ...Spriter) {
-	g := game.initGame(sprites)
 	engine.GdspxMain(game)
-	if me, ok := game.(interface{ MainEntry() }); ok {
-		me.MainEntry()
-	}
-	if !g.isRunned {
-		Gopt_Game_Run(game, "assets")
-	}
+	g := game.initGame(sprites)
+	gGamer = game
+	gGame = g
 }
 
 // Gopt_Game_Run runs the game.
@@ -422,6 +430,7 @@ func spriteOf(sprite Spriter) *Sprite {
 }
 
 func (p *Game) loadIndex(g reflect.Value, proj *projConfig) (err error) {
+	p.proxy = engine.NewSpriteProxy()
 	if backdrops := proj.getBackdrops(); len(backdrops) > 0 {
 		p.baseObj.initBackdrops("", backdrops, proj.getBackdropIndex())
 		p.worldWidth_ = proj.Map.Width
