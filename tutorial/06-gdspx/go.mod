@@ -4,10 +4,7 @@ go 1.22.3
 
 toolchain go1.23.1
 
-require (
-	github.com/goplus/spx v1.0.0
-	godot-ext/gdspx v0.0.0
-)
+require github.com/goplus/spx v1.0.0
 
 require (
 	github.com/ajstarks/svgo v0.0.0-20210927141636-6d70534b1098 // indirect
@@ -26,6 +23,7 @@ require (
 	github.com/qiniu/x v1.13.10 // indirect
 	github.com/srwiley/oksvg v0.0.0-20210519022825-9fc0c575d5fe // indirect
 	github.com/srwiley/rasterx v0.0.0-20210519020934-456a8d69b780 // indirect
+	godot-ext/gdspx v0.0.0 // indirect
 	golang.org/x/image v0.18.0 // indirect
 	golang.org/x/mobile v0.0.0-20220518205345-8578da9835fd // indirect
 	golang.org/x/sync v0.7.0 // indirect
@@ -34,12 +32,12 @@ require (
 )
 
 replace (
+	github.com/goplus/spx => ../../
 	github.com/hajimehoshi/oto => github.com/hajimehoshi/oto v1.0.1
 	github.com/srwiley/oksvg => github.com/qiniu/oksvg v0.2.0-no-charset
-	godot-ext/gdspx => github.com/realdream-ai/gdspx v0.0.0-20240920103647-dea90e6145f5
+	godot-ext/gdspx => ../../../
 	golang.org/x/image => golang.org/x/image v0.0.0-20210628002857-a66eb6448b8d
 	golang.org/x/mobile => golang.org/x/mobile v0.0.0-20210902104108-5d9a33257ab5
 	golang.org/x/mod => golang.org/x/mod v0.5.1
 	golang.org/x/tools => golang.org/x/tools v0.1.8
-	github.com/goplus/spx => ../../
 )
