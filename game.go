@@ -108,6 +108,7 @@ type Spriter interface {
 	Main()
 }
 type Gamer interface {
+	engine.Gamer
 	initGame(sprites []Spriter) *Game
 }
 
@@ -177,10 +178,24 @@ func (p *Game) initGame(sprites []Spriter) *Game {
 	return p
 }
 
+func RegisterSpriteType[T any]() {
+	engine.RegisterSpriteType[T]()
+}
+
+func (p *Game) OnEngineStart() {
+	println("OnEngineStart")
+}
+func (p *Game) OnEngineDestroy() {
+	println("OnEngineDestroy")
+}
+func (p *Game) OnEngineUpdate(delta float32) {
+
+}
+
 // Gopt_Game_Main is required by Go+ compiler as the entry of a .gmx project.
 func Gopt_Game_Main(game Gamer, sprites ...Spriter) {
-	engine.GdspxMain()
 	g := game.initGame(sprites)
+	engine.GdspxMain(game)
 	if me, ok := game.(interface{ MainEntry() }); ok {
 		me.MainEntry()
 	}

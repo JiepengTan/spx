@@ -5,13 +5,27 @@ import (
 	"godot-ext/gdspx/pkg/gdspx"
 )
 
-func GdspxMain() {
-	registerTypes()
+var game Gamer
+
+type Gamer interface {
+	RegisterEngineTypes()
+	OnEngineStart()
+	OnEngineUpdate(delta float32)
+	OnEngineDestroy()
+}
+
+func GdspxMain(g Gamer) {
+	game = g
+	game.RegisterEngineTypes()
 	gdspx.LinkEngine(gde.EngineCallbackInfo{
 		OnEngineStart:   onStart,
 		OnEngineUpdate:  onUpdate,
 		OnEngineDestroy: onDestroy,
 	})
+}
+
+func RegisterSpriteType[T any]() {
+	gde.RegisterSpriteType[T]()
 }
 
 func SetWindowSize(width, height int) {
@@ -38,12 +52,13 @@ func registerTypes() {
 
 }
 func onStart() {
-	print("onStart")
+	game.OnEngineStart()
 }
 
 func onUpdate(delta float32) {
+	game.OnEngineUpdate(delta)
 }
 
 func onDestroy() {
-	print("onStart")
+	game.OnEngineDestroy()
 }
