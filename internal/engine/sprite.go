@@ -2,7 +2,6 @@ package engine
 
 import (
 	gde "godot-ext/gdspx/pkg/engine"
-	"math"
 )
 
 type ProxySprite struct {
@@ -31,9 +30,6 @@ func (pself *ProxySprite) SyncTexture(path string) {
 }
 
 func (pself *ProxySprite) SyncPos(x, y float64) {
-	if math.Abs(pself.x-x) < 0.1 && math.Abs(pself.y-y) < 0.1 {
-		return
-	}
 	//println(pself.Name, "SyncPos", int(x), int(y))
 	pself.x = x
 	pself.y = y

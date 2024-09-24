@@ -76,7 +76,6 @@ func (this *SmallEnemy) Main() {
 	this.OnStart(func() {
 		this.SetXYpos(-100, 237)
 //line tutorial/05-Animation/SmallEnemy.spx:2:1
-		return
 //line tutorial/05-Animation/SmallEnemy.spx:3:1
 		for {
 			spx.Sched()
