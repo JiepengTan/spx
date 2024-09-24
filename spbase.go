@@ -234,6 +234,7 @@ type baseObj struct {
 	costumes      []*costume
 	costumeIndex_ int
 	proxy         *engine.ProxySprite
+	HasDestroyed  bool
 }
 
 func (p *baseObj) initWith(base string, sprite *spriteConfig, shared *sharedImages) {
@@ -383,8 +384,7 @@ func (p *baseObj) setCostumeByIndex(idx int) bool {
 	return false
 }
 func (p *baseObj) onCostumeChange() {
-	path := p.getCostumePath()
-	p.proxy.OnCustomeChanged(path)
+	p.proxy.OnCostumeChange(p.getCostumePath())
 }
 func (p *baseObj) setCostumeByName(name string) bool {
 	if idx := p.findCostume(name); idx >= 0 {

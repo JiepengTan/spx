@@ -24,7 +24,6 @@ import (
 	"sync"
 
 	"github.com/goplus/spx/internal/anim"
-	"github.com/goplus/spx/internal/engine"
 	"github.com/goplus/spx/internal/gdi/clrutil"
 	"github.com/goplus/spx/internal/math32"
 	"github.com/goplus/spx/internal/tools"
@@ -118,7 +117,6 @@ func (p *Sprite) getAllShapes() []Shape {
 
 func (p *Sprite) init(
 	base string, g *Game, name string, sprite *spriteConfig, gamer reflect.Value, shared *sharedImages) {
-	p.proxy = engine.NewSpriteProxy()
 	if sprite.Costumes != nil {
 		p.baseObj.init(base, sprite.Costumes, sprite.getCostumeIndex())
 	} else {
@@ -347,6 +345,7 @@ func Gopt_Sprite_Clone__1(sprite Spriter, data interface{}) {
 }
 
 func (p *Sprite) OnCloned__0(onCloned func(data interface{})) {
+	p.proxy = nil
 	p.hasOnCloned = true
 	p.allWhenCloned = &eventSink{
 		prev:  p.allWhenCloned,
@@ -359,6 +358,7 @@ func (p *Sprite) OnCloned__0(onCloned func(data interface{})) {
 }
 
 func (p *Sprite) OnCloned__1(onCloned func()) {
+	p.proxy = nil
 	p.OnCloned__0(func(interface{}) {
 		onCloned()
 	})
@@ -511,7 +511,7 @@ func (p *Sprite) Destroy() { // destroy sprite, whether prototype or cloned
 	if p == gco.Current().Obj {
 		gco.Abort()
 	}
-	p.proxy.Destroy()
+	p.HasDestroyed = true
 }
 
 // delete only cloned sprite, no effect on prototype sprite.
@@ -530,7 +530,6 @@ func (p *Sprite) Hide() {
 	}
 	p.doStopSay()
 	p.isVisible = false
-	p.proxy.SetVisible(false)
 }
 
 func (p *Sprite) Show() {
@@ -538,7 +537,6 @@ func (p *Sprite) Show() {
 		log.Println("Show", p.name)
 	}
 	p.isVisible = true
-	p.proxy.SetVisible(true)
 }
 
 func (p *Sprite) Visible() bool {

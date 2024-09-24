@@ -76,11 +76,12 @@ type Game struct {
 	fs     spxfs.Dir
 	shared *sharedImages
 
-	sounds soundMgr
-	turtle turtleCanvas
-	typs   map[string]reflect.Type // map: name => sprite type, for all sprites
-	sprs   map[string]Spriter      // map: name => sprite prototype, for loaded sprites
-	items  []Shape                 // shapes on stage (in Zorder), not only sprites
+	sounds       soundMgr
+	turtle       turtleCanvas
+	typs         map[string]reflect.Type // map: name => sprite type, for all sprites
+	sprs         map[string]Spriter      // map: name => sprite prototype, for loaded sprites
+	items        []Shape                 // shapes on stage (in Zorder), not only sprites
+	destroyItems []Shape                 // shapes on stage (in Zorder), not only sprites
 
 	tickMgr tickMgr
 	input   inputMgr
@@ -116,6 +117,8 @@ func (p *Game) IsRunned() bool {
 	return p.isRunned
 }
 
+func (this *Game) RegisterEngineTypes() {
+}
 func (p *Game) getSharedImgs() *sharedImages {
 	if p.shared == nil {
 		p.shared = &sharedImages{imgs: make(map[string]gdi.Image)}
@@ -158,6 +161,7 @@ func (p *Game) reset() {
 	p.input.reset()
 	p.Stop(AllOtherScripts)
 	p.items = nil
+	p.destroyItems = nil
 	p.isLoaded = false
 	p.sprs = make(map[string]Spriter)
 }
@@ -188,20 +192,48 @@ var (
 )
 
 func (p *Game) OnEngineStart() {
+	println("OnEngineStart")
 	if me, ok := gGamer.(interface{ MainEntry() }); ok {
 		me.MainEntry()
 	}
 	if !gGame.isRunned {
 		Gopt_Game_Run(gGamer, "assets")
 	}
-	println("OnEngineStart")
 }
 
 func (p *Game) OnEngineDestroy() {
 	println("OnEngineDestroy")
 }
 func (p *Game) OnEngineUpdate(delta float32) {
+	p.Update()
+	count := 0
+	items := p.getItems()
+	for _, item := range items {
+		sprite, ok := item.(*Sprite)
+		if ok {
+			if sprite.proxy == nil && !sprite.HasDestroyed {
+				sprite.proxy = engine.NewSpriteProxy()
+			}
+			sprite.proxy.Name = sprite.name
+			if sprite.isVisible {
+				x, y := sprite.getXY()
+				sprite.proxy.SyncPos(x, y)
+				sprite.proxy.SyncTexture(sprite.getCostumePath())
+				count++
+			}
+			sprite.proxy.SetVisible(sprite.isVisible)
+		}
+	}
 
+	for _, item := range p.destroyItems {
+		sprite, ok := item.(*Sprite)
+		if ok {
+			sprite.proxy.Destroy()
+			sprite.proxy = nil
+		}
+	}
+	p.destroyItems = nil
+	//println("OnEngineUpdate", count)
 }
 
 // Gopt_Game_Main is required by Go+ compiler as the entry of a .gmx project.
@@ -431,6 +463,7 @@ func spriteOf(sprite Spriter) *Sprite {
 
 func (p *Game) loadIndex(g reflect.Value, proj *projConfig) (err error) {
 	p.proxy = engine.NewSpriteProxy()
+
 	if backdrops := proj.getBackdrops(); len(backdrops) > 0 {
 		p.baseObj.initBackdrops("", backdrops, proj.getBackdropIndex())
 		p.worldWidth_ = proj.Map.Width
@@ -446,6 +479,8 @@ func (p *Game) loadIndex(g reflect.Value, proj *projConfig) (err error) {
 	}
 	p.mapMode = toMapMode(proj.Map.Mode)
 
+	p.proxy.SetZIndex(-1)
+	p.proxy.SyncTexture(p.getCostumePath())
 	inits := make([]Spriter, 0, len(proj.Zorder))
 	for _, v := range proj.Zorder {
 		if name, ok := v.(string); ok {
@@ -916,6 +951,8 @@ func (p *Game) removeShape(child Shape) {
 			copy(newItems, items[:i])
 			copy(newItems[i:], items[i+1:])
 			p.items = newItems
+			p.HasDestroyed = true
+			p.destroyItems = append(p.destroyItems, item)
 			return
 		}
 	}
