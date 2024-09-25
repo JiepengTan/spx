@@ -117,8 +117,6 @@ func (p *Game) IsRunned() bool {
 	return p.isRunned
 }
 
-func (this *Game) RegisterEngineTypes() {
-}
 func (p *Game) getSharedImgs() *sharedImages {
 	if p.shared == nil {
 		p.shared = &sharedImages{imgs: make(map[string]gdi.Image)}
@@ -180,10 +178,6 @@ func (p *Game) initGame(sprites []Spriter) *Game {
 		p.typs[tySpr.Name()] = tySpr
 	}
 	return p
-}
-
-func RegisterSpriteType[T any]() {
-	engine.RegisterSpriteType[T]()
 }
 
 var (
@@ -661,7 +655,7 @@ func (p *Game) runLoop(cfg *Config) (err error) {
 	p.isRunned = true
 	p.initEventLoop()
 	engine.SetWindowTitle(cfg.Title)
-	return engine.RunGame(p)
+	return nil
 }
 
 func (p *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
@@ -1127,6 +1121,7 @@ func (p *Game) updateMousePos() {
 
 	worldW, worldH := p.worldSize_()
 	mx, my := int(pos.X)-(worldW>>1), (worldH>>1)-int(pos.Y)
+	mx, my = engine.GetMousePos()
 	atomic.StoreInt64(&p.gMouseX, int64(mx))
 	atomic.StoreInt64(&p.gMouseY, int64(my))
 }

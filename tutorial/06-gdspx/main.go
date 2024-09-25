@@ -41,15 +41,12 @@ func (this *Bullet) Main() {
 //line tutorial/05-Animation/Bullet.spx:8:1
 			spx.Gopt_Sprite_Clone__0(this)
 			count++
-			if( count >= 3){
-				return 
-			}
 		}
 	})
 //line tutorial/05-Animation/Bullet.spx:12:1
 	this.OnCloned__1(func() {
+		this.SetXYpos(this.MouseX(), this.MouseY())
 //line tutorial/05-Animation/Bullet.spx:13:1
-		this.SetXYpos(0, 0)
 //line tutorial/05-Animation/Bullet.spx:14:1
 		this.Show()
 //line tutorial/05-Animation/Bullet.spx:15:1
@@ -58,7 +55,7 @@ func (this *Bullet) Main() {
 //line tutorial/05-Animation/Bullet.spx:16:1
 			this.Wait(0.04)
 //line tutorial/05-Animation/Bullet.spx:17:1
-			this.Step__0(10)
+			this.Step__0(2)
 //line tutorial/05-Animation/Bullet.spx:18:1
 			if this.Ypos() > 180 {
 //line tutorial/05-Animation/Bullet.spx:19:1
