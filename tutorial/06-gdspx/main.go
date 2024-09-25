@@ -55,7 +55,7 @@ func (this *Bullet) Main() {
 //line tutorial/05-Animation/Bullet.spx:16:1
 			this.Wait(0.04)
 //line tutorial/05-Animation/Bullet.spx:17:1
-			this.Step__0(2)
+			this.Step__0(10)
 //line tutorial/05-Animation/Bullet.spx:18:1
 			if this.Ypos() > 180 {
 //line tutorial/05-Animation/Bullet.spx:19:1

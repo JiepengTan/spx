@@ -25,6 +25,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"sync"
 	"sync/atomic"
 	"time"
 	"unsafe"
@@ -33,7 +34,6 @@ import (
 	"github.com/goplus/spx/internal/coroutine"
 	"github.com/goplus/spx/internal/engine"
 	"github.com/goplus/spx/internal/gdi"
-	"github.com/goplus/spx/internal/math32"
 
 	spxfs "github.com/goplus/spx/fs"
 	_ "github.com/goplus/spx/fs/asset"
@@ -83,10 +83,10 @@ type Game struct {
 	items        []Shape                 // shapes on stage (in Zorder), not only sprites
 	destroyItems []Shape                 // shapes on stage (in Zorder), not only sprites
 
-	tickMgr tickMgr
-	input   inputMgr
-	events  chan event
-	aurec   *audiorecord.Recorder
+	tickMgr   tickMgr
+	events    chan event
+	aurec     *audiorecord.Recorder
+	startFlag sync.Once
 
 	// map world
 	worldWidth_  int
@@ -156,7 +156,7 @@ func (p *Game) getSpriteProtoByName(name string, g reflect.Value) Spriter {
 
 func (p *Game) reset() {
 	p.sinkMgr.reset()
-	p.input.reset()
+	p.startFlag = sync.Once{}
 	p.Stop(AllOtherScripts)
 	p.items = nil
 	p.destroyItems = nil
@@ -208,6 +208,8 @@ func (p *Game) OnEngineUpdate(delta float32) {
 			if sprite.proxy == nil && !sprite.HasDestroyed {
 				sprite.proxy = engine.NewSpriteProxy(sprite)
 				sprite.onBindProxy()
+				// TODO tanjp handle collision events
+				sprite.proxy.SetScale(engine.NewVec2(0.5, 0.5))
 			}
 			sprite.proxy.Name = sprite.name
 			if sprite.isVisible {
@@ -332,7 +334,7 @@ func Gopt_Game_Run(game Gamer, resource interface{}, gameConf ...*Config) {
 
 // MouseHitItem returns the topmost item which is hit by mouse.
 func (p *Game) MouseHitItem() (target *Sprite, ok bool) {
-	x, y := p.input.mouseXY()
+	x, y := engine.GetMousePos()
 	hc := hitContext{Pos: image.Pt(x, y)}
 	item, ok := p.onHit(hc)
 	if ok {
@@ -394,11 +396,6 @@ func findObjPtr(v reflect.Value, name string, from int) interface{} {
 }
 
 func (p *Game) startLoad(fs spxfs.Dir, cfg *Config) {
-	var keyDuration int
-	if cfg != nil {
-		keyDuration = cfg.KeyDuration
-	}
-	p.input.init(p, keyDuration)
 	p.sounds.init(p)
 	p.events = make(chan event, 16)
 	p.fs = fs
@@ -666,11 +663,15 @@ func (p *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeigh
 	return p.windowSize_()
 }
 
+var ()
+
 func (p *Game) Update() error {
 	if !p.isLoaded {
 		return nil
 	}
-	p.input.update()
+	p.startFlag.Do(func() {
+		p.fireEvent(&eventStart{})
+	})
 	p.updateMousePos()
 	p.sounds.update()
 	p.tickMgr.update()
@@ -1100,7 +1101,7 @@ func (p *Game) PrevBackdrop(wait ...bool) {
 // -----------------------------------------------------------------------------
 
 func (p *Game) KeyPressed(key Key) bool {
-	return isKeyPressed(key)
+	return engine.IsKeyPressed(key)
 }
 
 func (p *Game) MouseX() float64 {
@@ -1112,7 +1113,7 @@ func (p *Game) MouseY() float64 {
 }
 
 func (p *Game) MousePressed() bool {
-	return p.input.isMousePressed()
+	return engine.IsMousePressed()
 }
 
 func (p *Game) getMousePos() (x, y float64) {
@@ -1120,12 +1121,7 @@ func (p *Game) getMousePos() (x, y float64) {
 }
 
 func (p *Game) updateMousePos() {
-	x, y := p.input.mouseXY()
-	pos := p.Camera.screenToWorld(math32.NewVector2(float64(x), float64(y)))
-
-	worldW, worldH := p.worldSize_()
-	mx, my := int(pos.X)-(worldW>>1), (worldH>>1)-int(pos.Y)
-	mx, my = engine.GetMousePos()
+	mx, my := engine.GetMousePos()
 	atomic.StoreInt64(&p.gMouseX, int64(mx))
 	atomic.StoreInt64(&p.gMouseY, int64(my))
 }
