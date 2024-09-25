@@ -101,6 +101,11 @@ type Sprite struct {
 	lastAnim            *anim.Anim
 	isWaitingStopAnim   bool
 	defaultCostumeIndex int
+
+	collisionMask  int64
+	collisionLayer int64
+	triggerMask    int64
+	triggerLayer   int64
 }
 
 func (p *Sprite) SetDying() { // dying: visible but can't be touched
@@ -138,6 +143,11 @@ func (p *Sprite) init(
 	for key, val := range sprite.AnimBindings {
 		p.animBindings[key] = val
 	}
+
+	p.collisionMask = sprite.CollisionMask
+	p.collisionLayer = sprite.CollisionLayer
+	p.triggerMask = sprite.TriggerMask
+	p.triggerLayer = sprite.TriggerLayer
 
 	p.defaultAnimation = sprite.DefaultAnimation
 	p.animations = make(map[string]*aniConfig)
@@ -1579,3 +1589,9 @@ func (p *Sprite) fixWorldRange(x, y float64) (float64, float64) {
 }
 
 // -----------------------------------------------------------------------------
+func (p *Sprite) onBindProxy() {
+	p.proxy.SetTriggerLayer(p.triggerLayer)
+	p.proxy.SetTriggerMask(p.triggerMask)
+	p.proxy.SetCollisionLayer(p.collisionLayer)
+	p.proxy.SetCollisionMask(p.collisionMask)
+}

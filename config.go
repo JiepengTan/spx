@@ -245,6 +245,10 @@ type spriteConfig struct {
 	Pivot               math32.Vector2        `json:"pivot"`
 	DefaultAnimation    string                `json:"defaultAnimation"`
 	AnimBindings        map[string]string     `json:"animBindings"`
+	CollisionMask       int64                 `json:"collisionMask"`
+	CollisionLayer      int64                 `json:"collisionLayer"`
+	TriggerMask         int64                 `json:"triggerMask"`
+	TriggerLayer        int64                 `json:"triggerLayer"`
 }
 
 func (p *spriteConfig) getCostumeIndex() int {

@@ -206,7 +206,8 @@ func (p *Game) OnEngineUpdate(delta float32) {
 		sprite, ok := item.(*Sprite)
 		if ok {
 			if sprite.proxy == nil && !sprite.HasDestroyed {
-				sprite.proxy = engine.NewSpriteProxy()
+				sprite.proxy = engine.NewSpriteProxy(sprite)
+				sprite.onBindProxy()
 			}
 			sprite.proxy.Name = sprite.name
 			if sprite.isVisible {
@@ -456,7 +457,7 @@ func spriteOf(sprite Spriter) *Sprite {
 }
 
 func (p *Game) loadIndex(g reflect.Value, proj *projConfig) (err error) {
-	p.proxy = engine.NewSpriteProxy()
+	p.proxy = engine.NewSpriteProxy(p)
 
 	if backdrops := proj.getBackdrops(); len(backdrops) > 0 {
 		p.baseObj.initBackdrops("", backdrops, proj.getBackdropIndex())
@@ -473,8 +474,11 @@ func (p *Game) loadIndex(g reflect.Value, proj *projConfig) (err error) {
 	}
 	p.mapMode = toMapMode(proj.Map.Mode)
 
+	// setup proxy's property
 	p.proxy.SetZIndex(-1)
+	p.proxy.DisablePhysic()
 	p.proxy.SyncTexture(p.getCostumePath())
+
 	inits := make([]Spriter, 0, len(proj.Zorder))
 	for _, v := range proj.Zorder {
 		if name, ok := v.(string); ok {
