@@ -27,6 +27,7 @@ func (this *Game) Main() {
 func (this *Bullet) Main() {
 //line tutorial/05-Animation/Bullet.spx:1:1
 	this.OnTouched__1(func() {
+		println("Bullet touched")
 //line tutorial/05-Animation/Bullet.spx:2:1
 		this.Destroy()
 	})

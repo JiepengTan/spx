@@ -106,6 +106,16 @@ type Sprite struct {
 	collisionLayer int64
 	triggerMask    int64
 	triggerLayer   int64
+
+	colliderType   int64
+	colliderCenter math32.Vector2
+	colliderSize   math32.Vector2
+	colliderRadius float64
+
+	triggerType   int64
+	triggerCenter math32.Vector2
+	triggerSize   math32.Vector2
+	triggerRadius float64
 }
 
 func (p *Sprite) SetDying() { // dying: visible but can't be touched
@@ -144,10 +154,21 @@ func (p *Sprite) init(
 		p.animBindings[key] = val
 	}
 
+	// bind physic config
 	p.collisionMask = sprite.CollisionMask
 	p.collisionLayer = sprite.CollisionLayer
 	p.triggerMask = sprite.TriggerMask
 	p.triggerLayer = sprite.TriggerLayer
+
+	p.colliderType = paserColliderType(sprite.ColliderType)
+	p.colliderCenter = sprite.ColliderCenter
+	p.colliderSize = sprite.ColliderSize
+	p.colliderRadius = sprite.ColliderRadius
+
+	p.triggerType = paserColliderType(sprite.TriggerType)
+	p.triggerCenter = sprite.TriggerCenter
+	p.triggerSize = sprite.TriggerSize
+	p.triggerRadius = sprite.TriggerRadius
 
 	p.defaultAnimation = sprite.DefaultAnimation
 	p.animations = make(map[string]*aniConfig)
@@ -235,6 +256,7 @@ func (p *Sprite) init(
 		p.animations[key] = ani
 	}
 }
+
 func (p *Sprite) awake() {
 	p.playDefaultAnim()
 }
@@ -1280,7 +1302,6 @@ func (p *Sprite) Touching(obj interface{}) bool {
 	switch v := obj.(type) {
 	case string:
 		if o := p.g.touchingSpriteBy(p, v); o != nil {
-			o.fireTouched(p)
 			return true
 		}
 		return false

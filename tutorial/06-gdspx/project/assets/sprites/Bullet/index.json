@@ -20,5 +20,15 @@
   "triggerLayer":1,
   "triggerMask":2,
   "collisionLayer":0,
-  "collisionMask":0
+  "collisionMask":0	,
+  "colliderType":"circle",
+	"colliderCenter":{"x":0,"y":0},
+	"colliderSize":{"x":0,"y":0},
+	"colliderRadius":10,
+	"triggerType":"circle",
+	"triggerCenter":{"x":0,"y":0},
+	"triggerSize":{"x":0,"y":0},
+	"triggerRadius":10,
+
+  "None": 0
 }

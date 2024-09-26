@@ -249,6 +249,14 @@ type spriteConfig struct {
 	CollisionLayer      int64                 `json:"collisionLayer"`
 	TriggerMask         int64                 `json:"triggerMask"`
 	TriggerLayer        int64                 `json:"triggerLayer"`
+	ColliderType        string                `json:"colliderType"`
+	ColliderCenter      math32.Vector2        `json:"colliderCenter"`
+	ColliderSize        math32.Vector2        `json:"colliderSize"`
+	ColliderRadius      float64               `json:"colliderRadius"`
+	TriggerType         string                `json:"triggerType"`
+	TriggerCenter       math32.Vector2        `json:"triggerCenter"`
+	TriggerSize         math32.Vector2        `json:"triggerSize"`
+	TriggerRadius       float64               `json:"triggerRadius"`
 }
 
 func (p *spriteConfig) getCostumeIndex() int {

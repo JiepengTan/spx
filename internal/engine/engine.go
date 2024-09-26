@@ -3,9 +3,15 @@ package engine
 import (
 	. "godot-ext/gdspx/pkg/engine"
 	"godot-ext/gdspx/pkg/gdspx"
+	"sync"
 )
 
-var game Gamer
+var (
+	game             Gamer
+	tempTriggerPairs []TriggerPair
+	TriggerPairs     []TriggerPair
+	mu               sync.Mutex
+)
 
 type Gamer interface {
 	OnEngineStart()
@@ -24,14 +30,37 @@ func GdspxMain(g Gamer) {
 
 // callbacks
 func onStart() {
+
 	println("OnEngineStart")
+	PlatformMgr.SetDebugMode(true)
+	tempTriggerPairs = make([]TriggerPair, 0)
+	TriggerPairs = make([]TriggerPair, 0)
 	game.OnEngineStart()
 }
 
 func onUpdate(delta float32) {
-	//pos := InputMgr.GetMousePos()
-	//println("OnEngineUpdate", delta, int(pos.X), int(pos.Y))
+	// cache trigger pairs
+	cacheTriggerPairs()
 	game.OnEngineUpdate(delta)
+
+}
+
+func cacheTriggerPairs() {
+	mu.Lock()
+	TriggerPairs = append(TriggerPairs, tempTriggerPairs...)
+	mu.Unlock()
+	tempTriggerPairs = tempTriggerPairs[:0]
+}
+
+func GetTriggerPairs(lst []TriggerPair) []TriggerPair {
+	mu.Lock()
+	lst = append(lst, TriggerPairs...)
+	if len(TriggerPairs) > 0 {
+		println("TriggerPairs", len(TriggerPairs))
+	}
+	TriggerPairs = TriggerPairs[:0]
+	mu.Unlock()
+	return lst
 }
 
 func onDestroy() {

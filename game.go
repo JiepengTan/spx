@@ -198,6 +198,7 @@ func (p *Game) OnEngineStart() {
 func (p *Game) OnEngineDestroy() {
 	println("OnEngineDestroy")
 }
+
 func (p *Game) OnEngineUpdate(delta float32) {
 	p.Update()
 	count := 0
@@ -205,20 +206,24 @@ func (p *Game) OnEngineUpdate(delta float32) {
 	for _, item := range items {
 		sprite, ok := item.(*Sprite)
 		if ok {
+			var proxy *engine.ProxySprite
 			if sprite.proxy == nil && !sprite.HasDestroyed {
 				sprite.proxy = engine.NewSpriteProxy(sprite)
 				sprite.onBindProxy()
-				// TODO tanjp handle collision events
-				sprite.proxy.SetScale(engine.NewVec2(0.5, 0.5))
+				initSpritePhysic(sprite, sprite.proxy)
 			}
-			sprite.proxy.Name = sprite.name
+			proxy = sprite.proxy
+			if sprite.HasDestroyed {
+				continue
+			}
+			proxy.Name = sprite.name
 			if sprite.isVisible {
 				x, y := sprite.getXY()
-				sprite.proxy.SyncPos(x, y)
-				sprite.proxy.SyncTexture(sprite.getCostumePath())
+				proxy.SyncPos(x, y)
+				proxy.SyncTexture(sprite.getCostumePath())
 				count++
 			}
-			sprite.proxy.SetVisible(sprite.isVisible)
+			proxy.SetVisible(sprite.isVisible)
 		}
 	}
 
@@ -231,6 +236,28 @@ func (p *Game) OnEngineUpdate(delta float32) {
 	}
 	p.destroyItems = nil
 	//println("OnEngineUpdate", count)
+
+	p.triggerPhysicEvents()
+
+}
+func (p *Game) triggerPhysicEvents() {
+	triggers := make([]engine.TriggerPair, 0)
+	triggers = engine.GetTriggerPairs(triggers)
+	for _, pair := range triggers {
+		src := pair.Src.Target
+		dst := pair.Dst.Target
+		srcSprite, ok1 := src.(*Sprite)
+		dstSrpite, ok2 := dst.(*Sprite)
+		if ok1 && ok2 {
+			if srcSprite.isVisible && dstSrpite.isVisible {
+				srcSprite.hasOnTouched = true
+				srcSprite.fireTouched(dstSrpite)
+			}
+
+		} else {
+			panic("unexpected trigger pair ")
+		}
+	}
 }
 
 // Gopt_Game_Main is required by Go+ compiler as the entry of a .gmx project.

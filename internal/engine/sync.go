@@ -9,14 +9,15 @@ type ProxySprite struct {
 	x, y    float64
 	Name    string
 	PicPath string
-	target  interface{}
+	Target  interface{}
 }
 
 func NewSpriteProxy(obj interface{}) *ProxySprite {
 	player := CreateEmptySprite[ProxySprite]()
-	player.target = obj
+	player.Target = obj
 	return player
 }
+
 func (pself *ProxySprite) OnCostumeChange(path string) {
 	//resPath := "res://assets/" + path
 	//println("OnCostumeChange", resPath)
@@ -38,9 +39,14 @@ func (pself *ProxySprite) SyncPos(x, y float64) {
 	pself.SetPosition(Vec2{X: float32(x), Y: float32(y)})
 }
 
+type TriggerPair struct {
+	Src *ProxySprite
+	Dst *ProxySprite
+}
+
 func (pself *ProxySprite) OnTriggerEnter(target ISpriter) {
 	sprite, ok := target.(*ProxySprite)
 	if ok {
-		println(pself.Name, " OnTriggerEnter ", sprite.Name)
+		tempTriggerPairs = append(tempTriggerPairs, TriggerPair{Src: pself, Dst: sprite})
 	}
 }
