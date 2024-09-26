@@ -16,5 +16,9 @@
   "size": 0.65,
   "visible": false,
   "x": 230,
-  "y": 185
+  "y": 185,
+  "triggerLayer":1,
+  "triggerMask":2,
+  "collisionLayer":0,
+  "collisionMask":0
 }

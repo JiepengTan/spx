@@ -39,9 +39,6 @@
   "costumeIndex": 0,
   "fAnimations": {
     "die": {
-      "onStart":{
-        "play": "explode"
-      },
       "frameFps": 20,
       "frameFrom": "die-0",
       "frameTo": "die-3"
@@ -53,5 +50,9 @@
   "size": 0.65,
   "visible": false,
   "x": -58,
-  "y": -179
+  "y": -179,
+  "triggerLayer":2,
+  "triggerMask":1,
+  "collisionLayer":0,
+  "collisionMask":0
 }
