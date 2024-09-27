@@ -1274,15 +1274,7 @@ func (p *Sprite) ClearGraphEffects() {
 type Color = color.RGBA
 
 func (p *Sprite) TouchingColor(color Color) bool {
-	for _, item := range p.g.items {
-		if sp, ok := item.(*Sprite); ok && sp != p {
-			ret := p.touchedColor_(sp, color)
-			if ret {
-				return true
-			}
-		}
-	}
-	return false
+	panic("todo gdspx")
 }
 
 // Touching func:
@@ -1379,47 +1371,8 @@ func checkTouchingDirection(dir float64) int {
 }
 
 func (p *Sprite) checkTouchingScreen(where int) (touching int) {
-	rect := p.getRotatedRect()
-	if rect == nil {
-		return
-	}
-	plist := rect.Points()
-	w, h := p.g.worldSize_()
-
-	edge := 2.0
-
-	for _, val := range plist {
-		if val.X < float64(-w/2) && (where&touchingScreenLeft) != 0 {
-			//w/2-edge,-h/2   edge,h
-			rect := math32.NewRotatedRect1(math32.NewRect(float64(-w/2)-edge, float64(-h/2), edge, float64(h)))
-			if p.touchRotatedRect(rect) {
-				return touchingScreenLeft
-			}
-		}
-		if val.Y > float64(h/2) && (where&touchingScreenTop) != 0 {
-			//w/2,h/2+edge   w,edge
-			rect := math32.NewRotatedRect1(math32.NewRect(float64(-w/2), float64(h/2)+edge, float64(w), edge))
-			if p.touchRotatedRect(rect) {
-				return touchingScreenTop
-			}
-		}
-		if val.X > float64(w/2) && (where&touchingScreenRight) != 0 {
-			//w/2,-h/2   edge,h
-			rect := math32.NewRotatedRect1(math32.NewRect(float64(w/2), float64(-h/2), edge, float64(h)))
-			if p.touchRotatedRect(rect) {
-				return touchingScreenRight
-			}
-		}
-		if val.Y < float64(-h/2) && (where&touchingScreenBottom) != 0 {
-			//w/2,-h/2  w, edge
-			rect := math32.NewRotatedRect1(math32.NewRect(float64(-w/2), float64(-h/2), float64(w), edge))
-			if p.touchRotatedRect(rect) {
-				return touchingScreenBottom
-			}
-		}
-	}
-
-	return
+	panic("todo gdspx")
+	return 0
 }
 
 // -----------------------------------------------------------------------------

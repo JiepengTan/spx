@@ -21,7 +21,6 @@ import (
 	"image/color"
 	"log"
 	"math"
-	"reflect"
 
 	"github.com/goplus/spx/internal/effect"
 	"github.com/goplus/spx/internal/gdi"
@@ -215,157 +214,11 @@ func (p *Sprite) getDrawInfo() *spriteDrawInfo {
 }
 
 func (p *Sprite) touchPoint(x, y float64) bool {
-	rRect := p.getRotatedRect()
-	if rRect == nil {
-		return false
-	}
-	pos := &math32.Vector2{X: x, Y: y}
-	ret := rRect.Contains(pos)
-	if !ret {
-		return false
-	}
-	c := p.costumes[p.costumeIndex_]
-	img, cx, cy := c.needImage(p.g.fs)
-	p.applyPivot(c, &cx, &cy)
-	geo := p.getDrawInfo().getPixelGeo(cx, cy)
-
-	pixel, _ := p.getDrawInfo().getPixel(pos, img, geo)
-	if reflect.DeepEqual(pixel, color.Transparent) {
-		return false
-	}
-	if debugInstr {
-		log.Printf("touchPoint pixel pos(%s) color(%v)", pos.String(), pixel)
-	}
 	return true
 }
 
-func (p *Sprite) touchRotatedRect(dstRect *math32.RotatedRect) bool {
-	currRect := p.getRotatedRect()
-	if currRect == nil {
-		return false
-	}
-	ret := currRect.IsCollision(dstRect)
-	if !ret {
-		return false
-	}
-
-	//get bound rect
-	currBoundRect := currRect.BoundingRect()
-	dstRectBoundRect := dstRect.BoundingRect()
-	boundRect := currBoundRect.Intersect(dstRectBoundRect)
-	if debugInstr {
-		log.Printf("touchRotatedRect  currBoundRect(%s) dstRectBoundRect(%s) boundRect(%s)",
-			currBoundRect.String(), dstRectBoundRect.String(), boundRect.String())
-	}
-	c := p.costumes[p.costumeIndex_]
-	img, cx, cy := c.needImage(p.g.fs)
-	p.applyPivot(c, &cx, &cy)
-	geo := p.getDrawInfo().getPixelGeo(cx, cy)
-
-	//check boun rect pixel
-	for x := boundRect.X; x < boundRect.Width+boundRect.X; x++ {
-		for y := boundRect.Y; y < boundRect.Height+boundRect.Y; y++ {
-			color1, _ := p.getDrawInfo().getPixel(math32.NewVector2(x, y), img, geo)
-			_, _, _, a := color1.RGBA()
-			if a != 0 {
-				return true
-			}
-		}
-	}
-	return false
-}
-
-func (p *Sprite) touchedColor_(dst *Sprite, color Color) bool {
-	currRect := p.getRotatedRect()
-	if currRect == nil {
-		return false
-	}
-	dstRect := dst.getRotatedRect()
-	if dstRect == nil {
-		return false
-	}
-	ret := currRect.IsCollision(dstRect)
-	if !ret {
-		return false
-	}
-
-	//get bound rect
-	currBoundRect := currRect.BoundingRect()
-	dstRectBoundRect := dstRect.BoundingRect()
-	boundRect := currBoundRect.Intersect(dstRectBoundRect)
-
-	c := p.costumes[p.costumeIndex_]
-	pimg, cx, cy := c.needImage(p.g.fs)
-	p.applyPivot(c, &cx, &cy)
-	geo := p.getDrawInfo().getPixelGeo(cx, cy)
-
-	c2 := dst.costumes[dst.costumeIndex_]
-	dstimg, cx2, cy2 := c2.needImage(p.g.fs)
-	dst.applyPivot(c2, &cx2, &cy2)
-	geo2 := dst.getDrawInfo().getPixelGeo(cx2, cy2)
-
-	cr, cg, cb, ca := color.RGBA()
-	//check boun rect pixel
-	for x := boundRect.X; x < boundRect.Width+boundRect.X; x++ {
-		for y := boundRect.Y; y < boundRect.Height+boundRect.Y; y++ {
-			pos := math32.NewVector2(x, y)
-			color1, _ := p.getDrawInfo().getPixel(pos, pimg, geo)
-			color2, _ := dst.getDrawInfo().getPixel(pos, dstimg, geo2)
-			_, _, _, a1 := color1.RGBA()
-			r, g, b, a2 := color2.RGBA()
-			if a1 != 0 && a2 != 0 && r == cr && g == cg && b == cb && a2 == ca {
-				return true
-			}
-		}
-	}
-	return false
-}
-
 func (p *Sprite) touchingSprite(dst *Sprite) bool {
-	currRect := p.getRotatedRect()
-	if currRect == nil {
-		return false
-	}
-	dstRect := dst.getRotatedRect()
-	if dstRect == nil {
-		return false
-	}
-	ret := currRect.IsCollision(dstRect)
-	if !ret {
-		return false
-	}
-
-	//get bound rect
-	currBoundRect := currRect.BoundingRect()
-	dstRectBoundRect := dstRect.BoundingRect()
-	boundRect := currBoundRect.Intersect(dstRectBoundRect)
-	if debugInstr {
-		log.Printf("touchingSprite  curr(%f,%f) currRect(%s) currBoundRect(%s)  dst(%f,%f) dstRect(%s) dstRectBoundRect(%s) boundRect(%s)",
-			p.x, p.y, currRect, currBoundRect, dst.x, dst.y, dstRect, dstRectBoundRect, boundRect)
-	}
-
-	c := p.costumes[p.costumeIndex_]
-	pimg, cx, cy := c.needImage(p.g.fs)
-	p.applyPivot(c, &cx, &cy)
-	geo := p.getDrawInfo().getPixelGeo(cx, cy)
-
-	c2 := dst.costumes[dst.costumeIndex_]
-	dstimg, cx2, cy2 := c2.needImage(p.g.fs)
-	dst.applyPivot(c2, &cx2, &cy2)
-	geo2 := dst.getDrawInfo().getPixelGeo(cx2, cy2)
-	//check boun rect pixel
-	for x := boundRect.X; x < boundRect.Width+boundRect.X; x++ {
-		for y := boundRect.Y; y < boundRect.Height+boundRect.Y; y++ {
-			pos := math32.NewVector2(x, y)
-			color1, _ := p.getDrawInfo().getPixel(pos, pimg, geo)
-			color2, _ := dst.getDrawInfo().getPixel(pos, dstimg, geo2)
-			_, _, _, a1 := color1.RGBA()
-			_, _, _, a2 := color2.RGBA()
-			if a1 != 0 && a2 != 0 {
-				return true
-			}
-		}
-	}
+	// TODO tanjp
 	return false
 }
 
