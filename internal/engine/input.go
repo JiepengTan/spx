@@ -14,11 +14,10 @@ func IsMousePressed() bool {
 	return false
 }
 
-func IsStateKey(key int64) bool {
-	return false
+func IsKeyPressed(key int64) bool {
+	return SyncInputGetKey(key)
 }
 
-func IsKeyPressed(key int64) bool {
-	println("TODO use gdspx api")
+func IsStateKey(key int64) bool {
 	return false
 }

@@ -30,8 +30,6 @@ func GdspxMain(g Gamer) {
 
 // callbacks
 func onStart() {
-
-	println("OnEngineStart")
 	PlatformMgr.SetDebugMode(true)
 	tempTriggerPairs = make([]TriggerPair, 0)
 	TriggerPairs = make([]TriggerPair, 0)
@@ -39,7 +37,6 @@ func onStart() {
 }
 
 func onUpdate(delta float32) {
-	// cache trigger pairs
 	cacheTriggerPairs()
 	game.OnEngineUpdate(delta)
 	handleEngineCoroutines()
@@ -56,9 +53,6 @@ func cacheTriggerPairs() {
 func GetTriggerPairs(lst []TriggerPair) []TriggerPair {
 	mu.Lock()
 	lst = append(lst, TriggerPairs...)
-	if len(TriggerPairs) > 0 {
-		println("TriggerPairs", len(TriggerPairs))
-	}
 	TriggerPairs = TriggerPairs[:0]
 	mu.Unlock()
 	return lst

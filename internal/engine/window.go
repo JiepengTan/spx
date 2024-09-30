@@ -7,7 +7,6 @@ import (
 //----------------------------------------
 
 func SetWindowSize(width, height int) {
-	println("SetWindowSize", width, height)
 	PlatformMgr.SetWindowSize(int64(width), int64(height))
 }
 
