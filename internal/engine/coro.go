@@ -1,7 +1,6 @@
 package engine
 
 import (
-	. "godot-ext/gdspx/pkg/engine"
 	"time"
 )
 
@@ -10,8 +9,7 @@ const (
 )
 
 var (
-	jobQueue  = make(chan Job, 1)
-	gameFrame = 0
+	updateJobQueue = make(chan Job, 1)
 )
 
 type Job func()
@@ -24,7 +22,7 @@ func handleEngineCoroutines() {
 	for {
 		isTimeout := false
 		select {
-		case job, ok := <-jobQueue:
+		case job, ok := <-updateJobQueue:
 			if !ok {
 				return
 			}
