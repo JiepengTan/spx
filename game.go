@@ -620,7 +620,6 @@ func (p *Game) Update() error {
 		p.fireEvent(&eventStart{})
 	})
 	p.updateMousePos()
-	p.sounds.update()
 	p.tickMgr.update()
 	return nil
 }
