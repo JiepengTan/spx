@@ -15,7 +15,7 @@ func IsMousePressed() bool {
 }
 
 func IsKeyPressed(key int64) bool {
-	return SyncInputGetKey(key)
+	return InputMgr.GetKey(key)
 }
 
 func IsStateKey(key int64) bool {

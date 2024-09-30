@@ -1048,7 +1048,7 @@ func (p *Game) PrevBackdrop(wait ...bool) {
 // -----------------------------------------------------------------------------
 
 func (p *Game) KeyPressed(key Key) bool {
-	return engine.IsKeyPressed(key)
+	return engine.SyncInputGetKey(key)
 }
 
 func (p *Game) MouseX() float64 {
@@ -1060,7 +1060,7 @@ func (p *Game) MouseY() float64 {
 }
 
 func (p *Game) MousePressed() bool {
-	return engine.IsMousePressed()
+	return engine.SyncInputMousePressed()
 }
 
 func (p *Game) getMousePos() (x, y float64) {
