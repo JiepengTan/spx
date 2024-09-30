@@ -201,22 +201,29 @@ func (p *Game) OnEngineDestroy() {
 
 func (p *Game) OnEngineUpdate(delta float32) {
 	p.Update()
+	p.updateProxy()
+}
+
+func (p *Game) updateProxy() {
 	count := 0
 	items := p.getItems()
 	for _, item := range items {
 		sprite, ok := item.(*Sprite)
 		if ok {
 			var proxy *engine.ProxySprite
+			// bind proxy
 			if sprite.proxy == nil && !sprite.HasDestroyed {
 				sprite.proxy = engine.NewSpriteProxy(sprite)
 				sprite.onBindProxy()
 				initSpritePhysic(sprite, sprite.proxy)
+				sprite.proxy.SetScale(engine.NewVec2(0.5, 0.5)) // TODO(tanjp) remove this hack
 			}
 			proxy = sprite.proxy
 			if sprite.HasDestroyed {
 				continue
 			}
 			proxy.Name = sprite.name
+			// sync position
 			if sprite.isVisible {
 				x, y := sprite.getXY()
 				proxy.SyncPos(x, y)
@@ -227,6 +234,7 @@ func (p *Game) OnEngineUpdate(delta float32) {
 		}
 	}
 
+	// unbind proxy
 	for _, item := range p.destroyItems {
 		sprite, ok := item.(*Sprite)
 		if ok {
@@ -235,12 +243,8 @@ func (p *Game) OnEngineUpdate(delta float32) {
 		}
 	}
 	p.destroyItems = nil
-	//println("OnEngineUpdate", count)
 
-	p.triggerPhysicEvents()
-
-}
-func (p *Game) triggerPhysicEvents() {
+	// update physic
 	triggers := make([]engine.TriggerPair, 0)
 	triggers = engine.GetTriggerPairs(triggers)
 	for _, pair := range triggers {

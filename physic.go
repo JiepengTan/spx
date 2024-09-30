@@ -28,8 +28,6 @@ const (
 )
 
 func initSpritePhysic(sprite *Sprite, proxy *engine.ProxySprite) {
-	// TODO tanjp handle collision events
-	proxy.SetScale(engine.NewVec2(0.5, 0.5))
 	// set trigger & collider
 	switch sprite.colliderType {
 	case physicColliderCircle:
