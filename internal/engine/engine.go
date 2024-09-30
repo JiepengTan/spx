@@ -42,6 +42,7 @@ func onUpdate(delta float32) {
 	// cache trigger pairs
 	cacheTriggerPairs()
 	game.OnEngineUpdate(delta)
+	handleEngineCoroutines()
 
 }
 
