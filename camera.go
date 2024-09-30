@@ -19,45 +19,35 @@ package spx
 import (
 	"log"
 
-	"github.com/goplus/spx/internal/camera"
 	"github.com/goplus/spx/internal/math32"
-	"github.com/hajimehoshi/ebiten/v2"
 )
 
 type Camera struct {
-	freecamera camera.FreeCamera
-	g          *Game
-	on_        interface{}
+	g   *Game
+	on_ interface{}
 }
 
 func (c *Camera) init(g *Game, winW, winH float64, worldW, worldH float64) {
-	c.freecamera = *camera.NewFreeCamera(winW, winH, worldW, worldH)
 	c.g = g
 }
 
 func (c *Camera) isWorldRange(pos *math32.Vector2) bool {
-	return c.freecamera.IsWorldRange(pos)
+	return true // TODO tanjp
 }
 
 func (c *Camera) SetXYpos(x float64, y float64) {
 	c.on_ = nil
-	c.freecamera.MoveTo(x, y)
+	return // TODO tanjp
 }
 
 func (c *Camera) ChangeXYpos(x float64, y float64) {
 	c.on_ = nil
-	c.freecamera.Move(x, y)
+	return // TODO tanjp
 }
 
 func (c *Camera) screenToWorld(point *math32.Vector2) *math32.Vector2 {
-	return c.freecamera.ScreenToWorld(point)
+	return point // TODO tanjp
 }
-
-/* unused:
-func (c *Camera) worldToScreen(point *math32.Vector2) *math32.Vector2 {
-	return c.freecamera.WorldToScreen(point)
-}
-*/
 
 func (c *Camera) On(obj interface{}) {
 	switch v := obj.(type) {
@@ -81,23 +71,4 @@ func (c *Camera) On(obj interface{}) {
 		panic("Camera.On: unexpected parameter")
 	}
 	c.on_ = obj
-}
-
-func (c *Camera) updateOnObj() {
-	switch v := c.on_.(type) {
-	case *Sprite:
-		cx, cy := v.getXY()
-		c.freecamera.MoveTo(cx, cy)
-	case nil:
-	case specialObj:
-		cx := c.g.MouseX()
-		cy := c.g.MouseY()
-		c.freecamera.MoveTo(cx, cy)
-	}
-}
-
-func (c *Camera) render(world, screen *ebiten.Image) error {
-	c.updateOnObj()
-	c.freecamera.Render(world, screen)
-	return nil
 }
