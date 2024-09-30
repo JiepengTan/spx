@@ -249,7 +249,7 @@ func (p *Game) triggerPhysicEvents() {
 		srcSprite, ok1 := src.(*Sprite)
 		dstSrpite, ok2 := dst.(*Sprite)
 		if ok1 && ok2 {
-			if srcSprite.isVisible && dstSrpite.isVisible {
+			if srcSprite.isVisible && !srcSprite.isDying && dstSrpite.isVisible && !dstSrpite.isDying {
 				srcSprite.hasOnTouched = true
 				srcSprite.fireTouched(dstSrpite)
 			}
