@@ -13,6 +13,7 @@ type Bullet struct {
 type SmallEnemy struct {
 	spx.Sprite
 	*Game
+	life int
 }
 type Game struct {
 	spx.Game
@@ -56,9 +57,9 @@ func (this *Bullet) Main() {
 //line tutorial/05-Animation/Bullet.spx:16:1
 			this.Wait(0.04)
 //line tutorial/05-Animation/Bullet.spx:17:1
-			this.Step__0(10)
+			this.Step__0(20)
 //line tutorial/05-Animation/Bullet.spx:18:1
-			if this.Ypos() > 180 {
+			if this.Ypos() > 380 {
 //line tutorial/05-Animation/Bullet.spx:19:1
 				this.Destroy()
 			}
@@ -72,13 +73,13 @@ func (this *Bullet) Classfname() string {
 func (this *SmallEnemy) Main() {
 //line tutorial/05-Animation/SmallEnemy.spx:1:1
 	this.OnStart(func() {
-		this.SetXYpos(-100, 237)
+		this.SetXYpos(-100, 474)
 //line tutorial/05-Animation/SmallEnemy.spx:2:1
 //line tutorial/05-Animation/SmallEnemy.spx:3:1
 		for {
 			spx.Sched()
 //line tutorial/05-Animation/SmallEnemy.spx:4:1
-			this.Wait(3)
+			this.Wait(2)
 //line tutorial/05-Animation/SmallEnemy.spx:5:1
 			spx.Gopt_Sprite_Clone__0(this)
 		}
@@ -86,7 +87,7 @@ func (this *SmallEnemy) Main() {
 //line tutorial/05-Animation/SmallEnemy.spx:9:1
 	this.OnCloned__1(func() {
 //line tutorial/05-Animation/SmallEnemy.spx:10:1
-		this.SetXYpos(spx.Rand__0(-131, 131), 237)
+		this.SetXYpos(spx.Rand__0(-261, 261), 474)
 //line tutorial/05-Animation/SmallEnemy.spx:11:1
 		this.Show()
 //line tutorial/05-Animation/SmallEnemy.spx:12:1
@@ -97,34 +98,34 @@ func (this *SmallEnemy) Main() {
 //line tutorial/05-Animation/SmallEnemy.spx:14:1
 			this.ChangeYpos(-2.4)
 //line tutorial/05-Animation/SmallEnemy.spx:15:1
-			if this.Touching(spx.EdgeBottom) {
+			if this.Ypos() < -200 {
 //line tutorial/05-Animation/SmallEnemy.spx:16:1
 				this.Destroy()
+				println("SmallEnemy destroyed")
 			}
 		}
 	})
 //line tutorial/05-Animation/SmallEnemy.spx:21:1
 	this.OnCloned__1(func() {
 //line tutorial/05-Animation/SmallEnemy.spx:22:1
-		life := 1
+		this.life = 3
 //line tutorial/05-Animation/SmallEnemy.spx:23:1
 		for {
 			spx.Sched()
 //line tutorial/05-Animation/SmallEnemy.spx:24:1
 			this.Wait(0.05)
-//line tutorial/05-Animation/SmallEnemy.spx:25:1
-			if this.Touching("Bullet") {
-//line tutorial/05-Animation/SmallEnemy.spx:26:1
-				life--
-//line tutorial/05-Animation/SmallEnemy.spx:27:1
-				if life == 0 {
-//line tutorial/05-Animation/SmallEnemy.spx:28:1
-					this.Die()
-				}
-			}
+		}
+	})
+
+	this.OnTouched__0(func(sprite *spx.Sprite) {
+		println("SmallEnemy touched")
+		this.life--
+		if this.life == 0 {
+			this.Die()
 		}
 	})
 }
+
 func (this *SmallEnemy) Classfname() string {
 	return "SmallEnemy"
 }
