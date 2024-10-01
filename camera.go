@@ -19,6 +19,7 @@ package spx
 import (
 	"log"
 
+	"github.com/goplus/spx/internal/engine"
 	"github.com/goplus/spx/internal/math32"
 )
 
@@ -36,19 +37,27 @@ func (c *Camera) isWorldRange(pos *math32.Vector2) bool {
 }
 
 func (c *Camera) SetXYpos(x float64, y float64) {
-	c.on_ = nil
-	return // TODO tanjp
+	c.ChangeXYpos(x, y)
 }
 
 func (c *Camera) ChangeXYpos(x float64, y float64) {
 	c.on_ = nil
-	return // TODO tanjp
+	engine.SyncCameraSetCameraPosition(engine.NewVec2(x, y))
 }
 
 func (c *Camera) screenToWorld(point *math32.Vector2) *math32.Vector2 {
 	return point // TODO tanjp
 }
 
+func (c *Camera) update() {
+	if c.on_ == nil {
+		return
+	}
+	switch v := c.on_.(type) {
+	case *Sprite:
+		engine.UpdateCameraPosition(v.x, v.y)
+	}
+}
 func (c *Camera) On(obj interface{}) {
 	switch v := obj.(type) {
 	case string:
@@ -58,6 +67,7 @@ func (c *Camera) On(obj interface{}) {
 			return
 		}
 		obj = sp
+		println("Camera.On: sprite found -", sp.name)
 	case *Sprite:
 	case nil:
 	case Spriter:

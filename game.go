@@ -621,6 +621,7 @@ func (p *Game) Update() error {
 	})
 	p.updateMousePos()
 	p.tickMgr.update()
+	p.Camera.update()
 	return nil
 }
 
