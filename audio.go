@@ -18,6 +18,8 @@ package spx
 
 import (
 	"sync"
+
+	"github.com/goplus/spx/internal/engine"
 )
 
 type PlayAction int
@@ -51,8 +53,6 @@ func (p *soundMgr) playAction(media Sound, opts *PlayOptions) (err error) {
 	switch opts.Action {
 	case PlayRewind:
 		err = p.play(media, opts.Wait, opts.Loop)
-	case PlayContinue:
-		err = p.playContinue(media, opts.Wait, opts.Loop)
 	case PlayStop:
 		p.stop(media)
 	case PlayResume:
@@ -66,37 +66,41 @@ func (p *soundMgr) playAction(media Sound, opts *PlayOptions) (err error) {
 func (p *soundMgr) stopAll() {
 }
 
-func (p *soundMgr) playContinue(media Sound, wait, loop bool) (err error) {
-
-	return
-}
-
 func (p *soundMgr) play(media Sound, wait, loop bool) (err error) {
-
+	engine.SyncAudioPlayAudio(engine.ToEnginePath(media.Path))
 	return
 }
 
 func (p *soundMgr) stop(media Sound) {
-
+	engine.SyncAudioPauseMusic()
 }
 
 func (p *soundMgr) pause(media Sound) {
-
+	engine.SyncAudioPauseMusic()
 }
 
 func (p *soundMgr) resume(media Sound) {
-
+	engine.SyncAudioResumeMusic()
 }
 
 func (p *soundMgr) volume() float64 {
-	return 0
+	volume := engine.SyncAudioGetAudioVolume()
+	return float64(volume)
 }
 
 func (p *soundMgr) SetVolume(volume float64) {
-
+	engine.SyncAudioSetAudioVolume(float32(volume))
 }
 
 func (p *soundMgr) ChangeVolume(delta float64) {
+	volume := p.volume() + delta
+	if volume < 0 {
+		volume = 0
+	}
+	if volume > 1 {
+		volume = 1
+	}
+	p.SetVolume(volume)
 }
 
 // -------------------------------------------------------------------------------------

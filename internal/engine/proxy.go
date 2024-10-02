@@ -27,7 +27,7 @@ func (pself *ProxySprite) SyncTexture(path string) {
 	if path == "" {
 		return
 	}
-	resPath := "res://assets/" + path
+	resPath := ToEnginePath(path)
 	pself.PicPath = resPath
 	pself.SetTexture(pself.PicPath)
 }

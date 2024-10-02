@@ -6,6 +6,10 @@ import (
 	"sync"
 )
 
+const (
+	assetsDir = "res://assets/"
+)
+
 var (
 	game             Gamer
 	tempTriggerPairs []TriggerPair
@@ -17,6 +21,10 @@ type Gamer interface {
 	OnEngineStart()
 	OnEngineUpdate(delta float32)
 	OnEngineDestroy()
+}
+
+func ToEnginePath(path string) string {
+	return assetsDir + path
 }
 
 func GdspxMain(g Gamer) {
