@@ -21,6 +21,7 @@ import (
 	"unsafe"
 
 	"github.com/goplus/spx/internal/coroutine"
+	"github.com/goplus/spx/internal/engine"
 )
 
 // -------------------------------------------------------------------------------------
@@ -71,7 +72,7 @@ type tickMgr struct {
 // currentTPS is the current TPS (ticks per second),
 // that represents how many update function is called in a second.
 func getCurrentTPS() float64 {
-	return 30 // TODO(tanjp) use engine api
+	return engine.GetCurrentTPS()
 }
 
 func (p *tickMgr) init() {
