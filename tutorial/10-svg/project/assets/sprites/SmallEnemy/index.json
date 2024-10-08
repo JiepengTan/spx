@@ -1,0 +1,69 @@
+{
+  "costumes": [
+    {
+      "bitmapResolution": 2,
+      "name": "normal",
+      "path": "32.png",
+      "x": 50,
+      "y": 36
+    },
+    {
+      "bitmapResolution": 2,
+      "name": "die-0",
+      "path": "33.svg",
+      "x": 50,
+      "y": 36
+    },
+    {
+      "bitmapResolution": 2,
+      "name": "die-1",
+      "path": "34.svg",
+      "x": 50,
+      "y": 44
+    },
+    {
+      "bitmapResolution": 2,
+      "name": "die-2",
+      "path": "35.svg",
+      "x": 56,
+      "y": 50
+    },
+    {
+      "bitmapResolution": 2,
+      "name": "die-3",
+      "path": "36.svg",
+      "x": 44,
+      "y": 38
+    }
+  ],
+  "costumeIndex": 0,
+  "fAnimations": {
+    "die": {
+      "frameFps": 2,
+      "frameFrom": "die-0",
+      "frameTo": "die-3"
+    }
+  },
+  "heading": 90,
+  "isDraggable": false,
+  "rotationStyle": "normal",
+  "size": 0.65,
+  "visible": false,
+  "x": -58,
+  "y": -179,
+
+  "triggerLayer":2,
+  "triggerMask":1,
+  "collisionLayer":0,
+  "collisionMask":0,
+	"colliderType":"circle",
+	"colliderCenter":{"x":0,"y":0},
+	"colliderSize":{"x":0,"y":0},
+	"colliderRadius":100,
+	"triggerType":"circle",
+	"triggerCenter":{"x":0,"y":0},
+	"triggerSize":{"x":0,"y":0},
+	"triggerRadius":100,
+
+  "None": 0
+}
