@@ -19,7 +19,6 @@ package spx
 import (
 	"flag"
 	"fmt"
-	"image"
 	"log"
 	"math/rand"
 	"os"
@@ -281,12 +280,8 @@ func Gopt_Game_Run(game Gamer, resource interface{}, gameConf ...*Config) {
 
 // MouseHitItem returns the topmost item which is hit by mouse.
 func (p *Game) MouseHitItem() (target *Sprite, ok bool) {
-	x, y := engine.GetMousePos()
-	hc := hitContext{Pos: image.Pt(x, y)}
-	item, ok := p.onHit(hc)
-	if ok {
-		target, ok = item.Target.(*Sprite)
-	}
+	//x, y := engine.GetMousePos()
+	// TODO(tanjp) use engine api
 	return
 }
 
@@ -643,12 +638,10 @@ type clicker interface {
 }
 
 func (p *Game) doWhenLeftButtonDown(ev *eventLeftButtonDown) {
-	hc := hitContext{Pos: image.Pt(ev.X, ev.Y)}
-	if hr, ok := p.onHit(hc); ok {
-		if o, ok := hr.Target.(clicker); ok {
-			o.doWhenClick(o)
-		}
-	}
+	// TODO query the clicked sprite by engine api
+	//if o, ok := hr.Target.(clicker); ok {
+	//	o.doWhenClick(o)
+	//}
 }
 
 func (p *Game) handleEvent(event event) {
@@ -997,20 +990,6 @@ func (p *Game) findSprite(name string) *Sprite {
 		}
 	}
 	return nil
-}
-
-// -----------------------------------------------------------------------------
-
-func (p *Game) onHit(hc hitContext) (hr hitResult, ok bool) {
-	items := p.getItems()
-	i := len(items)
-	for i > 0 {
-		i--
-		if hr, ok = items[i].hit(hc); ok {
-			return
-		}
-	}
-	return hitResult{Target: p}, true
 }
 
 // -----------------------------------------------------------------------------

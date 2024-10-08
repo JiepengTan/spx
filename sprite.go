@@ -930,7 +930,11 @@ func (p *Sprite) doMoveToForAnim(x, y float64, ani *anim.Anim) {
 		p.g.movePen(p, x, y)
 	}
 	p.x, p.y = x, y
-	p.getDrawInfo().updateMatrix()
+	p.updateMatrix()
+}
+
+func (p *Sprite) updateMatrix() {
+	// TODO(tanjp) update matrix, ps:remove this function
 }
 
 func (p *Sprite) goMoveForward(step float64) {
@@ -1200,7 +1204,7 @@ func (p *Sprite) setDirection(dir float64, change bool) bool {
 		p.doWhenTurning(p, &TurningInfo{NewDir: dir, OldDir: p.direction, Obj: p})
 	}
 	p.direction = dir
-	p.getDrawInfo().updateMatrix()
+	p.updateMatrix()
 	return true
 }
 
@@ -1228,7 +1232,7 @@ func (p *Sprite) SetSize(size float64) {
 		log.Println("SetSize", p.name, size)
 	}
 	p.scale = size
-	p.getDrawInfo().updateMatrix()
+	p.updateMatrix()
 }
 
 func (p *Sprite) ChangeSize(delta float64) {
@@ -1236,7 +1240,7 @@ func (p *Sprite) ChangeSize(delta float64) {
 		log.Println("ChangeSize", p.name, delta)
 	}
 	p.scale += delta
-	p.getDrawInfo().updateMatrix()
+	p.updateMatrix()
 }
 
 // -----------------------------------------------------------------------------
@@ -1512,53 +1516,15 @@ func (p *Sprite) CostumeHeight() float64 {
 }
 
 func (p *Sprite) Bounds() *math32.RotatedRect {
-	return p.getRotatedRect()
+	if !p.isVisible {
+		return nil
+	}
+	return nil // TODO(tanjp) fixed by engine api
 }
-
-/*
- func (p *Sprite) Pixel(x, y float64) color.Color {
-	 c2 := p.costumes[p.costumeIndex_]
-	 img, cx, cy := c2.needImage(p.g.fs)
-	 geo := p.getDrawInfo().getPixelGeo(cx, cy)
-	 color1, p1 := p.getDrawInfo().getPixel(math32.NewVector2(x, y), img, geo)
-	 if debugInstr {
-		 log.Printf("<<<< getPixel x, y(%f,%F) p1(%v) color1(%v) geo(%v)  ", x, y, p1, color1, geo)
-	 }
-	 return color1
- }
-*/
 
 // -----------------------------------------------------------------------------
 
 func (p *Sprite) fixWorldRange(x, y float64) (float64, float64) {
-	rect := p.getDrawInfo().getUpdateRotateRect(x, y)
-	if rect == nil {
-		return x, y
-	}
-	plist := rect.Points()
-	for _, val := range plist {
-		if p.g.isWorldRange(val) {
-			return x, y
-		}
-	}
-
-	worldW, worldH := p.g.worldSize_()
-	maxW := float64(worldW)/2.0 + float64(rect.Size.Width)
-	maxH := float64(worldH)/2.0 + float64(rect.Size.Height)
-
-	if x < -maxW {
-		x = -maxW
-	}
-	if x > maxW {
-		x = maxW
-	}
-	if y < -maxH {
-		y = -maxH
-	}
-	if y > maxH {
-		y = maxH
-	}
-
 	return x, y
 }
 
