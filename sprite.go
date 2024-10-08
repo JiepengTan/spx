@@ -24,7 +24,7 @@ import (
 	"sync"
 
 	"github.com/goplus/spx/internal/anim"
-	"github.com/goplus/spx/internal/gdi/clrutil"
+	"github.com/goplus/spx/internal/gdi"
 	"github.com/goplus/spx/internal/math32"
 	"github.com/goplus/spx/internal/tools"
 )
@@ -1408,7 +1408,7 @@ func (p *Sprite) PenDown() {
 }
 
 func (p *Sprite) SetPenColor(color Color) {
-	h, _, v := clrutil.RGB2HSV(color.R, color.G, color.B)
+	h, _, v := gdi.RGB2HSV(color.R, color.G, color.B)
 	p.penHue = (200 * h) / 360
 	p.penShade = 50 * v
 	p.penColor = color
@@ -1459,15 +1459,15 @@ func (p *Sprite) setPenShade(v float64, change bool) {
 }
 
 func (p *Sprite) doUpdatePenColor() {
-	r, g, b := clrutil.HSV2RGB((p.penHue*180)/100, 1, 1)
+	r, g, b := gdi.HSV2RGB((p.penHue*180)/100, 1, 1)
 	shade := p.penShade
 	if shade > 100 { // range 0..100
 		shade = 200 - shade
 	}
 	if shade < 50 {
-		r, g, b = clrutil.MixRGB(0, 0, 0, r, g, b, (10+shade)/60)
+		r, g, b = gdi.MixRGB(0, 0, 0, r, g, b, (10+shade)/60)
 	} else {
-		r, g, b = clrutil.MixRGB(r, g, b, 255, 255, 255, (shade-50)/60)
+		r, g, b = gdi.MixRGB(r, g, b, 255, 255, 255, (shade-50)/60)
 	}
 	p.penColor = color.RGBA{R: r, G: g, B: b, A: p.penColor.A}
 }

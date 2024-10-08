@@ -1,4 +1,4 @@
-package clrutil
+package gdi
 
 import (
 	"math"
@@ -6,7 +6,6 @@ import (
 )
 
 // HSV2RGB converts hue (0-360), saturation (0-1), and brightness (0-1) to RGB.
-//
 func HSV2RGB(h, s, v float64) (uint8, uint8, uint8) {
 	var r, g, b float64
 	h = math.Mod(h, 360)
@@ -51,7 +50,6 @@ func HSV2RGB(h, s, v float64) (uint8, uint8, uint8) {
 }
 
 // RGB2HSV converts RGB to an array containing the hue, saturation, and brightness.
-//
 func RGB2HSV(R, G, B uint8) (h, s, v float64) {
 	var f, i float64
 	r := float64(R) / 255
@@ -78,7 +76,6 @@ func RGB2HSV(R, G, B uint8) (h, s, v float64) {
 }
 
 // ScaleBrightness changes color brightness.
-//
 func ScaleBrightness(r, g, b uint8, scale float64) (uint8, uint8, uint8) {
 	h, s, v := RGB2HSV(r, g, b)
 	val := math.Max(0, math.Min(scale*v, 1))
@@ -86,7 +83,6 @@ func ScaleBrightness(r, g, b uint8, scale float64) (uint8, uint8, uint8) {
 }
 
 // MixRGB mixs rgb1 with rgb2. 0 gives all rgb1, 1 gives rbg2, .5 mixes them 50/50.
-//
 func MixRGB(r1, g1, b1 uint8, r2, g2, b2 uint8, fraction float64) (r, g, b uint8) {
 	if fraction <= 0 {
 		return r1, g1, b1
@@ -101,7 +97,6 @@ func MixRGB(r1, g1, b1 uint8, r2, g2, b2 uint8, fraction float64) (r, g, b uint8
 }
 
 // Random returns a random color.
-//
 func Random() (uint8, uint8, uint8) {
 	h := 360 * rand.Float64()
 	s := 0.7 + (0.3 * rand.Float64())

@@ -18,36 +18,11 @@ package spx
 
 import (
 	"fmt"
-
-	"golang.org/x/image/font"
-
-	"github.com/goplus/spx/internal/gdi"
-	xfont "github.com/goplus/spx/internal/gdi/font"
-)
-
-var (
-	defaultFont   gdi.Font
-	defaultFont2  gdi.Font
-	defaultFontSm gdi.Font
 )
 
 func init() {
 	const dpi = 72
-	defaultFont = xfont.NewDefault(&xfont.Options{
-		Size:    15,
-		DPI:     dpi,
-		Hinting: font.HintingFull,
-	})
-	defaultFont2 = xfont.NewDefault(&xfont.Options{ // for stageMonitor
-		Size:    12,
-		DPI:     dpi,
-		Hinting: font.HintingFull,
-	})
-	defaultFontSm = xfont.NewDefault(&xfont.Options{
-		Size:    11,
-		DPI:     dpi,
-		Hinting: font.HintingFull,
-	})
+
 }
 
 // -------------------------------------------------------------------------------------

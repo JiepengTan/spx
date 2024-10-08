@@ -16,12 +16,6 @@
 
 package spx
 
-import (
-	"github.com/goplus/spx/internal/gdi"
-	xfont "github.com/goplus/spx/internal/gdi/font"
-	"golang.org/x/image/font"
-)
-
 const (
 	quotePadding     = 5.0
 	quoteLineWidth   = 8.0
@@ -30,23 +24,8 @@ const (
 	quoteBorderRadis = 10.0
 )
 
-var (
-	quoteMsgFont gdi.Font
-	quoteDesFont gdi.Font
-)
-
 func init() {
 	const dpi = 72
-	quoteMsgFont = xfont.NewDefault(&xfont.Options{
-		Size:    35,
-		DPI:     dpi,
-		Hinting: font.HintingFull,
-	})
-	quoteDesFont = xfont.NewDefault(&xfont.Options{
-		Size:    18,
-		DPI:     dpi,
-		Hinting: font.HintingFull,
-	})
 }
 
 type quoter struct {

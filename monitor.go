@@ -23,10 +23,7 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/goplus/spx/internal/gdi"
-	xfont "github.com/goplus/spx/internal/gdi/font"
 	"github.com/goplus/spx/internal/tools"
-	"golang.org/x/image/font"
 )
 
 // -------------------------------------------------------------------------------------
@@ -149,26 +146,6 @@ var (
 	stmValueground   = Color{R: 0x21, G: 0x9f, B: 0xfc, A: 0xff}
 	stmValueRectPen  = Color{R: 0xf6, G: 0xf8, B: 0xfa, A: 0xff}
 )
-
-var (
-	size2Font = make(map[int]gdi.Font)
-)
-
-func getOrCreateFont(size int) gdi.Font {
-	const dpi = 72
-	if size <= 0 {
-		size = 1
-	}
-	if font, ok := size2Font[size]; ok {
-		return font
-	}
-	size2Font[size] = xfont.NewDefault(&xfont.Options{
-		Size:    float64(size),
-		DPI:     dpi,
-		Hinting: font.HintingFull,
-	})
-	return size2Font[size]
-}
 
 type rectKey struct {
 	x, y, w, h  float64
