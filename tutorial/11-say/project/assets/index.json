@@ -1,0 +1,16 @@
+{
+  "backdrops": [
+    {
+      "bitmapResolution": 2,
+      "name": "urban1",
+      "path": "6.png",
+      "x": 480,
+      "y": 360
+    }
+  ],
+  "backdropIndex": 0,
+  "zorder": [
+    "Jaime",
+    "Kai"
+  ]
+}
