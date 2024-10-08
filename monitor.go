@@ -152,10 +152,6 @@ type rectKey struct {
 	clr, clrPen Color
 }
 
-func (p *Monitor) hit(hc hitContext) (hr hitResult, ok bool) {
-	return
-}
-
 // -------------------------------------------------------------------------------------
 // IWidget
 func (pself *Monitor) GetName() string {

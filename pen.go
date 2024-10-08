@@ -43,7 +43,7 @@ func (p *turtleCanvas) penLine(obj *penLine) {
 	p.objs = append(p.objs, obj)
 }
 
-func (p *turtleCanvas) stampCostume(obj *spriteDrawInfo) {
+func (p *turtleCanvas) stampCostume(obj *Sprite) {
 	p.objs = append(p.objs, obj)
 }
 

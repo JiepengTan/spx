@@ -16,43 +16,10 @@
 
 package spx
 
-import (
-	"image"
-
-	"github.com/hajimehoshi/ebiten/v2"
-)
-
-// -------------------------------------------------------------------------------------
-
-type drawContext struct {
-	*ebiten.Image
-}
-
-type hitContext struct {
-	Pos image.Point
-}
-
-type hitResult struct {
-	Target interface{}
-}
-
 type Shape interface {
 }
 
 // -------------------------------------------------------------------------------------
-
-type spriteDrawInfo struct {
-	sprite  *Sprite
-	geo     ebiten.GeoM
-	visible bool
-}
-
-func (p *Sprite) getDrawInfo() *spriteDrawInfo {
-	return &spriteDrawInfo{
-		sprite:  p,
-		visible: p.isVisible,
-	}
-}
 
 func (p *Sprite) touchPoint(x, y float64) bool {
 	return true
@@ -61,9 +28,4 @@ func (p *Sprite) touchPoint(x, y float64) bool {
 func (p *Sprite) touchingSprite(dst *Sprite) bool {
 	// TODO tanjp
 	return false
-}
-
-func (p *Sprite) applyPivot(c *costume, cx, cy *float64) {
-	*cx += p.pivot.X * float64(c.bitmapResolution)
-	*cy -= p.pivot.Y * float64(c.bitmapResolution)
 }

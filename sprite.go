@@ -1396,7 +1396,7 @@ func (p *Sprite) GotoBack() {
 // -----------------------------------------------------------------------------
 
 func (p *Sprite) Stamp() {
-	p.g.stampCostume(p.getDrawInfo())
+	p.g.stampCostume(p)
 }
 
 func (p *Sprite) PenUp() {

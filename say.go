@@ -50,10 +50,6 @@ const (
 	minWidth      = leadingWidth + leadingWidth + gapWidth
 )
 
-func (p *sayOrThinker) hit(hc hitContext) (hr hitResult, ok bool) {
-	return
-}
-
 // -------------------------------------------------------------------------------------
 
 func (p *Sprite) sayOrThink(msgv interface{}, style int) {

@@ -56,7 +56,3 @@ func (p *Sprite) doStopQuote() {
 		p.quoteObj = nil
 	}
 }
-
-func (p *quoter) hit(hc hitContext) (hr hitResult, ok bool) {
-	return
-}

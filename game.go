@@ -833,7 +833,7 @@ func (p *Game) getTurtle() turtleCanvas {
 	return p.turtle
 }
 
-func (p *Game) stampCostume(di *spriteDrawInfo) {
+func (p *Game) stampCostume(di *Sprite) {
 	p.turtle.stampCostume(di)
 }
 

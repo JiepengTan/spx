@@ -76,7 +76,3 @@ func getSpcspVal(ss specsp, key string, defaultVal ...interface{}) interface{} {
 	}
 	return v
 }
-
-func (m *measure) hit(hc hitContext) (hr hitResult, ok bool) {
-	return
-}
