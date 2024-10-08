@@ -1,0 +1,46 @@
+{
+  "backdrops": [
+    {
+      "bitmapResolution": 2,
+      "name": "backdrop1",
+      "path": "1.png"
+    }
+  ],
+  "zorder": [
+    "MyAircraft",
+    "Bullet", 
+    {
+      "name":"life",
+      "size": 1.0,
+      "type": "monitor",
+      "target": "",
+      "val": "getVar:life",
+      "color": 15629590,
+      "label": "Life",
+      "mode": 1,
+      "sliderMin": 0,
+      "sliderMax": 100,
+      "x": 5,
+      "y": 30,
+      "isDiscrete": true,
+      "visible": true
+    },
+    {
+      "name":"score",
+      "size": 1.0,
+      "type": "monitor",
+      "target": "",
+      "val": "getVar:life",
+      "color": 15629590,
+      "label": "score中文AAAAAA",
+      "mode": 1,
+      "sliderMin": 0,
+      "sliderMax": 100,
+      "x": 5,
+      "y": 0,
+      "isDiscrete": true,
+      "visible": true
+    }
+  ]
+ 
+}
