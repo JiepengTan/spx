@@ -46,7 +46,6 @@ type hitResult struct {
 }
 
 type Shape interface {
-	draw(dc drawContext)
 	hit(hc hitContext) (hr hitResult, ok bool)
 }
 

@@ -21,7 +21,6 @@ import (
 	"unsafe"
 
 	"github.com/goplus/spx/internal/coroutine"
-	"github.com/hajimehoshi/ebiten/v2"
 )
 
 // -------------------------------------------------------------------------------------
@@ -72,10 +71,7 @@ type tickMgr struct {
 // currentTPS is the current TPS (ticks per second),
 // that represents how many update function is called in a second.
 func getCurrentTPS() float64 {
-	if tps := ebiten.CurrentTPS(); tps != 0 {
-		return tps
-	}
-	return ebiten.DefaultTPS
+	return 30 // TODO(tanjp) use engine api
 }
 
 func (p *tickMgr) init() {
