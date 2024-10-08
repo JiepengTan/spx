@@ -1,0 +1,34 @@
+{
+  "costumes": [
+    {
+      "bitmapResolution": 2,
+      "name": "bullet",
+      "path": "30.png",
+      "faceRight": 90,
+      "x": 8,
+      "y": 20
+    }
+  ],
+  "costumeIndex": 0,
+  "heading": 0,
+  "isDraggable": false,
+  "rotationStyle": "normal",
+  "size": 0.65,
+  "visible": false,
+  "x": 230,
+  "y": 185,
+  "triggerLayer":1,
+  "triggerMask":2,
+  "collisionLayer":0,
+  "collisionMask":0	,
+  "colliderType":"circle",
+	"colliderCenter":{"x":0,"y":0},
+	"colliderSize":{"x":0,"y":0},
+	"colliderRadius":10,
+	"triggerType":"circle",
+	"triggerCenter":{"x":0,"y":0},
+	"triggerSize":{"x":0,"y":0},
+	"triggerRadius":10,
+
+  "None": 0
+}
