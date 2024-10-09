@@ -18,3 +18,14 @@ func SyncCreateUiNode[T any](path string) *T {
 	<-done
 	return __ret
 }
+func SyncCreateEngineUiNode[T any](path string) *T {
+	var __ret *T
+	done := make(chan struct{})
+	job := func() {
+		__ret = CreateEngineUI[T](path)
+		done <- struct{}{}
+	}
+	updateJobQueue <- job
+	<-done
+	return __ret
+}

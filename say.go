@@ -18,6 +18,8 @@ package spx
 
 import (
 	"fmt"
+
+	"github.com/goplus/spx/internal/ui"
 )
 
 func init() {
@@ -36,6 +38,12 @@ type sayOrThinker struct {
 	sp    *Sprite
 	msg   string
 	style int // styleSay, styleThink
+	panel *ui.UiSay
+}
+
+func (p *sayOrThinker) refresh() {
+	p.panel.SetText(p.msg)
+	println("TODO sayOrThinker.refresh ", p.msg)
 }
 
 const (
@@ -67,10 +75,12 @@ func (p *Sprite) sayOrThink(msgv interface{}, style int) {
 	if old == nil {
 		p.sayObj = &sayOrThinker{sp: p, msg: msg, style: style}
 		p.g.addShape(p.sayObj)
+		p.sayObj.panel = ui.NewUiSay(msg)
 	} else {
 		old.msg, old.style = msg, style
 		p.g.activateShape(old)
 	}
+	p.sayObj.refresh()
 }
 
 func (p *Sprite) waitStopSay(secs float64) {
@@ -80,6 +90,7 @@ func (p *Sprite) waitStopSay(secs float64) {
 
 func (p *Sprite) doStopSay() {
 	if p.sayObj != nil {
+		p.sayObj.panel.Destroy()
 		p.g.removeShape(p.sayObj)
 		p.sayObj = nil
 	}

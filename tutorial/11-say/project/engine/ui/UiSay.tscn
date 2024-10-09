@@ -28,7 +28,7 @@ text = "The weather's often cold in the North and windy in the East.It's often w
 autowrap_mode = 2
 text_direction = 1
 
-[node name="ThinkDot" type="TextureRect" parent="."]
+[node name="ImageDot" type="TextureRect" parent="."]
 layout_mode = 2
 offset_left = 4.0
 offset_top = 145.0

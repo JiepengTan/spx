@@ -1364,6 +1364,17 @@ func SyncSpriteIsTriggerEnabled(obj Object) bool {
 }
 
 // IUiMgr
+func SyncUiBindNode(obj Object, rel_path string) Object {
+	var __ret Object
+	done := make(chan struct{})
+	job := func() {
+		__ret = UiMgr.BindNode(obj, rel_path)
+		done <- struct{}{}
+	}
+	updateJobQueue <- job
+	<-done
+	return __ret
+}
 func SyncUiCreateNode(path string) Object {
 	var __ret Object
 	done := make(chan struct{})
