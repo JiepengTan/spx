@@ -108,7 +108,7 @@ func (this *SmallEnemy) Main() {
 //line tutorial/05-Animation/SmallEnemy.spx:21:1
 	this.OnCloned__1(func() {
 //line tutorial/05-Animation/SmallEnemy.spx:22:1
-		this.life = 3
+		this.life = 1
 //line tutorial/05-Animation/SmallEnemy.spx:23:1
 		for {
 			spx.Sched()
