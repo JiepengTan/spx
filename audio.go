@@ -17,8 +17,6 @@
 package spx
 
 import (
-	"sync"
-
 	"github.com/goplus/spx/internal/engine"
 )
 
@@ -39,9 +37,8 @@ type PlayOptions struct {
 }
 
 type soundMgr struct {
-	g        *Game
-	playersM sync.Mutex
-	audios   map[string]Sound
+	g      *Game
+	audios map[string]Sound
 }
 
 func (p *soundMgr) init(g *Game) {
@@ -49,58 +46,75 @@ func (p *soundMgr) init(g *Game) {
 	p.g = g
 }
 
-func (p *soundMgr) playAction(media Sound, opts *PlayOptions) (err error) {
-	switch opts.Action {
-	case PlayRewind:
-		err = p.play(media, opts.Wait, opts.Loop)
-	case PlayStop:
-		p.stop(media)
-	case PlayResume:
-		p.resume(media)
-	case PlayPause:
-		p.pause(media)
-	}
+func (p *soundMgr) play(media Sound, opts *PlayOptions) (err error) {
+	err = p.playSfx(media, opts.Wait, false)
 	return
 }
 
 func (p *soundMgr) stopAll() {
+	engine.SyncAudioStopAll()
 }
 
-func (p *soundMgr) play(media Sound, wait, loop bool) (err error) {
-	engine.SyncAudioPlayAudio(engine.ToEnginePath(media.Path))
+func (p *soundMgr) playSfx(media Sound, wait, loop bool) (err error) {
+	engine.SyncAudioPlaySfx(engine.ToEnginePath(media.Path))
 	return
 }
 
-func (p *soundMgr) stop(media Sound) {
+func (p *soundMgr) stopMusic(media Sound) {
 	engine.SyncAudioPauseMusic()
 }
 
-func (p *soundMgr) pause(media Sound) {
+func (p *soundMgr) pauseMusic(media Sound) {
 	engine.SyncAudioPauseMusic()
 }
 
-func (p *soundMgr) resume(media Sound) {
+func (p *soundMgr) resumeMusic(media Sound) {
 	engine.SyncAudioResumeMusic()
 }
 
-func (p *soundMgr) volume() float64 {
-	volume := engine.SyncAudioGetAudioVolume()
+func (p *soundMgr) getVolume() float64 {
+	volume := engine.SyncAudioGetMasterVolume()
 	return float64(volume)
 }
 
-func (p *soundMgr) SetVolume(volume float64) {
-	engine.SyncAudioSetAudioVolume(float32(volume))
+func (p *soundMgr) setVolume(volume float64) {
+	engine.SyncAudioSetMasterVolume(float32(volume))
 }
 
-func (p *soundMgr) ChangeVolume(delta float64) {
-	volume := p.volume() + delta
-	if volume < 0 {
-		volume = 0
-	}
-	if volume > 1 {
-		volume = 1
-	}
-	p.SetVolume(volume)
+func (p *soundMgr) changeVolume(delta float64) {
+	volume := p.getVolume() + delta
+	volume = engine.Clamp01d(volume)
+	p.setVolume(volume)
+}
+
+func (p *soundMgr) getSfxVolume() float64 {
+	volume := engine.SyncAudioGetSfxVolume()
+	return float64(volume)
+}
+
+func (p *soundMgr) setSfxVolume(volume float64) {
+	engine.SyncAudioSetSfxVolume(float32(volume))
+}
+
+func (p *soundMgr) changeSfxVolume(delta float64) {
+	volume := p.getSfxVolume() + delta
+	volume = engine.Clamp01d(volume)
+	p.setSfxVolume(volume)
+}
+
+func (p *soundMgr) getMusicVolume() float64 {
+	volume := engine.SyncAudioGetMusicVolume()
+	return float64(volume)
+}
+
+func (p *soundMgr) setMusicVolume(volume float64) {
+	engine.SyncAudioSetMusicVolume(float32(volume))
+}
+
+func (p *soundMgr) changeMusicVolume(delta float64) {
+	volume := p.getMusicVolume() + delta
+	volume = engine.Clamp01d(volume)
+	p.setMusicVolume(volume)
 }
 
 // -------------------------------------------------------------------------------------

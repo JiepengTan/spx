@@ -1167,7 +1167,7 @@ func (p *Game) Play__2(media Sound, action *PlayOptions) {
 		log.Println("Play", media.Path)
 	}
 
-	err := p.sounds.playAction(media, action)
+	err := p.sounds.play(media, action)
 	if err != nil {
 		panic(err)
 	}
@@ -1194,15 +1194,15 @@ func (p *Game) StopAllSounds() {
 }
 
 func (p *Game) Volume() float64 {
-	return p.sounds.volume()
+	return p.sounds.getVolume()
 }
 
 func (p *Game) SetVolume(volume float64) {
-	p.sounds.SetVolume(volume)
+	p.sounds.setVolume(volume)
 }
 
 func (p *Game) ChangeVolume(delta float64) {
-	p.sounds.ChangeVolume(delta)
+	p.sounds.changeVolume(delta)
 }
 
 func (p *Game) Loudness() float64 {

@@ -12,47 +12,25 @@ import (
 )
 
 // IAudioMgr
-func SyncAudioPlayAudio(path string) {
+func SyncAudioStopAll() {
 
 	done := make(chan struct{})
 	job := func() {
-		AudioMgr.PlayAudio(path)
+		AudioMgr.StopAll()
 		done <- struct{}{}
 	}
 	updateJobQueue <- job
 	<-done
 }
-func SyncAudioSetAudioVolume(volume float32) {
+func SyncAudioPlaySfx(path string) {
 
 	done := make(chan struct{})
 	job := func() {
-		AudioMgr.SetAudioVolume(volume)
+		AudioMgr.PlaySfx(path)
 		done <- struct{}{}
 	}
 	updateJobQueue <- job
 	<-done
-}
-func SyncAudioGetAudioVolume() float32 {
-	var __ret float32
-	done := make(chan struct{})
-	job := func() {
-		__ret = AudioMgr.GetAudioVolume()
-		done <- struct{}{}
-	}
-	updateJobQueue <- job
-	<-done
-	return __ret
-}
-func SyncAudioIsMusicPlaying() bool {
-	var __ret bool
-	done := make(chan struct{})
-	job := func() {
-		__ret = AudioMgr.IsMusicPlaying()
-		done <- struct{}{}
-	}
-	updateJobQueue <- job
-	<-done
-	return __ret
 }
 func SyncAudioPlayMusic(path string) {
 
@@ -63,27 +41,6 @@ func SyncAudioPlayMusic(path string) {
 	}
 	updateJobQueue <- job
 	<-done
-}
-func SyncAudioSetMusicVolume(volume float32) {
-
-	done := make(chan struct{})
-	job := func() {
-		AudioMgr.SetMusicVolume(volume)
-		done <- struct{}{}
-	}
-	updateJobQueue <- job
-	<-done
-}
-func SyncAudioGetMusicVolume() float32 {
-	var __ret float32
-	done := make(chan struct{})
-	job := func() {
-		__ret = AudioMgr.GetMusicVolume()
-		done <- struct{}{}
-	}
-	updateJobQueue <- job
-	<-done
-	return __ret
 }
 func SyncAudioPauseMusic() {
 
@@ -125,6 +82,80 @@ func SyncAudioSetMusicTimer(time float32) {
 	}
 	updateJobQueue <- job
 	<-done
+}
+func SyncAudioIsMusicPlaying() bool {
+	var __ret bool
+	done := make(chan struct{})
+	job := func() {
+		__ret = AudioMgr.IsMusicPlaying()
+		done <- struct{}{}
+	}
+	updateJobQueue <- job
+	<-done
+	return __ret
+}
+func SyncAudioSetSfxVolume(volume float32) {
+
+	done := make(chan struct{})
+	job := func() {
+		AudioMgr.SetSfxVolume(volume)
+		done <- struct{}{}
+	}
+	updateJobQueue <- job
+	<-done
+}
+func SyncAudioGetSfxVolume() float32 {
+	var __ret float32
+	done := make(chan struct{})
+	job := func() {
+		__ret = AudioMgr.GetSfxVolume()
+		done <- struct{}{}
+	}
+	updateJobQueue <- job
+	<-done
+	return __ret
+}
+func SyncAudioSetMusicVolume(volume float32) {
+
+	done := make(chan struct{})
+	job := func() {
+		AudioMgr.SetMusicVolume(volume)
+		done <- struct{}{}
+	}
+	updateJobQueue <- job
+	<-done
+}
+func SyncAudioGetMusicVolume() float32 {
+	var __ret float32
+	done := make(chan struct{})
+	job := func() {
+		__ret = AudioMgr.GetMusicVolume()
+		done <- struct{}{}
+	}
+	updateJobQueue <- job
+	<-done
+	return __ret
+}
+func SyncAudioSetMasterVolume(volume float32) {
+
+	done := make(chan struct{})
+	job := func() {
+		AudioMgr.SetMasterVolume(volume)
+		done <- struct{}{}
+	}
+	updateJobQueue <- job
+	<-done
+}
+func SyncAudioGetMasterVolume() float32 {
+	var __ret float32
+	done := make(chan struct{})
+	job := func() {
+		__ret = AudioMgr.GetMasterVolume()
+		done <- struct{}{}
+	}
+	updateJobQueue <- job
+	<-done
+	return __ret
 }
 
 // ICameraMgr
