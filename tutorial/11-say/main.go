@@ -33,7 +33,7 @@ func (this *Jaime) Main() {
 //line tutorial/01-Weather/Jaime.spx:8:1
 		this.NextCostume()
 //line tutorial/01-Weather/Jaime.spx:9:1
-		this.Say("The weather's often cold in the North\n and windy in the East.", 1)
+		this.Say("The weather's often cold\n in the North and\n windy in the East.", 1)
 //line tutorial/01-Weather/Jaime.spx:10:1
 		this.Say("It's often wet in the West\n and sometimes warm in the South.", 1)
 //line tutorial/01-Weather/Jaime.spx:11:1
@@ -46,23 +46,23 @@ func (this *Jaime) Main() {
 //line tutorial/01-Weather/Jaime.spx:16:1
 		this.Say("I like spring and summer.", 1)
 //line tutorial/01-Weather/Jaime.spx:17:1
-		this.Say("The days are long and the nights are short.", 1)
+		this.Say("The days are long and\n the nights are short.", 1)
 //line tutorial/01-Weather/Jaime.spx:18:1
-		this.Say("The sun rises early and sets late. ", 1)
+		this.Say("The sun rises early and\n sets late. ", 1)
 //line tutorial/01-Weather/Jaime.spx:19:1
 		this.NextCostume()
 //line tutorial/01-Weather/Jaime.spx:20:1
 		this.Say("I don't like autumn and winter.", 1)
 //line tutorial/01-Weather/Jaime.spx:21:1
-		this.Say("The days are short and the nights are long.", 1)
+		this.Say("The days are short and\n the nights are long.", 1)
 //line tutorial/01-Weather/Jaime.spx:22:1
-		this.Say("The sun rises late and sets early.", 1)
+		this.Say("The sun rises late and\n sets early.", 1)
 //line tutorial/01-Weather/Jaime.spx:23:1
 		this.NextCostume()
 //line tutorial/01-Weather/Jaime.spx:24:1
-		this.Say("Our climate is not very good, but it's certainly interesting.", 1)
+		this.Say("Our climate is not very good,\n but it's certainly interesting.", 1)
 //line tutorial/01-Weather/Jaime.spx:25:1
-		this.Say("It's our favourite subject of conversation.", 1)
+		this.Say("It's our favourite subject\n of conversation.", 1)
 //line tutorial/01-Weather/Jaime.spx:26:1
 		this.Broadcast__0("6")
 	})
@@ -89,7 +89,7 @@ func (this *Kai) Main() {
 //line tutorial/01-Weather/Kai.spx:6:1
 	this.OnMsg__1("2", func() {
 //line tutorial/01-Weather/Kai.spx:7:1
-		this.Say("What's the climate like in your country?", 1)
+		this.Say("What's the climate like\n in your country?", 1)
 //line tutorial/01-Weather/Kai.spx:8:1
 		this.Broadcast__0("3")
 	})

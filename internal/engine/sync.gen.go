@@ -1621,3 +1621,192 @@ func SyncUiGetRect(obj Object) Rect2 {
 	<-done
 	return __ret
 }
+func SyncUiGetLayoutDirection(obj Object) int64 {
+	var __ret int64
+	done := make(chan struct{})
+	job := func() {
+		__ret = UiMgr.GetLayoutDirection(obj)
+		done <- struct{}{}
+	}
+	updateJobQueue <- job
+	<-done
+	return __ret
+}
+func SyncUiSetLayoutDirection(obj Object, value int64) {
+
+	done := make(chan struct{})
+	job := func() {
+		UiMgr.SetLayoutDirection(obj, value)
+		done <- struct{}{}
+	}
+	updateJobQueue <- job
+	<-done
+}
+func SyncUiGetLayoutMode(obj Object) int64 {
+	var __ret int64
+	done := make(chan struct{})
+	job := func() {
+		__ret = UiMgr.GetLayoutMode(obj)
+		done <- struct{}{}
+	}
+	updateJobQueue <- job
+	<-done
+	return __ret
+}
+func SyncUiSetLayoutMode(obj Object, value int64) {
+
+	done := make(chan struct{})
+	job := func() {
+		UiMgr.SetLayoutMode(obj, value)
+		done <- struct{}{}
+	}
+	updateJobQueue <- job
+	<-done
+}
+func SyncUiGetAnchorsPreset(obj Object) int64 {
+	var __ret int64
+	done := make(chan struct{})
+	job := func() {
+		__ret = UiMgr.GetAnchorsPreset(obj)
+		done <- struct{}{}
+	}
+	updateJobQueue <- job
+	<-done
+	return __ret
+}
+func SyncUiSetAnchorsPreset(obj Object, value int64) {
+
+	done := make(chan struct{})
+	job := func() {
+		UiMgr.SetAnchorsPreset(obj, value)
+		done <- struct{}{}
+	}
+	updateJobQueue <- job
+	<-done
+}
+func SyncUiGetScale(obj Object) Vec2 {
+	var __ret Vec2
+	done := make(chan struct{})
+	job := func() {
+		__ret = UiMgr.GetScale(obj)
+		done <- struct{}{}
+	}
+	updateJobQueue <- job
+	<-done
+	return __ret
+}
+func SyncUiSetScale(obj Object, value Vec2) {
+
+	done := make(chan struct{})
+	job := func() {
+		UiMgr.SetScale(obj, value)
+		done <- struct{}{}
+	}
+	updateJobQueue <- job
+	<-done
+}
+func SyncUiGetPosition(obj Object) Vec2 {
+	var __ret Vec2
+	done := make(chan struct{})
+	job := func() {
+		__ret = UiMgr.GetPosition(obj)
+		done <- struct{}{}
+	}
+	updateJobQueue <- job
+	<-done
+	return __ret
+}
+func SyncUiSetPosition(obj Object, value Vec2) {
+
+	done := make(chan struct{})
+	job := func() {
+		UiMgr.SetPosition(obj, value)
+		done <- struct{}{}
+	}
+	updateJobQueue <- job
+	<-done
+}
+func SyncUiGetSize(obj Object) Vec2 {
+	var __ret Vec2
+	done := make(chan struct{})
+	job := func() {
+		__ret = UiMgr.GetSize(obj)
+		done <- struct{}{}
+	}
+	updateJobQueue <- job
+	<-done
+	return __ret
+}
+func SyncUiSetSize(obj Object, value Vec2) {
+
+	done := make(chan struct{})
+	job := func() {
+		UiMgr.SetSize(obj, value)
+		done <- struct{}{}
+	}
+	updateJobQueue <- job
+	<-done
+}
+func SyncUiGetGlobalPosition(obj Object) Vec2 {
+	var __ret Vec2
+	done := make(chan struct{})
+	job := func() {
+		__ret = UiMgr.GetGlobalPosition(obj)
+		done <- struct{}{}
+	}
+	updateJobQueue <- job
+	<-done
+	return __ret
+}
+func SyncUiSetGlobalPosition(obj Object, value Vec2) {
+
+	done := make(chan struct{})
+	job := func() {
+		UiMgr.SetGlobalPosition(obj, value)
+		done <- struct{}{}
+	}
+	updateJobQueue <- job
+	<-done
+}
+func SyncUiGetRotation(obj Object) float32 {
+	var __ret float32
+	done := make(chan struct{})
+	job := func() {
+		__ret = UiMgr.GetRotation(obj)
+		done <- struct{}{}
+	}
+	updateJobQueue <- job
+	<-done
+	return __ret
+}
+func SyncUiSetRotation(obj Object, value float32) {
+
+	done := make(chan struct{})
+	job := func() {
+		UiMgr.SetRotation(obj, value)
+		done <- struct{}{}
+	}
+	updateJobQueue <- job
+	<-done
+}
+func SyncUiGetFlip(obj Object, horizontal bool) bool {
+	var __ret bool
+	done := make(chan struct{})
+	job := func() {
+		__ret = UiMgr.GetFlip(obj, horizontal)
+		done <- struct{}{}
+	}
+	updateJobQueue <- job
+	<-done
+	return __ret
+}
+func SyncUiSetFlip(obj Object, horizontal bool, is_flip bool) {
+
+	done := make(chan struct{})
+	job := func() {
+		UiMgr.SetFlip(obj, horizontal, is_flip)
+		done <- struct{}{}
+	}
+	updateJobQueue <- job
+	<-done
+}

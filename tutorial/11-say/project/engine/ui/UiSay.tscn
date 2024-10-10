@@ -6,32 +6,30 @@
 [node name="Say" type="Control"]
 layout_mode = 3
 anchors_preset = 0
-offset_top = 10000.0
-offset_bottom = 10000.0
 
-[node name="V" type="VBoxContainer" parent="."]
+[node name="VL" type="VBoxContainer" parent="."]
 layout_mode = 1
 anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
 offset_top = -69.0
-offset_right = 60.0
+offset_right = 41.0
 grow_vertical = 0
 
-[node name="BG" type="PanelContainer" parent="V"]
+[node name="BG" type="PanelContainer" parent="VL"]
 layout_mode = 2
 theme = ExtResource("1_wmn3a")
 
-[node name="Label" type="Label" parent="V/BG"]
+[node name="Label" type="Label" parent="VL/BG"]
 custom_minimum_size = Vector2(1, 0)
 layout_mode = 2
 text_direction = 1
 
-[node name="HL" type="HBoxContainer" parent="V"]
+[node name="H" type="HBoxContainer" parent="VL"]
 layout_direction = 2
 layout_mode = 2
 
-[node name="ImageDot" type="TextureRect" parent="V/HL"]
+[node name="ImageDot" type="TextureRect" parent="VL/H"]
 custom_minimum_size = Vector2(30, 30)
 layout_mode = 2
 texture = ExtResource("2_kmrtr")
@@ -39,12 +37,32 @@ expand_mode = 2
 stretch_mode = 4
 flip_h = true
 
-[node name="HR" type="HBoxContainer" parent="V"]
-visible = false
+[node name="VR" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -38.0
+offset_top = -69.0
+grow_horizontal = 0
+grow_vertical = 0
+
+[node name="BG" type="PanelContainer" parent="VR"]
+layout_mode = 2
+theme = ExtResource("1_wmn3a")
+
+[node name="Label" type="Label" parent="VR/BG"]
+custom_minimum_size = Vector2(1, 0)
+layout_mode = 2
+text_direction = 1
+
+[node name="H" type="HBoxContainer" parent="VR"]
 layout_direction = 3
 layout_mode = 2
 
-[node name="ImageDot" type="TextureRect" parent="V/HR"]
+[node name="ImageDot" type="TextureRect" parent="VR/H"]
 custom_minimum_size = Vector2(30, 30)
 layout_mode = 2
 texture = ExtResource("2_kmrtr")
