@@ -22,14 +22,14 @@ func (this *Jaime) Main() {
 //line tutorial/01-Weather/Jaime.spx:1:1
 	this.OnMsg__1("1", func() {
 //line tutorial/01-Weather/Jaime.spx:2:1
-		this.Say("I come from England.", 1)
+		this.Say("I come from \nEngland. aaaaa", 1)
 //line tutorial/01-Weather/Jaime.spx:3:1
 		this.Broadcast__0("2")
 	})
 //line tutorial/01-Weather/Jaime.spx:6:1
 	this.OnMsg__1("3", func() {
 //line tutorial/01-Weather/Jaime.spx:7:1
-		this.Say("It's mild, \nbut it's not always pleasant.", 1)
+		this.Say("It's mild, \nbut it's not always\n\n\n pleasant.", 1)
 //line tutorial/01-Weather/Jaime.spx:8:1
 		this.NextCostume()
 //line tutorial/01-Weather/Jaime.spx:9:1

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dl6cww0t5blw7"
-path="res://.godot/imported/ThinkRoot.png-96aed149862822b64576c99a4b57b9eb.ctex"
+uid="uid://dxn0c72yygef8"
+path="res://.godot/imported/quote.png-46f2a1c745736a471bb2b73b7ae6a431.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://engine/ThinkRoot.png"
-dest_files=["res://.godot/imported/ThinkRoot.png-96aed149862822b64576c99a4b57b9eb.ctex"]
+source_file="res://engine/textures/quote/quote.png"
+dest_files=["res://.godot/imported/quote.png-46f2a1c745736a471bb2b73b7ae6a431.ctex"]
 
 [params]
 

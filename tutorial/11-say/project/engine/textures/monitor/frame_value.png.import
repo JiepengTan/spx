@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bcgss6q0fbi5"
-path="res://.godot/imported/ThinkFrame.png-a590884603de45ea0f5cef37ff0b4aaf.ctex"
+uid="uid://ccrnx7ptuijh0"
+path="res://.godot/imported/frame_value.png-2feb44c5f368df083422a7a9d1d0a102.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://engine/ThinkFrame.png"
-dest_files=["res://.godot/imported/ThinkFrame.png-a590884603de45ea0f5cef37ff0b4aaf.ctex"]
+source_file="res://engine/textures/monitor/frame_value.png"
+dest_files=["res://.godot/imported/frame_value.png-2feb44c5f368df083422a7a9d1d0a102.ctex"]
 
 [params]
 
