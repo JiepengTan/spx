@@ -24,6 +24,7 @@ import (
 	"syscall"
 
 	"github.com/goplus/spx/internal/tools"
+	"github.com/goplus/spx/internal/ui"
 )
 
 // -------------------------------------------------------------------------------------
@@ -41,6 +42,7 @@ type Monitor struct {
 	x, y    float64
 	label   string
 	visible bool
+	panel   *ui.UiMonitor
 }
 
 /*
@@ -78,12 +80,27 @@ func newMonitor(g reflect.Value, v specsp) (*Monitor, error) {
 	x := v["x"].(float64)
 	y := v["y"].(float64)
 	visible := v["visible"].(bool)
-	return &Monitor{
+
+	panel := ui.NewUiMonitor()
+	monitor := &Monitor{
 		target: target, val: val, eval: eval, name: name, size: size,
-		visible: visible, mode: mode, color: color, x: x, y: y, label: label,
-	}, nil
+		visible: visible, mode: mode, color: color, x: x, y: y, label: label, panel: panel,
+	}
+	panel.UpdateCallBack = func(delta float32) {
+		monitor.OnUpdate(delta)
+	}
+	return monitor, nil
 }
 
+func (pself *Monitor) OnUpdate(delta float32) {
+	// call on main thread !
+	if !pself.visible {
+		return
+	}
+	val := pself.eval()
+	pself.panel.SetPos(pself.x, pself.y)
+	pself.panel.SetText(pself.label, val)
+}
 func getTarget(g reflect.Value, target string) (reflect.Value, int) {
 	if target == "" {
 		return g, 1 // spx.Game

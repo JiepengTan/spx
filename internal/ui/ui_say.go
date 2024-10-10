@@ -15,7 +15,7 @@ type UiSay struct {
 	WinX, WinY float64
 }
 
-func NewUiSay(msg string) *UiSay {
+func NewUiSay() *UiSay {
 	panel := engine.SyncCreateEngineUiNode[UiSay]("")
 	return panel
 }
@@ -29,13 +29,12 @@ func (pself *UiSay) OnStart() {
 
 func (pself *UiSay) SetText(x, y float64, msg string) {
 	isLeft := x <= 0
-	xPos := x + pself.WinX/2
 	engine.SyncUiSetVisible(pself.vboxL.GetId(), isLeft)
 	engine.SyncUiSetVisible(pself.vboxR.GetId(), !isLeft)
 	label := pself.labelL.GetId()
 	if !isLeft {
 		label = pself.labelR.GetId()
 	}
-	engine.SyncUiSetPosition(pself.GetId(), engine.NewVec2(xPos, (-y-65+pself.WinY/2)))
+	engine.SyncUiSetPosition(pself.GetId(), PosGame2UI(x, y+65))
 	engine.SyncUiSetText(label, msg)
 }

@@ -33,6 +33,7 @@ import (
 	"github.com/goplus/spx/internal/coroutine"
 	"github.com/goplus/spx/internal/engine"
 	"github.com/goplus/spx/internal/gdi"
+	"github.com/goplus/spx/internal/ui"
 
 	spxfs "github.com/goplus/spx/fs"
 	_ "github.com/goplus/spx/fs/asset"
@@ -343,6 +344,8 @@ func (p *Game) startLoad(fs spxfs.Dir, cfg *Config) {
 	p.fs = fs
 	p.windowWidth_ = cfg.Width
 	p.windowHeight_ = cfg.Height
+	ui.WinX = float64(p.windowWidth_)
+	ui.WinY = float64(p.windowHeight_)
 }
 
 func (p *Game) canBindSprite(name string) bool {
@@ -614,9 +617,17 @@ func (p *Game) Update() error {
 	p.startFlag.Do(func() {
 		p.fireEvent(&eventStart{})
 	})
+
 	p.updateMousePos()
 	p.tickMgr.update()
 	p.Camera.update()
+	newItems := make([]Shape, len(p.items))
+	copy(newItems, p.items)
+	for _, item := range newItems {
+		if result, ok := item.(interface{ OnUpdate(float32) }); ok {
+			result.OnUpdate(0.01)
+		}
+	}
 	return nil
 }
 

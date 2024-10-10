@@ -42,8 +42,6 @@ type sayOrThinker struct {
 }
 
 func (p *sayOrThinker) refresh() {
-	p.panel.WinX = float64(gGame.g.windowWidth_)
-	p.panel.WinY = float64(gGame.g.windowHeight_)
 	p.panel.SetText(p.sp.x, p.sp.y, p.msg)
 }
 
@@ -76,7 +74,7 @@ func (p *Sprite) sayOrThink(msgv interface{}, style int) {
 	if old == nil {
 		p.sayObj = &sayOrThinker{sp: p, msg: msg, style: style}
 		p.g.addShape(p.sayObj)
-		p.sayObj.panel = ui.NewUiSay(msg)
+		p.sayObj.panel = ui.NewUiSay()
 	} else {
 		old.msg, old.style = msg, style
 		p.g.activateShape(old)

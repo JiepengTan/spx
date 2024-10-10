@@ -20,8 +20,8 @@
       "mode": 1,
       "sliderMin": 0,
       "sliderMax": 100,
-      "x": 5,
-      "y": 30,
+      "x": 300,
+      "y": 120,
       "isDiscrete": true,
       "visible": true
     },

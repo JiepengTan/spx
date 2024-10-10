@@ -3,8 +3,6 @@
 package main
 
 import (
-	"fmt"
-
 	"github.com/goplus/spx"
 )
 
@@ -68,13 +66,6 @@ func (this *MyAircraft) Main() {
 //line tutorial/09-ui/MyAircraft.spx:5:1
 		monotorSize := 1.0
 //line tutorial/09-ui/MyAircraft.spx:6:1
-		var scoreText *spx.ProxyUi
-		for {
-			spx.Sched()
-			scoreText = spx.NewUiNode("Widget")
-			scoreText.SetText("aaa")
-			break
-		}
 		for {
 			spx.Sched()
 //line tutorial/09-ui/MyAircraft.spx:7:1
@@ -92,7 +83,6 @@ func (this *MyAircraft) Main() {
 				this.life += stepSize
 //line tutorial/09-ui/MyAircraft.spx:11:1
 				stepSize *= 10
-				scoreText.SetText(fmt.Sprintf("Score: %d", this.life))
 			}
 //line tutorial/09-ui/MyAircraft.spx:13:1
 			monitor := spx.Gopt_Game_Gopx_GetWidget[spx.Monitor](this, "life")

@@ -45,7 +45,7 @@ cache/0/60/0/kerning_overrides/60/0 = Vector2(0, 0)
 default_font = SubResource("FontFile_jpoch")
 default_font_size = 30
 
-[node name="SpxLabel" type="SpxLabel"]
+[node name="Label" type="Label"]
 offset_right = 9.0
 offset_bottom = 26.0
 theme = SubResource("Theme_ny8x4")
