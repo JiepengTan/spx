@@ -2,7 +2,18 @@ package engine
 
 import (
 	. "godot-ext/gdspx/pkg/engine"
+	"time"
+
+	"github.com/goplus/spx/internal/coroutine"
 )
+
+var (
+	Gco *coroutine.Coroutines
+)
+
+func Wait(secs float64) {
+	Gco.Sleep(time.Duration(secs * 1e9))
+}
 
 func SyncInputMousePressed() bool {
 	return SyncInputGetMouseState(0) || SyncInputGetMouseState(1)

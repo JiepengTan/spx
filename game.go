@@ -683,6 +683,7 @@ func (p *Game) initEventLoop() {
 
 func init() {
 	gco = coroutine.New()
+	engine.Gco = gco
 }
 
 var (
