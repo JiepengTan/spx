@@ -41,7 +41,7 @@ custom_minimum_size = Vector2(1, 0)
 layout_mode = 2
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 26
-text = "a阿斯顿撒撒旦干撒给"
+text = "a撒给"
 vertical_alignment = 1
 text_direction = 1
 
@@ -67,7 +67,7 @@ layout_mode = 2
 custom_minimum_size = Vector2(1, 0)
 layout_mode = 2
 theme_override_font_sizes/font_size = 26
-text = "sdg"
+text = "s六g"
 horizontal_alignment = 1
 vertical_alignment = 1
 

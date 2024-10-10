@@ -1,0 +1,6 @@
+var (
+	MyAircraft MyAircraft
+	Bullet     Bullet
+	scores 	   int
+	life 	   int
+)

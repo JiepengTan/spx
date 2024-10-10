@@ -1,0 +1,28 @@
+
+onStart => {
+	isIncres:= true
+	sizeStep:= 0.2
+	monotorSize := 1.0
+	for {
+		stepSize := 10
+		for i:=0; i<10; i++{
+			wait 0.15
+			life += stepSize
+			stepSize*=10
+		}
+		monitor := getWidget(Monitor,"life")
+		if isIncres {
+			monotorSize += sizeStep
+			if(monotorSize>2){
+				isIncres = false
+			}
+		} else {
+			monotorSize -= sizeStep
+			if(monotorSize<1){
+				isIncres = true
+			}
+		}
+		monitor.SetSize float64(monotorSize)
+		life= 0
+	}
+}
