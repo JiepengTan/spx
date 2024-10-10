@@ -98,8 +98,9 @@ func (pself *Monitor) OnUpdate(delta float32) {
 		return
 	}
 	val := pself.eval()
-	pself.panel.SetPos(pself.x, pself.y)
-	pself.panel.SetText(pself.label, val)
+	pself.panel.UpdateScale(pself.size)
+	pself.panel.UpdatePos(pself.x, pself.y)
+	pself.panel.UpdateText(pself.label, val)
 }
 func getTarget(g reflect.Value, target string) (reflect.Value, int) {
 	if target == "" {

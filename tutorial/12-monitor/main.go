@@ -62,14 +62,16 @@ func (this *MyAircraft) Main() {
 //line tutorial/09-ui/MyAircraft.spx:3:1
 		isIncres := true
 //line tutorial/09-ui/MyAircraft.spx:4:1
-		sizeStep := 0.2
+		sizeStep := 0.05
 //line tutorial/09-ui/MyAircraft.spx:5:1
 		monotorSize := 1.0
 //line tutorial/09-ui/MyAircraft.spx:6:1
+	
 		for {
 			spx.Sched()
 //line tutorial/09-ui/MyAircraft.spx:7:1
 			stepSize := 10
+			monitor := spx.Gopt_Game_Gopx_GetWidget[spx.Monitor](this, "life")
 //line tutorial/09-ui/MyAircraft.spx:8:1
 			for
 //line tutorial/09-ui/MyAircraft.spx:8:1
@@ -83,29 +85,29 @@ func (this *MyAircraft) Main() {
 				this.life += stepSize
 //line tutorial/09-ui/MyAircraft.spx:11:1
 				stepSize *= 10
+				//line tutorial/09-ui/MyAircraft.spx:14:1
+				if isIncres {
+	//line tutorial/09-ui/MyAircraft.spx:15:1
+					monotorSize += sizeStep
+	//line tutorial/09-ui/MyAircraft.spx:16:1
+					if monotorSize > 2 {
+	//line tutorial/09-ui/MyAircraft.spx:17:1
+						isIncres = false
+					}
+				} else {
+	//line tutorial/09-ui/MyAircraft.spx:20:1
+					monotorSize -= sizeStep
+	//line tutorial/09-ui/MyAircraft.spx:21:1
+					if monotorSize < 1 {
+	//line tutorial/09-ui/MyAircraft.spx:22:1
+						isIncres = true
+					}
+				}
+	//line tutorial/09-ui/MyAircraft.spx:25:1
+				monitor.SetSize(float64(monotorSize))
+				monitor.ChangeXpos(1)
 			}
 //line tutorial/09-ui/MyAircraft.spx:13:1
-			monitor := spx.Gopt_Game_Gopx_GetWidget[spx.Monitor](this, "life")
-//line tutorial/09-ui/MyAircraft.spx:14:1
-			if isIncres {
-//line tutorial/09-ui/MyAircraft.spx:15:1
-				monotorSize += sizeStep
-//line tutorial/09-ui/MyAircraft.spx:16:1
-				if monotorSize > 2 {
-//line tutorial/09-ui/MyAircraft.spx:17:1
-					isIncres = false
-				}
-			} else {
-//line tutorial/09-ui/MyAircraft.spx:20:1
-				monotorSize -= sizeStep
-//line tutorial/09-ui/MyAircraft.spx:21:1
-				if monotorSize < 1 {
-//line tutorial/09-ui/MyAircraft.spx:22:1
-					isIncres = true
-				}
-			}
-//line tutorial/09-ui/MyAircraft.spx:25:1
-			monitor.SetSize(float64(monotorSize))
 //line tutorial/09-ui/MyAircraft.spx:26:1
 			this.life = 0
 		}

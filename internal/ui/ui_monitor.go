@@ -2,6 +2,8 @@ package ui
 
 import (
 	. "godot-ext/gdspx/pkg/engine"
+
+	"github.com/goplus/spx/internal/engine"
 )
 
 type UiMonitor struct {
@@ -26,14 +28,15 @@ func (pself *UiMonitor) OnStart() {
 	pself.labelName = BindUI[UiNode](pself.GetId(), "BG/H/LabelName")
 	pself.labelValue = BindUI[UiNode](pself.GetId(), "BG/H/C/H/LabelValue")
 }
-func (pself *UiMonitor) SetScale(x float64) {
-
+func (pself *UiMonitor) UpdateScale(x float64) {
+	pself.SetScale(engine.NewVec2(x, x))
 }
-func (pself *UiMonitor) SetPos(x, y float64) {
+func (pself *UiMonitor) UpdatePos(x, y float64) {
 	pos := PosGame2UI(x, y)
 	pself.SetGlobalPosition(pos)
 }
-func (pself *UiMonitor) SetText(name, value string) {
+
+func (pself *UiMonitor) UpdateText(name, value string) {
 	pself.labelName.SetText(name)
 	pself.labelValue.SetText(value)
 }
