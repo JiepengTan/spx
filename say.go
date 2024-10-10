@@ -42,8 +42,9 @@ type sayOrThinker struct {
 }
 
 func (p *sayOrThinker) refresh() {
-	p.panel.SetText(p.msg)
-	println("TODO sayOrThinker.refresh ", p.msg)
+	p.panel.WinX = float64(gGame.g.windowWidth_)
+	p.panel.WinY = float64(gGame.g.windowHeight_)
+	p.panel.SetText(p.sp.x, p.sp.y, p.msg)
 }
 
 const (

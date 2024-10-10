@@ -5,36 +5,48 @@
 
 [node name="Say" type="Control"]
 layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 49.0
-offset_top = -5.0
-offset_right = 49.0
-offset_bottom = -5.0
-grow_horizontal = 2
-grow_vertical = 2
+anchors_preset = 0
+offset_top = 10000.0
+offset_bottom = 10000.0
 
-[node name="BG" type="PanelContainer" parent="."]
-layout_mode = 0
-offset_right = 285.0
-offset_bottom = 144.0
+[node name="V" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = -69.0
+offset_right = 60.0
+grow_vertical = 0
+
+[node name="BG" type="PanelContainer" parent="V"]
+layout_mode = 2
 theme = ExtResource("1_wmn3a")
 
-[node name="Label" type="Label" parent="BG"]
+[node name="Label" type="Label" parent="V/BG"]
 custom_minimum_size = Vector2(1, 0)
 layout_mode = 2
-text = "The weather's often cold in the North and windy in the East.It's often wet in the West and sometimes warm in the South."
-autowrap_mode = 2
 text_direction = 1
 
-[node name="ImageDot" type="TextureRect" parent="."]
+[node name="HL" type="HBoxContainer" parent="V"]
+layout_direction = 2
 layout_mode = 2
-offset_left = 4.0
-offset_top = 145.0
-offset_right = 63.0
-offset_bottom = 174.0
+
+[node name="ImageDot" type="TextureRect" parent="V/HL"]
+custom_minimum_size = Vector2(30, 30)
+layout_mode = 2
 texture = ExtResource("2_kmrtr")
 expand_mode = 2
 stretch_mode = 4
 flip_h = true
+
+[node name="HR" type="HBoxContainer" parent="V"]
+visible = false
+layout_direction = 3
+layout_mode = 2
+
+[node name="ImageDot" type="TextureRect" parent="V/HR"]
+custom_minimum_size = Vector2(30, 30)
+layout_mode = 2
+texture = ExtResource("2_kmrtr")
+expand_mode = 2
+stretch_mode = 4
