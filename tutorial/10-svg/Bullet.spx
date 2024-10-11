@@ -4,7 +4,7 @@ onTouched => {
 
 onStart => {
 	for {
-		wait 0.3
+		wait 0.1
 		clone
 	}
 }
@@ -14,8 +14,8 @@ onCloned => {
 	show
 	for {
 		wait 0.01
-		step 2
-		if touching(Edge) {
+		step 6
+		if ypos >380 {
 			destroy
 		}
 	}
