@@ -10,6 +10,7 @@ import (
 	"os/exec"
 	"path"
 	"path/filepath"
+	"strings"
 
 	_ "embed"
 )
@@ -32,16 +33,28 @@ func main() {
 		impl.TargetDir = os.Args[2]
 	}
 	if len(os.Args) <= 1 {
-		impl.ShowHelpInfo()
+		showHelpInfo()
 		return
 	}
 	switch os.Args[1] {
 	case "help", "version":
-		impl.ShowHelpInfo()
+		showHelpInfo()
+		return
+	case "clear":
+		if impl.IsFileExist(impl.TargetDir + "/.godot") {
+			clearProject(impl.TargetDir)
+		} else {
+			fmt.Println("Not a spx project skip")
+		}
 		return
 	case "init":
 		impl.PrepareGoEnv(go_mode_txt, main_go)
 	}
+
+	if !impl.IsFileExist(impl.TargetDir + "/go.mod") {
+		impl.PrepareGoEnv(go_mode_txt, main_go)
+	}
+
 	if err := wrap(); err != nil {
 		fmt.Fprintf(os.Stderr, "%v\n", err)
 		os.Exit(1)
@@ -72,6 +85,58 @@ func wrap() error {
 		return impl.RunGdspx(gd4spxPath, project, "-e")
 	}
 	return nil
+}
+func clearProject(dir string) {
+	deleteFilesAndDirs(dir)
+}
+func deleteFilesAndDirs(dir string) error {
+	files, err := os.ReadDir(dir)
+	if err != nil {
+		return err
+	}
+	for _, file := range files {
+		fullPath := filepath.Join(dir, file.Name())
+		if file.Name() == "assets" || strings.HasSuffix(fullPath, ".spx") {
+			continue
+		}
+
+		if file.IsDir() {
+			err = os.RemoveAll(fullPath)
+			if err != nil {
+				return err
+			}
+		} else {
+			err = os.Remove(fullPath)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+func showHelpInfo() {
+	fmt.Println(`
+Usage:
+
+    spx <command> [path]      
+
+The commands are:
+
+    - init            # Create a spx project in the current directory
+    - run             # Run the current project
+    - editor          # Open the current project in editor mode
+    - build           # Build the dynamic library
+    - export          # Export the PC package (macOS, Windows, Linux) (TODO)
+    - buildweb        # Build for WebAssembly (WASM)
+    - exportweb       # Export the web package
+    - clear           # Run the current project
+
+ eg:
+
+    spx init                      # create a project in current path
+    spx init ./test/demo01        # create a project at path ./test/demo01 
+	`)
 }
 
 func CopyEmbed(dst string) error {
