@@ -88,6 +88,7 @@ func wrap() error {
 }
 func clearProject(dir string) {
 	deleteFilesAndDirs(dir)
+	deleteImportFiles(dir)
 }
 func deleteFilesAndDirs(dir string) error {
 	files, err := os.ReadDir(dir)
@@ -115,6 +116,21 @@ func deleteFilesAndDirs(dir string) error {
 
 	return nil
 }
+func deleteImportFiles(dir string) error {
+	return filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if !info.IsDir() && strings.HasSuffix(path, ".import") {
+			err = os.Remove(path)
+			if err != nil {
+				return fmt.Errorf("failed to delete file: %v", err)
+			}
+		}
+
+		return nil
+	})
+}
 func showHelpInfo() {
 	fmt.Println(`
 Usage:
@@ -130,7 +146,7 @@ The commands are:
     - export          # Export the PC package (macOS, Windows, Linux) (TODO)
     - buildweb        # Build for WebAssembly (WASM)
     - exportweb       # Export the web package
-    - clear           # Run the current project
+    - clear           # Clear the project 
 
  eg:
 
