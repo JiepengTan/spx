@@ -1,1 +1,16 @@
-/project/.godot
+# gdspx specific ignores
+/.godot
+/.import
+/.godot
+/engine
+/lib
+/Makefile
+/export.cfg
+/export_presets.cfg
+*.translation
+/.mono
+/data_*
+/mono_crash.*.json
+
+# user specify ignores
+# ...
