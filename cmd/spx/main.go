@@ -7,6 +7,8 @@ import (
 	"io"
 	"io/fs"
 	"os"
+	"os/exec"
+	"path"
 	"path/filepath"
 
 	_ "embed"
@@ -16,7 +18,8 @@ var (
 	//go:embed template/engine/*
 	engineFiles embed.FS
 
-	TargetDir string
+	//go:embed template/go.mod.txt
+	go_mode_txt string
 )
 
 func CopyEmbed(dst string) error {
@@ -30,6 +33,9 @@ func CopyEmbed(dst string) error {
 
 	fsys, err := fs.Sub(engineFiles, "template/engine")
 	if err != nil {
+		return err
+	}
+	if err := os.MkdirAll(dst, 0755); err != nil {
 		return err
 	}
 
@@ -75,7 +81,7 @@ func main() {
 		impl.ShowHelpInfo()
 		return
 	case "init":
-		impl.PrepareGoEnv()
+		impl.PrepareGoEnv(go_mode_txt)
 	}
 	if err := wrap(); err != nil {
 		fmt.Fprintf(os.Stderr, "%v\n", err)
@@ -84,18 +90,18 @@ func main() {
 }
 
 func wrap() error {
+	CopyEmbed(impl.TargetDir)
 	// look for a go.mod file
 	gd4spxPath, project, libPath, err := impl.SetupEnv()
 	if err != nil {
 		return err
 	}
-	CopyEmbed(project)
 
 	switch os.Args[1] {
 	case "init":
 		return nil
 	case "run", "editor", "export", "build":
-		impl.BuildDll(project, libPath)
+		BuildDll(project, libPath)
 	case "buildweb", "exportweb":
 		impl.BuildWasm(project)
 	}
@@ -107,4 +113,26 @@ func wrap() error {
 		return impl.RunGdspx(gd4spxPath, project, "-e")
 	}
 	return nil
+}
+func BuildDll(project, outputPath string) {
+	os.Remove(path.Join(project, "main.go"))
+	rawdir, _ := os.Getwd()
+	os.Chdir(project)
+	envVars := []string{""}
+	RunGoplus(envVars, "build")
+	os.Chdir(rawdir)
+	os.Rename(path.Join(project, "gop_autogen.go"), path.Join(project, "main.go"))
+	impl.BuildDll(project, outputPath)
+}
+
+func RunGoplus(envVars []string, args ...string) error {
+	golang := exec.Command("gop", args...)
+
+	if envVars != nil {
+		golang.Env = append(os.Environ(), envVars...)
+	}
+	golang.Stderr = os.Stderr
+	golang.Stdout = os.Stdout
+	golang.Stdin = os.Stdin
+	return golang.Run()
 }

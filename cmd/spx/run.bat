@@ -1,3 +1,3 @@
 go install .
-spx init test
-spx run test
+spx init ../test
+spx run ../test
