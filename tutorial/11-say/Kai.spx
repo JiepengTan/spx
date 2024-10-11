@@ -4,12 +4,12 @@ onStart => {
 }
 
 onMsg "2", => {
-	say "What's the climate like in your country?", 1
+	say "What's the climate \nlike in your country?", 1
 	broadcast "3"
 }
 
 onMsg "4", => {
-	say "Which seasons do you like best?", 1
+	say "Which seasons do you\n like best?", 1
 	broadcast "5"
 }
 
