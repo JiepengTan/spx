@@ -75,7 +75,7 @@ func (p *Game) updateProxy() {
 	// unbind proxy
 	for _, item := range p.destroyItems {
 		sprite, ok := item.(*Sprite)
-		if ok {
+		if ok && sprite.proxy != nil {
 			sprite.proxy.Destroy()
 			sprite.proxy = nil
 		}

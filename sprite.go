@@ -1375,7 +1375,6 @@ func checkTouchingDirection(dir float64) int {
 }
 
 func (p *Sprite) checkTouchingScreen(where int) (touching int) {
-	panic("todo gdspx")
 	return 0
 }
 
