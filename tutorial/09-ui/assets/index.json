@@ -21,7 +21,7 @@
       "sliderMin": 0,
       "sliderMax": 100,
       "x": 5,
-      "y": 30,
+      "y": -50,
       "isDiscrete": true,
       "visible": true
     },
@@ -37,7 +37,7 @@
       "sliderMin": 0,
       "sliderMax": 100,
       "x": 5,
-      "y": 0,
+      "y": -110,
       "isDiscrete": true,
       "visible": true
     }
