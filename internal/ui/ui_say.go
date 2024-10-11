@@ -8,11 +8,10 @@ import (
 
 type UiSay struct {
 	UiNode
-	vboxL      *UiNode
-	labelL     *UiNode
-	vboxR      *UiNode
-	labelR     *UiNode
-	WinX, WinY float64
+	vboxL  *UiNode
+	labelL *UiNode
+	vboxR  *UiNode
+	labelR *UiNode
 }
 
 func NewUiSay() *UiSay {

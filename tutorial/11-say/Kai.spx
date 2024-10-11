@@ -1,0 +1,20 @@
+onStart => {
+	say "Where do you come from?", 1
+	broadcast "1"
+}
+
+onMsg "2", => {
+	say "What's the climate like in your country?", 1
+	broadcast "3"
+}
+
+onMsg "4", => {
+	say "Which seasons do you like best?", 1
+	broadcast "5"
+}
+
+onMsg "6", => {
+	say "Thanks. Bye!", 1
+	nextCostume
+	broadcast "7"
+}

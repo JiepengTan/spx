@@ -1,0 +1,32 @@
+onMsg "1", => {
+	say "I come from England.", 1
+	broadcast "2"
+}
+
+onMsg "3", => {
+	say "It's mild, but it's not always pleasant.", 1
+	nextCostume
+	say "The weather's often cold in the North and windy in the East.", 1.5
+	say "It's often wet in the West and sometimes warm in the South.", 1
+	broadcast "4"
+}
+
+onMsg "5", => {
+	nextCostume
+	say "I like spring and summer.", 1
+	say "The days are long and the nights are short.", 1
+	say "The sun rises early and sets late. ", 1
+	nextCostume
+	say "I don't like autumn and winter.", 1
+	say "The days are short and the nights are long.", 1
+	say "The sun rises late and sets early.", 1
+	nextCostume
+	say "Our climate is not very good, but it's certainly interesting.", 1
+	say "It's our favourite subject of conversation.", 1
+	broadcast "6"
+}
+
+onMsg "7", => {
+	say "Bye!", 1
+	nextCostume
+}
