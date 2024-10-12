@@ -22,11 +22,15 @@ var (
 	//go:embed template/go.mod.txt
 	go_mode_txt string
 
+	//go:embed template/gitignore.txt
+	gitignore string
+
 	//go:embed template/main.go
 	main_go string
 )
 
 func main() {
+	impl.ReplaceTemplate(go_mode_txt, main_go, gitignore)
 	impl.CheckPresetEnvironment()
 	impl.TargetDir = "."
 	if len(os.Args) > 2 {
@@ -48,11 +52,11 @@ func main() {
 		}
 		return
 	case "init":
-		impl.PrepareGoEnv(go_mode_txt, main_go)
+		impl.PrepareGoEnv()
 	}
 
 	if !impl.IsFileExist(impl.TargetDir + "/go.mod") {
-		impl.PrepareGoEnv(go_mode_txt, main_go)
+		impl.PrepareGoEnv()
 	}
 
 	if err := wrap(); err != nil {
