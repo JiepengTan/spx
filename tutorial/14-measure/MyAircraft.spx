@@ -2,5 +2,4 @@ onStart => {
 	clone
 	step 130
 	turnTo 90
-	quote "c中文c", "Crocodiles[i]"
 }
