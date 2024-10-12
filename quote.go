@@ -16,6 +16,8 @@
 
 package spx
 
+import "github.com/goplus/spx/internal/ui"
+
 const (
 	quotePadding     = 5.0
 	quoteLineWidth   = 8.0
@@ -32,6 +34,12 @@ type quoter struct {
 	sprite      *Sprite
 	message     string
 	description string
+	panel       *ui.UiQuote
+}
+
+func (p *quoter) refresh() {
+	// TODO use sprite's bounding box
+	p.panel.SetText(p.sprite.x, p.sprite.y, 80, 80, p.message, p.description)
 }
 
 func (p *Sprite) quote_(message, description string) {
@@ -39,10 +47,12 @@ func (p *Sprite) quote_(message, description string) {
 	if old == nil {
 		p.quoteObj = &quoter{sprite: p, message: message, description: description}
 		p.g.addShape(p.quoteObj)
+		p.quoteObj.panel = ui.NewUiQuote()
 	} else {
 		old.message, old.description = message, description
 		p.g.activateShape(old)
 	}
+	p.quoteObj.refresh()
 }
 
 func (p *Sprite) waitStopQuote(secs float64) {
@@ -52,6 +62,8 @@ func (p *Sprite) waitStopQuote(secs float64) {
 
 func (p *Sprite) doStopQuote() {
 	if p.quoteObj != nil {
+		p.quoteObj.panel.Destroy()
+		p.quoteObj.panel = nil
 		p.g.removeShape(p.quoteObj)
 		p.quoteObj = nil
 	}

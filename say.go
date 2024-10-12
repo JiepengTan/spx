@@ -90,6 +90,7 @@ func (p *Sprite) waitStopSay(secs float64) {
 func (p *Sprite) doStopSay() {
 	if p.sayObj != nil {
 		p.sayObj.panel.Destroy()
+		p.sayObj.panel = nil
 		p.g.removeShape(p.sayObj)
 		p.sayObj = nil
 	}
