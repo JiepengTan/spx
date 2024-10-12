@@ -4,34 +4,36 @@
 
 [node name="UiQuote" type="Control"]
 layout_mode = 3
-anchors_preset = 0
-
-[node name="C" type="Control" parent="."]
-layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -82.0
-offset_top = -186.5
-offset_right = 82.0
-offset_bottom = 186.5
+offset_left = -576.0
+offset_top = -324.0
+offset_right = -476.0
+offset_bottom = -224.0
 grow_horizontal = 2
 grow_vertical = 2
+
+[node name="C" type="Control" parent="."]
+anchors_preset = 0
+offset_right = 100.0
+offset_bottom = 100.0
 
 [node name="LabelDes" type="Label" parent="C"]
 custom_minimum_size = Vector2(1, 0)
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
-offset_top = -10.275
-offset_bottom = 25.725
+offset_left = -1.0
+offset_top = -26.0
+offset_right = -1.0
 grow_horizontal = 2
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/shadow_offset_x = 2
 theme_override_constants/outline_size = 3
-theme_override_font_sizes/font_size = 26
+theme_override_font_sizes/font_size = 18
 text = "a"
 horizontal_alignment = 1
 text_direction = 1
@@ -43,8 +45,8 @@ anchors_preset = 12
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = -30.675
-offset_bottom = 8.32501
+offset_top = -12.0
+offset_bottom = 27.0
 grow_horizontal = 2
 grow_vertical = 0
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
@@ -57,32 +59,31 @@ horizontal_alignment = 1
 vertical_alignment = 1
 text_direction = 1
 
-[node name="ImageL" type="NinePatchRect" parent="C"]
+[node name="ImageL2" type="NinePatchRect" parent="C"]
 layout_mode = 1
 anchors_preset = 9
 anchor_bottom = 1.0
-offset_right = 67.0
+offset_right = 35.0
 grow_vertical = 2
 texture = ExtResource("1_leka2")
-region_rect = Rect2(0, 0, 67, 362)
-patch_margin_left = 67
-patch_margin_top = 25
-patch_margin_bottom = 25
+region_rect = Rect2(0, 0, 34.6219, 182.461)
+patch_margin_left = 35
+patch_margin_top = 13
+patch_margin_bottom = 13
 
-[node name="ImageR" type="NinePatchRect" parent="C"]
+[node name="ImageL3" type="NinePatchRect" parent="C"]
 layout_mode = 1
 anchors_preset = 11
 anchor_left = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -67.0
+offset_left = -35.0
 grow_horizontal = 0
 grow_vertical = 2
 scale = Vector2(-1, 1)
-pivot_offset = Vector2(33.5, 0)
+pivot_offset = Vector2(17, 0)
 texture = ExtResource("1_leka2")
-draw_center = false
-region_rect = Rect2(0, 0, 67, 362)
-patch_margin_left = 67
-patch_margin_top = 25
-patch_margin_bottom = 25
+region_rect = Rect2(0, 0, 34.6219, 182.461)
+patch_margin_left = 35
+patch_margin_top = 13
+patch_margin_bottom = 13
