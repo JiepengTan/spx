@@ -18,8 +18,11 @@ package spx
 
 import (
 	"fmt"
+	"godot-ext/gdspx/pkg/engine"
 	"strconv"
 	"strings"
+
+	"github.com/goplus/spx/internal/ui"
 )
 
 const (
@@ -40,6 +43,7 @@ type measure struct {
 	svgLineStyle string
 	svgRotate    string
 	svgSize      int // size*scale + 0.5 + measureLineWidth
+	panel        *ui.UiMeasure
 }
 
 func newMeasure(v specsp) *measure {
@@ -53,7 +57,9 @@ func newMeasure(v specsp) *measure {
 	if err != nil {
 		panic(err)
 	}
-	return &measure{
+	println("newMeasure ", size, scale, text, int(v["x"].(float64)), int(v["y"].(float64)))
+	panel := ui.NewUiMeasure()
+	meansureObj := &measure{
 		heading:      heading,
 		size:         size,
 		text:         text,
@@ -63,7 +69,15 @@ func newMeasure(v specsp) *measure {
 		svgLineStyle: fmt.Sprintf("stroke-width:%d;stroke:rgb(%d, %d, %d);", measureLineWidth, c.R, c.G, c.B),
 		svgRotate:    fmt.Sprintf("rotate(%.1f %d %d)", heading, svgSize>>1, svgSize>>1),
 		svgSize:      svgSize,
+		panel:        panel,
 	}
+	panel.UpdateInfo(meansureObj.x, meansureObj.y, size*scale, heading-90, text, engine.Color{
+		R: float32(c.R) / 255.0,
+		G: float32(c.G) / 255.0,
+		B: float32(c.B) / 255.0,
+		A: float32(c.A) / 255.0,
+	})
+	return meansureObj
 }
 
 func getSpcspVal(ss specsp, key string, defaultVal ...interface{}) interface{} {

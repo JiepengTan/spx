@@ -418,6 +418,9 @@ func (p *Game) loadIndex(g reflect.Value, proj *projConfig) (err error) {
 	p.proxy.SetZIndex(-1)
 	p.proxy.DisablePhysic()
 	p.proxy.SyncTexture(p.getCostumePath())
+	p.doWindowSize() // set window size
+	ui.WinX = float64(p.windowWidth_)
+	ui.WinY = float64(p.windowHeight_)
 
 	inits := make([]Spriter, 0, len(proj.Zorder))
 	for _, v := range proj.Zorder {
@@ -440,7 +443,6 @@ func (p *Game) loadIndex(g reflect.Value, proj *projConfig) (err error) {
 		ini.Main()
 	}
 
-	p.doWindowSize() // set window size
 	if debugLoad {
 		log.Println("==> SetWindowSize", p.windowWidth_, p.windowHeight_)
 	}
@@ -452,9 +454,6 @@ func (p *Game) loadIndex(g reflect.Value, proj *projConfig) (err error) {
 		p.windowHeight_ = p.worldHeight_
 	}
 	p.Camera.init(p, float64(p.windowWidth_), float64(p.windowHeight_), float64(p.worldWidth_), float64(p.worldHeight_))
-
-	ui.WinX = float64(p.windowWidth_)
-	ui.WinY = float64(p.windowHeight_)
 
 	if proj.Camera != nil && proj.Camera.On != "" {
 		p.Camera.On(proj.Camera.On)

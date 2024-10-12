@@ -66,7 +66,7 @@ func main() {
 }
 
 func wrap() error {
-	CopyEmbed(impl.TargetDir)
+	//CopyEmbed(impl.TargetDir)
 	// look for a go.mod file
 	gd4spxPath, project, libPath, err := impl.SetupEnv()
 	if err != nil {

@@ -1,0 +1,60 @@
+{
+  "backdrops": [
+    {
+      "bitmapResolution": 1,
+      "name": "backdrop1",
+      "path": "1.png"
+    }
+  ],
+  "zorder": [
+    "MyAircraft",
+    {
+      "type": "measure",
+      "x": 0,
+      "y": 100,
+      "heading": 90,
+      "size": 10,
+      "scale": 10,
+      "color": 15629590
+    },
+    {
+      "type": "measure",
+      "x": -50,
+      "y": 50,
+      "heading": 180,
+      "size": 101,
+      "color": "white"
+    },
+    {
+      "type": "measure",
+      "x": 0,
+      "y": 0,
+      "heading": -90,
+      "size": 102,
+      "color": "#fff"
+    },
+    {
+      "type": "measure",
+      "x": 50,
+      "y": 50,
+      "heading": 0,
+      "size": 103,
+      "color": "#ffffff"
+    },
+    {
+      "type": "measure",
+      "x": -200,
+      "y": 0,
+      "heading": 60,
+      "size": 99
+    },
+    {
+      "type": "measure",
+      "x": 150,
+      "y": 0,
+      "heading": -30,
+      "size": 98,
+      "color": 65535
+    }
+  ]
+}
