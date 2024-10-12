@@ -29,6 +29,7 @@ anchor_right = 1.0
 offset_left = -1.0
 offset_top = -26.0
 offset_right = -1.0
+offset_bottom = 23.0
 grow_horizontal = 2
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/shadow_offset_x = 2
@@ -59,19 +60,19 @@ horizontal_alignment = 1
 vertical_alignment = 1
 text_direction = 1
 
-[node name="ImageL2" type="NinePatchRect" parent="C"]
+[node name="ImageL" type="NinePatchRect" parent="C"]
 layout_mode = 1
 anchors_preset = 9
 anchor_bottom = 1.0
 offset_right = 35.0
 grow_vertical = 2
 texture = ExtResource("1_leka2")
-region_rect = Rect2(0, 0, 34.6219, 182.461)
+region_rect = Rect2(0, 0, 34.6219, 181.266)
 patch_margin_left = 35
 patch_margin_top = 13
 patch_margin_bottom = 13
 
-[node name="ImageL3" type="NinePatchRect" parent="C"]
+[node name="ImageR" type="NinePatchRect" parent="C"]
 layout_mode = 1
 anchors_preset = 11
 anchor_left = 1.0
@@ -83,7 +84,7 @@ grow_vertical = 2
 scale = Vector2(-1, 1)
 pivot_offset = Vector2(17, 0)
 texture = ExtResource("1_leka2")
-region_rect = Rect2(0, 0, 34.6219, 182.461)
+region_rect = Rect2(0, 0, 34.6219, 181.431)
 patch_margin_left = 35
 patch_margin_top = 13
 patch_margin_bottom = 13
