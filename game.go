@@ -102,6 +102,7 @@ type Game struct {
 	sinkMgr  eventSinkMgr
 	isLoaded bool
 	isRunned bool
+	gamer_   Gamer
 }
 
 type Spriter interface {
@@ -182,10 +183,9 @@ func (p *Game) initGame(sprites []Spriter) *Game {
 
 // Gopt_Game_Main is required by Go+ compiler as the entry of a .gmx project.
 func Gopt_Game_Main(game Gamer, sprites ...Spriter) {
-	engine.GdspxMain(game)
 	g := game.initGame(sprites)
-	gGamer = game
-	gGame = g
+	g.gamer_ = game
+	engine.GdspxMain(game)
 }
 
 // Gopt_Game_Run runs the game.
@@ -397,7 +397,6 @@ func spriteOf(sprite Spriter) *Sprite {
 }
 
 func (p *Game) loadIndex(g reflect.Value, proj *projConfig) (err error) {
-	p.proxy = engine.NewSpriteProxy(p)
 
 	if backdrops := proj.getBackdrops(); len(backdrops) > 0 {
 		p.baseObj.initBackdrops("", backdrops, proj.getBackdropIndex())
@@ -415,10 +414,10 @@ func (p *Game) loadIndex(g reflect.Value, proj *projConfig) (err error) {
 	p.mapMode = toMapMode(proj.Map.Mode)
 
 	// setup proxy's property
-	p.proxy.SetZIndex(-1)
-	p.proxy.DisablePhysic()
-	p.proxy.SyncTexture(p.getCostumePath())
+	p.proxy = engine.SyncNewBackdropProxy(p, p.getCostumePath())
+
 	p.doWindowSize() // set window size
+
 	ui.WinX = float64(p.windowWidth_)
 	ui.WinY = float64(p.windowHeight_)
 
@@ -446,7 +445,7 @@ func (p *Game) loadIndex(g reflect.Value, proj *projConfig) (err error) {
 	if debugLoad {
 		log.Println("==> SetWindowSize", p.windowWidth_, p.windowHeight_)
 	}
-	engine.SetWindowSize(p.windowWidth_, p.windowHeight_)
+	engine.SyncPlatformSetWindowSize(int64(p.windowWidth_), int64(p.windowHeight_))
 	if p.windowWidth_ > p.worldWidth_ {
 		p.windowWidth_ = p.worldWidth_
 	}
@@ -593,42 +592,19 @@ func (p *Game) runLoop(cfg *Config) (err error) {
 		log.Println("==> RunLoop")
 	}
 	if !cfg.DontRunOnUnfocused {
-		engine.SetRunnableOnUnfocused(true)
+		engine.SyncSetRunnableOnUnfocused(true)
 	}
 	if cfg.FullScreen {
-		engine.SetFullscreen(true)
+		engine.SyncPlatformSetWindowFullscreen(true)
 	}
-	p.isRunned = true
 	p.initEventLoop()
-	engine.SetWindowTitle(cfg.Title)
+	engine.SyncPlatformSetWindowTitle(cfg.Title)
+	p.isRunned = true
 	return nil
 }
 
 func (p *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
 	return p.windowSize_()
-}
-
-var ()
-
-func (p *Game) Update() error {
-	if !p.isLoaded {
-		return nil
-	}
-	p.startFlag.Do(func() {
-		p.fireEvent(&eventStart{})
-	})
-
-	p.updateMousePos()
-	p.tickMgr.update()
-	p.Camera.update()
-	newItems := make([]Shape, len(p.items))
-	copy(newItems, p.items)
-	for _, item := range newItems {
-		if result, ok := item.(interface{ OnUpdate(float32) }); ok {
-			result.OnUpdate(0.01)
-		}
-	}
-	return nil
 }
 
 // startTick creates tickHandler to handle `onTick` event.
@@ -640,7 +616,7 @@ func (p *Game) startTick(duration int64, onTick func(tick int64)) *tickHandler {
 // currentTPS returns the current TPS (ticks per second),
 // that represents how many update function is called in a second.
 func (p *Game) currentTPS() float64 {
-	return p.tickMgr.currentTPS
+	return p.tickMgr.getCurrentTPS()
 }
 
 type clicker interface {
@@ -659,7 +635,6 @@ func (p *Game) handleEvent(event event) {
 	switch ev := event.(type) {
 
 	case *eventLeftButtonDown:
-		p.updateMousePos()
 		p.doWhenLeftButtonDown(ev)
 	case *eventKeyDown:
 		p.sinkMgr.doWhenKeyPressed(ev.Key)
@@ -694,7 +669,7 @@ func (p *Game) initEventLoop() {
 
 func init() {
 	gco = coroutine.New()
-	engine.Gco = gco
+	engine.SetCoroutines(gco)
 }
 
 var (
@@ -1056,12 +1031,6 @@ func (p *Game) MousePressed() bool {
 
 func (p *Game) getMousePos() (x, y float64) {
 	return p.MouseX(), p.MouseY()
-}
-
-func (p *Game) updateMousePos() {
-	mx, my := engine.GetMousePos()
-	atomic.StoreInt64(&p.gMouseX, int64(mx))
-	atomic.StoreInt64(&p.gMouseY, int64(my))
 }
 
 func (p *Game) Username() string {

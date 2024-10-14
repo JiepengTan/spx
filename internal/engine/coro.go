@@ -2,8 +2,23 @@ package engine
 
 import (
 	"time"
+
+	"github.com/goplus/spx/internal/coroutine"
 )
 
+var (
+	gco *coroutine.Coroutines
+)
+
+func SetCoroutines(co *coroutine.Coroutines) {
+	gco = co
+}
+
+func Wait(secs float64) {
+	gco.Sleep(time.Duration(secs * 1e9))
+}
+
+// ========== Engine Coroutines ==========
 const (
 	maxExecTime = 16 * time.Millisecond
 )

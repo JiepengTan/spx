@@ -1528,11 +1528,3 @@ func (p *Sprite) Bounds() *math32.RotatedRect {
 func (p *Sprite) fixWorldRange(x, y float64) (float64, float64) {
 	return x, y
 }
-
-// -----------------------------------------------------------------------------
-func (p *Sprite) onBindProxy() {
-	p.proxy.SetTriggerLayer(p.triggerLayer)
-	p.proxy.SetTriggerMask(p.triggerMask)
-	p.proxy.SetCollisionLayer(p.collisionLayer)
-	p.proxy.SetCollisionMask(p.collisionMask)
-}

@@ -10,6 +10,11 @@ const (
 	assetsDir = "res://assets/"
 )
 
+type TriggerPair struct {
+	Src *ProxySprite
+	Dst *ProxySprite
+}
+
 var (
 	game             Gamer
 	tempTriggerPairs []TriggerPair
@@ -48,7 +53,10 @@ func onUpdate(delta float32) {
 	cacheTriggerPairs()
 	game.OnEngineUpdate(delta)
 	handleEngineCoroutines()
+}
 
+func onDestroy() {
+	game.OnEngineDestroy()
 }
 
 func cacheTriggerPairs() {
@@ -64,8 +72,4 @@ func GetTriggerPairs(lst []TriggerPair) []TriggerPair {
 	TriggerPairs = TriggerPairs[:0]
 	mu.Unlock()
 	return lst
-}
-
-func onDestroy() {
-	game.OnEngineDestroy()
 }

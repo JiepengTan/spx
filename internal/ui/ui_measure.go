@@ -16,7 +16,7 @@ type UiMeasure struct {
 }
 
 func NewUiMeasure() *UiMeasure {
-	panel := CreateEngineUI[UiMeasure]("")
+	panel := engine.SyncCreateEngineUiNode[UiMeasure]("")
 	return panel
 }
 
@@ -37,12 +37,12 @@ func (pself *UiMeasure) UpdateInfo(x, y float64, length, heading float64, name s
 	labelPos := pos
 	pos.X -= float32(halfX)
 	pos.Y -= float32(halfY)
-	pself.container.SetGlobalPosition(pos)
-	pself.container.SetColor(color)
-	pself.container.SetSize(engine.NewVec2(length+extraLen, 26))
-	pself.container.SetRotation(rad)
+	engine.SyncUiSetGlobalPosition(pself.container.GetId(), pos)
+	engine.SyncUiSetColor(pself.container.GetId(), color)
+	engine.SyncUiSetSize(pself.container.GetId(), engine.NewVec2(length+extraLen, 26))
+	engine.SyncUiSetRotation(pself.container.GetId(), rad)
 
-	pself.labelContainer.SetGlobalPosition(labelPos)
-	pself.labelContainer.SetColor(color)
-	pself.labelValue.SetText(name)
+	engine.SyncUiSetGlobalPosition(pself.labelContainer.GetId(), labelPos)
+	engine.SyncUiSetColor(pself.labelContainer.GetId(), color)
+	engine.SyncUiSetText(pself.labelValue.GetId(), name)
 }

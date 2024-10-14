@@ -15,28 +15,31 @@ type UiMonitor struct {
 type UpdateFunc func(float32)
 
 func NewUiMonitor() *UiMonitor {
-	panel := CreateEngineUI[UiMonitor]("")
+	panel := engine.SyncCreateEngineUiNode[UiMonitor]("")
 	return panel
 }
+func (pself *UiMonitor) OnStart() {
+	pself.labelName = BindUI[UiNode](pself.GetId(), "BG/H/LabelName")
+	pself.labelValue = BindUI[UiNode](pself.GetId(), "BG/H/C/H/LabelValue")
+}
+
 func (pself *UiMonitor) OnUpdate(delta float32) {
 	if pself.UpdateCallBack != nil {
 		pself.UpdateCallBack(delta)
 	}
 }
 
-func (pself *UiMonitor) OnStart() {
-	pself.labelName = BindUI[UiNode](pself.GetId(), "BG/H/LabelName")
-	pself.labelValue = BindUI[UiNode](pself.GetId(), "BG/H/C/H/LabelValue")
-}
 func (pself *UiMonitor) UpdateScale(x float64) {
-	pself.SetScale(engine.NewVec2(x, x))
+	engine.SyncUiSetScale(pself.GetId(), engine.NewVec2(x, x))
 }
 func (pself *UiMonitor) UpdatePos(x, y float64) {
 	pos := PosGame2UI(x, y)
-	pself.SetGlobalPosition(pos)
+	engine.SyncUiSetGlobalPosition(pself.GetId(), pos)
 }
 
 func (pself *UiMonitor) UpdateText(name, value string) {
 	pself.labelName.SetText(name)
 	pself.labelValue.SetText(value)
+	engine.SyncUiSetText(pself.labelName.GetId(), name)
+	engine.SyncUiSetText(pself.labelValue.GetId(), value)
 }

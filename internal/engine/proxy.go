@@ -13,9 +13,9 @@ type ProxySprite struct {
 }
 
 func NewSpriteProxy(obj interface{}) *ProxySprite {
-	player := CreateEmptySprite[ProxySprite]()
-	player.Target = obj
-	return player
+	proxy := CreateEmptySprite[ProxySprite]()
+	proxy.Target = obj
+	return proxy
 }
 
 func (pself *ProxySprite) OnCostumeChange(path string) {
@@ -23,7 +23,7 @@ func (pself *ProxySprite) OnCostumeChange(path string) {
 	//println("OnCostumeChange", resPath)
 }
 
-func (pself *ProxySprite) SyncTexture(path string) {
+func (pself *ProxySprite) UpdateTexture(path string) {
 	if path == "" {
 		return
 	}
@@ -32,17 +32,12 @@ func (pself *ProxySprite) SyncTexture(path string) {
 	pself.SetTexture(pself.PicPath)
 }
 
-func (pself *ProxySprite) SyncPosRot(x, y float64, rot float64) {
+func (pself *ProxySprite) UpdatePosRot(x, y float64, rot float64) {
 	pself.x = x
 	pself.y = y
 	pself.SetPosition(Vec2{X: float32(x), Y: float32(y)})
 	rad := HeadingToRad(rot)
 	pself.SetRotation(rad)
-}
-
-type TriggerPair struct {
-	Src *ProxySprite
-	Dst *ProxySprite
 }
 
 func (pself *ProxySprite) OnTriggerEnter(target ISpriter) {

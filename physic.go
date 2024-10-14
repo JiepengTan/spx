@@ -16,33 +16,10 @@
 
 package spx
 
-import (
-	"math"
-
-	"github.com/goplus/spx/internal/engine"
-)
-
 const (
 	physicColliderCircle = 0x00
 	physicColliderRect   = 0x01
 )
-
-func initSpritePhysic(sprite *Sprite, proxy *engine.ProxySprite) {
-	// set trigger & collider
-	switch sprite.colliderType {
-	case physicColliderCircle:
-		proxy.SetColliderCircle(sprite.colliderCenter.ToVec2(), float32(math.Max(sprite.colliderRadius, 0.01)))
-	case physicColliderRect:
-		proxy.SetColliderRect(sprite.colliderCenter.ToVec2(), sprite.colliderSize.ToVec2())
-	}
-
-	switch sprite.triggerType {
-	case physicColliderCircle:
-		proxy.SetTriggerCircle(sprite.triggerCenter.ToVec2(), float32(math.Max(sprite.triggerRadius, 0.01)))
-	case physicColliderRect:
-		proxy.SetTriggerRect(sprite.triggerCenter.ToVec2(), sprite.triggerSize.ToVec2())
-	}
-}
 
 func paserColliderType(typeName string) int64 {
 	switch typeName {

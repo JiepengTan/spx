@@ -2,22 +2,9 @@ package engine
 
 import (
 	. "godot-ext/gdspx/pkg/engine"
-	"time"
-
-	"github.com/goplus/spx/internal/coroutine"
 )
 
-var (
-	Gco *coroutine.Coroutines
-)
-
-func Wait(secs float64) {
-	Gco.Sleep(time.Duration(secs * 1e9))
-}
-
-func SyncInputMousePressed() bool {
-	return SyncInputGetMouseState(0) || SyncInputGetMouseState(1)
-}
+// =============== factory ===================
 func SyncCreateUiNode[T any](path string) *T {
 	var __ret *T
 	done := make(chan struct{})
@@ -39,4 +26,64 @@ func SyncCreateEngineUiNode[T any](path string) *T {
 	updateJobQueue <- job
 	<-done
 	return __ret
+}
+
+func SyncCreateSprite[T any]() *T {
+	var __ret *T
+	done := make(chan struct{})
+	job := func() {
+		__ret = CreateSprite[T]()
+		done <- struct{}{}
+	}
+	updateJobQueue <- job
+	<-done
+	return __ret
+}
+
+func SyncCreateEmptySprite[T any]() *T {
+	var __ret *T
+	done := make(chan struct{})
+	job := func() {
+		__ret = CreateEmptySprite[T]()
+		done <- struct{}{}
+	}
+	updateJobQueue <- job
+	<-done
+	return __ret
+}
+
+func SyncNewBackdropProxy(obj interface{}, path string) *ProxySprite {
+	var __ret *ProxySprite
+	done := make(chan struct{})
+	job := func() {
+		__ret = newBackdropProxy(obj, path)
+		done <- struct{}{}
+	}
+	updateJobQueue <- job
+	<-done
+	return __ret
+}
+
+func newBackdropProxy(obj interface{}, path string) *ProxySprite {
+	__ret := CreateEmptySprite[ProxySprite]()
+	__ret.Target = obj
+	__ret.SetZIndex(-1)
+	__ret.DisablePhysic()
+	__ret.UpdateTexture(path)
+	return __ret
+}
+
+// =============== input ===================
+func SyncInputMousePressed() bool {
+	return SyncInputGetMouseState(0) || SyncInputGetMouseState(1)
+}
+
+// =============== time ===================
+func SyncGetCurrentTPS() float64 {
+	return 30 // TODO(tanjp) use engine api
+}
+
+// =============== window ===================
+func SyncSetRunnableOnUnfocused(flag bool) {
+	println("TODO tanjp SyncSetRunnableOnUnfocused")
 }

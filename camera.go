@@ -49,14 +49,14 @@ func (c *Camera) screenToWorld(point *math32.Vector2) *math32.Vector2 {
 	return point // TODO tanjp
 }
 
-func (c *Camera) update() {
-	if c.on_ == nil {
-		return
+func (c *Camera) getFollowPos() (bool, float64, float64) {
+	if c.on_ != nil {
+		switch v := c.on_.(type) {
+		case *Sprite:
+			return true, v.x, v.y
+		}
 	}
-	switch v := c.on_.(type) {
-	case *Sprite:
-		engine.UpdateCameraPosition(v.x, v.y)
-	}
+	return false, 0, 0
 }
 func (c *Camera) On(obj interface{}) {
 	switch v := obj.(type) {

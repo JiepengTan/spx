@@ -64,19 +64,17 @@ func (p *tickHandler) Stop() {
 // -------------------------------------------------------------------------------------
 
 type tickMgr struct {
-	tick       int64
-	currentTPS float64
-	list       tickHandlerBase
+	tick int64
+	list tickHandlerBase
 }
 
 // currentTPS is the current TPS (ticks per second),
 // that represents how many update function is called in a second.
-func getCurrentTPS() float64 {
-	return engine.GetCurrentTPS()
+func (p *tickMgr) getCurrentTPS() float64 {
+	return engine.SyncGetCurrentTPS()
 }
 
 func (p *tickMgr) init() {
-	p.currentTPS = getCurrentTPS()
 	p.list.initList()
 }
 
