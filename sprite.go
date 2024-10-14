@@ -71,6 +71,7 @@ type Sprite struct {
 	x, y          float64
 	scale         float64
 	direction     float64
+	initDirection float64
 	rotationStyle RotationStyle
 	rRect         *math32.RotatedRect
 	pivot         math32.Vector2
@@ -145,6 +146,7 @@ func (p *Sprite) init(
 	p.x, p.y = sprite.X, sprite.Y
 	p.scale = sprite.Size
 	p.direction = sprite.Heading
+	p.initDirection = sprite.Heading
 	p.rotationStyle = toRotationStyle(sprite.RotationStyle)
 	p.isVisible = sprite.Visible
 	p.pivot = sprite.Pivot

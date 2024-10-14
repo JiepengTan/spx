@@ -57,7 +57,6 @@ func newMeasure(v specsp) *measure {
 	if err != nil {
 		panic(err)
 	}
-	println("newMeasure ", size, scale, text, int(v["x"].(float64)), int(v["y"].(float64)))
 	panel := ui.NewUiMeasure()
 	meansureObj := &measure{
 		heading:      heading,
@@ -71,7 +70,7 @@ func newMeasure(v specsp) *measure {
 		svgSize:      svgSize,
 		panel:        panel,
 	}
-	panel.UpdateInfo(meansureObj.x, meansureObj.y, size*scale, heading-90, text, engine.Color{
+	panel.UpdateInfo(meansureObj.x, meansureObj.y, size*scale, heading, text, engine.Color{
 		R: float32(c.R) / 255.0,
 		G: float32(c.G) / 255.0,
 		B: float32(c.B) / 255.0,

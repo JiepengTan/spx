@@ -32,11 +32,12 @@ func (pself *ProxySprite) SyncTexture(path string) {
 	pself.SetTexture(pself.PicPath)
 }
 
-func (pself *ProxySprite) SyncPos(x, y float64) {
-	//println(pself.Name, "SyncPos", int(x), int(y))
+func (pself *ProxySprite) SyncPosRot(x, y float64, rot float64) {
 	pself.x = x
 	pself.y = y
 	pself.SetPosition(Vec2{X: float32(x), Y: float32(y)})
+	rad := HeadingToRad(rot)
+	pself.SetRotation(rad)
 }
 
 type TriggerPair struct {

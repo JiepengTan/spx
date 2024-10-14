@@ -4,6 +4,10 @@ import (
 	. "godot-ext/gdspx/pkg/engine"
 )
 
+func HeadingToRad(heading float64) float32 {
+	return DegToRad(float32(heading))
+}
+
 func NewVec2(x, y float64) Vec2 {
 	return Vec2{X: float32(x), Y: float32(y)}
 }

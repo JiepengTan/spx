@@ -64,7 +64,7 @@ func (p *Game) updateProxy() {
 			// sync position
 			if sprite.isVisible {
 				x, y := sprite.getXY()
-				proxy.SyncPos(x, y)
+				proxy.SyncPosRot(x, y, sprite.Heading()-sprite.initDirection)
 				proxy.SyncTexture(sprite.getCostumePath())
 				count++
 			}
