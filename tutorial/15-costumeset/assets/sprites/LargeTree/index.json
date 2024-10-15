@@ -1,0 +1,33 @@
+{
+  "costumeMPSet": {
+    "path": "../common.png",
+    "parts": [
+      {
+        "rect": {
+          "x": 334,
+          "y": 2,
+          "w": 96,
+          "h": 53
+        },
+        "nx": 4
+      },
+      {
+        "rect": {
+          "x": 432,
+          "y": 2,
+          "w": 52,
+          "h": 53
+        },
+        "nx": 1
+      }
+    ]
+  },
+  "costumeIndex": 0,
+  "heading": 90,
+  "isDraggable": false,
+  "rotationStyle": "normal",
+  "size": 1,
+  "visible": true,
+  "x": 50,
+  "y": 0
+}

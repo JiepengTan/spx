@@ -1,0 +1,7 @@
+onStart => {
+	for {
+		nextCostume
+		say costumeIndex
+		wait 0.3
+	}
+}
