@@ -132,11 +132,11 @@ func (p *Sprite) getAllShapes() []Shape {
 }
 
 func (p *Sprite) init(
-	base string, g *Game, name string, sprite *spriteConfig, gamer reflect.Value, shared *sharedImages) {
+	base string, g *Game, name string, sprite *spriteConfig, gamer reflect.Value) {
 	if sprite.Costumes != nil {
 		p.baseObj.init(base, sprite.Costumes, sprite.getCostumeIndex())
 	} else {
-		p.baseObj.initWith(base, sprite, shared)
+		p.baseObj.initWith(base, sprite)
 	}
 	p.defaultCostumeIndex = p.baseObj.costumeIndex_
 	p.eventSinks.init(&g.sinkMgr, p)
@@ -1503,16 +1503,14 @@ func (p *Sprite) ShowVar(name string) {
 // CostumeWidth returns width of sprite current costume.
 func (p *Sprite) CostumeWidth() float64 {
 	c := p.costumes[p.costumeIndex_]
-	img, _, _ := c.needImage(p.g.fs)
-	w, _ := img.Size()
+	w, _ := c.getSize(p.g.fs)
 	return float64(w / c.bitmapResolution)
 }
 
 // CostumeHeight returns height of sprite current costume.
 func (p *Sprite) CostumeHeight() float64 {
 	c := p.costumes[p.costumeIndex_]
-	img, _, _ := c.needImage(p.g.fs)
-	_, h := img.Size()
+	_, h := c.getSize(p.g.fs)
 	return float64(h / c.bitmapResolution)
 }
 

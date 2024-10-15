@@ -32,7 +32,6 @@ import (
 	"github.com/goplus/spx/internal/audiorecord"
 	"github.com/goplus/spx/internal/coroutine"
 	"github.com/goplus/spx/internal/engine"
-	"github.com/goplus/spx/internal/gdi"
 	"github.com/goplus/spx/internal/ui"
 
 	spxfs "github.com/goplus/spx/fs"
@@ -73,8 +72,7 @@ type Game struct {
 	eventSinks
 	Camera
 
-	fs     spxfs.Dir
-	shared *sharedImages
+	fs spxfs.Dir
 
 	sounds       soundMgr
 	turtle       turtleCanvas
@@ -116,13 +114,6 @@ type Gamer interface {
 
 func (p *Game) IsRunned() bool {
 	return p.isRunned
-}
-
-func (p *Game) getSharedImgs() *sharedImages {
-	if p.shared == nil {
-		p.shared = &sharedImages{imgs: make(map[string]gdi.Image)}
-	}
-	return p.shared
 }
 
 func (p *Game) newSpriteAndLoad(name string, tySpr reflect.Type, g reflect.Value) Spriter {
@@ -377,7 +368,7 @@ func (p *Game) loadSprite(sprite Spriter, name string, gamer reflect.Value) erro
 	vSpr := reflect.ValueOf(sprite).Elem()
 	vSpr.Set(reflect.Zero(vSpr.Type()))
 	base := vSpr.Field(0).Addr().Interface().(*Sprite)
-	base.init(baseDir, p, name, &conf, gamer, p.getSharedImgs())
+	base.init(baseDir, p, name, &conf, gamer)
 	p.sprs[name] = sprite
 	//
 	// init gamer pointer (field 1)
@@ -534,20 +525,20 @@ func (p *Game) addStageSprite(g reflect.Value, v specsp, inits []Spriter) []Spri
 }
 
 /*
-	{
-	  "type": "sprites",
-	  "target": "bananas",
-	  "items": [
-	    {
-	      "x": -100,
-	      "y": -21
-	    },
-	    {
-	      "x": 50,
-	      "y": -21
-	    }
-	  ]
-	}
+	 {
+	   "type": "sprites",
+	   "target": "bananas",
+	   "items": [
+		 {
+		   "x": -100,
+		   "y": -21
+		 },
+		 {
+		   "x": 50,
+		   "y": -21
+		 }
+	   ]
+	 }
 */
 func (p *Game) addStageSprites(g reflect.Value, v specsp, inits []Spriter) []Spriter {
 	target := v["target"].(string)
@@ -752,9 +743,7 @@ func (p *Game) windowSize_() (int, int) {
 func (p *Game) doWindowSize() {
 	if p.windowWidth_ == 0 {
 		c := p.costumes[p.costumeIndex_]
-		img, _, _ := c.needImage(p.fs)
-		w, h := img.Size()
-		p.windowWidth_, p.windowHeight_ = w/c.bitmapResolution, h/c.bitmapResolution
+		p.windowWidth_, p.windowHeight_ = c.getSize(p.fs)
 	}
 }
 
@@ -768,9 +757,7 @@ func (p *Game) worldSize_() (int, int) {
 func (p *Game) doWorldSize() {
 	if p.worldWidth_ == 0 {
 		c := p.costumes[p.costumeIndex_]
-		img, _, _ := c.needImage(p.fs)
-		w, h := img.Size()
-		p.worldWidth_, p.worldHeight_ = w/c.bitmapResolution, h/c.bitmapResolution
+		p.worldWidth_, p.worldHeight_ = c.getSize(p.fs)
 	}
 }
 
