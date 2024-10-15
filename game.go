@@ -216,7 +216,12 @@ func Gopt_Game_Run(game Gamer, resource interface{}, gameConf ...*Config) {
 		verbose := f.Bool("v", false, "print verbose information")
 		fullscreen := f.Bool("f", false, "full screen")
 		help := f.Bool("h", false, "show help information")
+		projectPath := f.Bool("path", false, "gdspx project path")
+		editorMode := f.Bool("e", false, "editor mode")
 		flag.Parse()
+		if *projectPath || *editorMode {
+			println("======== gdspx debug mode ========")
+		}
 		if *help {
 			fmt.Fprintf(os.Stderr, "Usage: %v [-v -f -h]\n", os.Args[0])
 			flag.PrintDefaults()
