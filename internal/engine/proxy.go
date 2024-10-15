@@ -31,6 +31,14 @@ func (pself *ProxySprite) UpdateTexture(path string) {
 	pself.PicPath = resPath
 	pself.SetTexture(pself.PicPath)
 }
+func (pself *ProxySprite) UpdateTextureAltas(path string, rect2 Rect2) {
+	if path == "" {
+		return
+	}
+	resPath := ToEnginePath(path)
+	pself.PicPath = resPath
+	pself.SetTextureAltas(pself.PicPath, rect2)
+}
 
 func (pself *ProxySprite) UpdatePosRot(x, y float64, rot float64) {
 	pself.x = x

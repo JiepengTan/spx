@@ -180,6 +180,7 @@ type costume struct {
 	faceRight        float64
 	bitmapResolution int
 	path             string
+	region           engine.Rect
 }
 
 func newCostumeWithSize(width, height int) *costume {
@@ -226,6 +227,9 @@ func (p *costume) needImage(fs spxfs.Dir) (gdi.Image, float64, float64) {
 		p.img.ensure(fs)
 	}
 	return p.img.cache, p.img.pt.x, p.img.pt.y
+}
+func (p *costume) isAltas() bool {
+	return p.region.Size.X > 0
 }
 
 // -------------------------------------------------------------------------------------
@@ -410,6 +414,14 @@ func (p *baseObj) getCostumeName() string {
 }
 func (p *baseObj) getCostumePath() string {
 	return p.costumes[p.costumeIndex_].path
+}
+
+func (p *baseObj) isCostumeAltas() bool {
+	return p.costumes[p.costumeIndex_].isAltas()
+}
+
+func (p *baseObj) getCostumeAltasRegion() engine.Rect {
+	return p.costumes[p.costumeIndex_].region
 }
 
 // -------------------------------------------------------------------------------------

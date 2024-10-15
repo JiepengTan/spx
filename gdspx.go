@@ -109,7 +109,12 @@ func (p *Game) updateProxy() {
 			if sprite.isVisible {
 				x, y := sprite.getXY()
 				proxy.UpdatePosRot(x, y, sprite.Heading()-sprite.initDirection)
-				proxy.UpdateTexture(sprite.getCostumePath())
+				if sprite.isCostumeAltas() {
+					proxy.UpdateTextureAltas(sprite.getCostumePath(), sprite.getCostumeAltasRegion().ToRect2())
+				} else {
+					proxy.UpdateTexture(sprite.getCostumePath())
+				}
+
 				count++
 			}
 			proxy.SetVisible(sprite.isVisible)

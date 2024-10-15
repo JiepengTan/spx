@@ -413,6 +413,19 @@ func SyncPlatformIsDebugMode() bool {
 	return __ret
 }
 
+// IResMgr
+func SyncResGetImageSize(path string) Vec2 {
+	var __ret Vec2
+	done := make(chan struct{})
+	job := func() {
+		__ret = ResMgr.GetImageSize(path)
+		done <- struct{}{}
+	}
+	updateJobQueue <- job
+	<-done
+	return __ret
+}
+
 // ISceneMgr
 func SyncSceneChangeSceneToFile(path string) {
 
@@ -689,6 +702,16 @@ func SyncSpriteGetColor(obj Object) Color {
 	updateJobQueue <- job
 	<-done
 	return __ret
+}
+func SyncSpriteSetTextureAltas(obj Object, path string, rect2 Rect2) {
+
+	done := make(chan struct{})
+	job := func() {
+		SpriteMgr.SetTextureAltas(obj, path, rect2)
+		done <- struct{}{}
+	}
+	updateJobQueue <- job
+	<-done
 }
 func SyncSpriteSetTexture(obj Object, path string) {
 
