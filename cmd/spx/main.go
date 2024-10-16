@@ -87,6 +87,8 @@ func wrap() error {
 		return impl.RunGdspx(gd4spxPath, project, "")
 	case "editor":
 		return impl.RunGdspx(gd4spxPath, project, "-e")
+	case "exportweb":
+		return impl.Export(gd4spxPath, project, "Web", ".builds/web/index.html")
 	}
 	return nil
 }
