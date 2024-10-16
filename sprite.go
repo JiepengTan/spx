@@ -1504,14 +1504,14 @@ func (p *Sprite) ShowVar(name string) {
 func (p *Sprite) CostumeWidth() float64 {
 	c := p.costumes[p.costumeIndex_]
 	w, _ := c.getSize(p.g.fs)
-	return float64(w / c.bitmapResolution)
+	return float64(w)
 }
 
 // CostumeHeight returns height of sprite current costume.
 func (p *Sprite) CostumeHeight() float64 {
 	c := p.costumes[p.costumeIndex_]
 	_, h := c.getSize(p.g.fs)
-	return float64(h / c.bitmapResolution)
+	return float64(h)
 }
 
 func (p *Sprite) Bounds() *math32.RotatedRect {

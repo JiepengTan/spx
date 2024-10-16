@@ -98,7 +98,7 @@ func (p *Game) updateProxy() {
 			if sprite.proxy == nil && !sprite.HasDestroyed {
 				sprite.proxy = engine.NewSpriteProxy(sprite)
 				initSpritePhysicInfo(sprite, sprite.proxy)
-				sprite.proxy.SetScale(engine.NewVec2(0.5, 0.5)) // TODO(tanjp) remove this hack
+				//sprite.proxy.SetScale(engine.NewVec2(0.5, 0.5)) // TODO(tanjp) remove this hack
 			}
 			proxy = sprite.proxy
 			if sprite.HasDestroyed {
