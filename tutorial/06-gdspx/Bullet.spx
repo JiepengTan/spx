@@ -5,12 +5,18 @@ onTouched => {
 onStart => {
 	for {
 		wait 0.1
-		clone
+		degree := 10.0
+		count := 3.0
+		for i:= -count+1 ; i< count ;i++{
+			sprite := clone
+			sprite.setXYpos mouseX, mouseY
+			sprite.setYpos mouseY+30
+			sprite.turnTo i * degree
+		}
 	}
 }
 
 onCloned => {
-	setXYpos mouseX, mouseY
 	show
 	for {
 		wait 0.01

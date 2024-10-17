@@ -3,13 +3,13 @@ var (
 )
 onStart => {
 	for {
-		wait 0.3
+		wait 0.1
 		clone
 	}
 }
 
 onCloned => {
-	life = 1
+	life = 4
 }
 
 onCloned => {
@@ -17,7 +17,7 @@ onCloned => {
 	show
 	for {
 		wait 0.05
-		changeYpos -2.4
+		changeYpos -4.4
 		if ypos < -280 {
 			destroy
 		}

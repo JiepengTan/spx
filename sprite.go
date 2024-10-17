@@ -359,11 +359,11 @@ func cloneSprite(out reflect.Value, outPtr Spriter, in reflect.Value, v specsp) 
 	return dest
 }
 
-func Gopt_Sprite_Clone__0(sprite Spriter) {
-	Gopt_Sprite_Clone__1(sprite, nil)
+func Gopt_Sprite_Clone__0(sprite Spriter) *Sprite {
+	return Gopt_Sprite_Clone__1(sprite, nil)
 }
 
-func Gopt_Sprite_Clone__1(sprite Spriter, data interface{}) {
+func Gopt_Sprite_Clone__1(sprite Spriter, data interface{}) *Sprite {
 	src := spriteOf(sprite)
 	if debugInstr {
 		log.Println("Clone", src.name)
@@ -376,6 +376,7 @@ func Gopt_Sprite_Clone__1(sprite Spriter, data interface{}) {
 	if dest.hasOnCloned {
 		dest.doWhenCloned(dest, data)
 	}
+	return dest
 }
 
 func (p *Sprite) OnCloned__0(onCloned func(data interface{})) {
@@ -1099,6 +1100,9 @@ func (p *Sprite) SetRotationStyle(style RotationStyle) {
 
 func (p *Sprite) Heading() float64 {
 	return p.direction
+}
+func (p *Sprite) Name() string {
+	return p.name
 }
 
 // Turn func:
