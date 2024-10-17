@@ -110,9 +110,9 @@ func (p *Game) updateProxy() {
 				x, y := sprite.getXY()
 				proxy.UpdatePosRot(x, y, sprite.Heading()-sprite.initDirection)
 				if sprite.isCostumeAltas() {
-					proxy.UpdateTextureAltas(sprite.getCostumePath(), sprite.getCostumeAltasRegion().ToRect2())
+					proxy.UpdateTextureAltas(sprite.getCostumePath(), sprite.getCostumeAltasRegion().ToRect2(), sprite.getCostumeRenderScale())
 				} else {
-					proxy.UpdateTexture(sprite.getCostumePath())
+					proxy.UpdateTexture(sprite.getCostumePath(), sprite.getCostumeRenderScale())
 				}
 
 				count++

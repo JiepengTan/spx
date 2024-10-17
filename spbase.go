@@ -324,7 +324,9 @@ func (p *baseObj) getCostumeName() string {
 func (p *baseObj) getCostumePath() string {
 	return p.costumes[p.costumeIndex_].path
 }
-
+func (p *baseObj) getCostumeRenderScale() float64 {
+	return 1.0 / float64(p.costumes[p.costumeIndex_].bitmapResolution)
+}
 func (p *baseObj) isCostumeAltas() bool {
 	//println("p.costumeIndex_ ", p.costumeIndex_, " len ", len(p.costumes), " isAltas ", p.costumes[p.costumeIndex_].isAltas())
 	return p.costumes[p.costumeIndex_].isAltas()

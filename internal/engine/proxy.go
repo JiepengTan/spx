@@ -23,21 +23,23 @@ func (pself *ProxySprite) OnCostumeChange(path string) {
 	//println("OnCostumeChange", resPath)
 }
 
-func (pself *ProxySprite) UpdateTexture(path string) {
+func (pself *ProxySprite) UpdateTexture(path string, renderScale float64) {
 	if path == "" {
 		return
 	}
 	resPath := ToEnginePath(path)
 	pself.PicPath = resPath
 	pself.SetTexture(pself.PicPath)
+	pself.SetRenderScale(NewVec2(renderScale, renderScale))
 }
-func (pself *ProxySprite) UpdateTextureAltas(path string, rect2 Rect2) {
+func (pself *ProxySprite) UpdateTextureAltas(path string, rect2 Rect2, renderScale float64) {
 	if path == "" {
 		return
 	}
 	resPath := ToEnginePath(path)
 	pself.PicPath = resPath
 	pself.SetTextureAltas(pself.PicPath, rect2)
+	pself.SetRenderScale(NewVec2(renderScale, renderScale))
 }
 
 func (pself *ProxySprite) UpdatePosRot(x, y float64, rot float64) {

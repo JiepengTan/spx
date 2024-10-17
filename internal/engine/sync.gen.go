@@ -693,6 +693,27 @@ func SyncSpriteGetScale(obj Object) Vec2 {
 	<-done
 	return __ret
 }
+func SyncSpriteSetRenderScale(obj Object, scale Vec2) {
+
+	done := make(chan struct{})
+	job := func() {
+		SpriteMgr.SetRenderScale(obj, scale)
+		done <- struct{}{}
+	}
+	updateJobQueue <- job
+	<-done
+}
+func SyncSpriteGetRenderScale(obj Object) Vec2 {
+	var __ret Vec2
+	done := make(chan struct{})
+	job := func() {
+		__ret = SpriteMgr.GetRenderScale(obj)
+		done <- struct{}{}
+	}
+	updateJobQueue <- job
+	<-done
+	return __ret
+}
 func SyncSpriteSetColor(obj Object, color Color) {
 
 	done := make(chan struct{})

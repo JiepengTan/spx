@@ -69,7 +69,7 @@ func newBackdropProxy(obj interface{}, path string) *ProxySprite {
 	__ret.Target = obj
 	__ret.SetZIndex(-1)
 	__ret.DisablePhysic()
-	__ret.UpdateTexture(path)
+	__ret.UpdateTexture(path, 1)
 	return __ret
 }
 
