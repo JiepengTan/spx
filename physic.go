@@ -17,8 +17,9 @@
 package spx
 
 const (
-	physicColliderCircle = 0x00
-	physicColliderRect   = 0x01
+	physicColliderNone   = 0x00
+	physicColliderCircle = 0x01
+	physicColliderRect   = 0x02
 )
 
 func paserColliderType(typeName string) int64 {
@@ -29,5 +30,5 @@ func paserColliderType(typeName string) int64 {
 		return physicColliderRect
 	}
 	println("unknown collider type:", typeName)
-	return physicColliderCircle
+	return physicColliderNone
 }

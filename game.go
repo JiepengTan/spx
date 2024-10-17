@@ -743,7 +743,7 @@ func (p *Game) windowSize_() (int, int) {
 func (p *Game) doWindowSize() {
 	if p.windowWidth_ == 0 {
 		c := p.costumes[p.costumeIndex_]
-		p.windowWidth_, p.windowHeight_ = c.getSize(p.fs)
+		p.windowWidth_, p.windowHeight_ = c.getSize()
 	}
 }
 
@@ -757,7 +757,7 @@ func (p *Game) worldSize_() (int, int) {
 func (p *Game) doWorldSize() {
 	if p.worldWidth_ == 0 {
 		c := p.costumes[p.costumeIndex_]
-		p.worldWidth_, p.worldHeight_ = c.getSize(p.fs)
+		p.worldWidth_, p.worldHeight_ = c.getSize()
 	}
 }
 

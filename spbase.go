@@ -26,7 +26,6 @@ import (
 
 	gdspx "godot-ext/gdspx/pkg/engine"
 
-	spxfs "github.com/goplus/spx/fs"
 	"github.com/goplus/spx/internal/engine"
 	"github.com/goplus/spx/internal/math32"
 )
@@ -136,7 +135,7 @@ func toBitmapResolution(v int) int {
 	return v
 }
 
-func (p *costume) getSize(fs spxfs.Dir) (int, int) {
+func (p *costume) getSize() (int, int) {
 	return p.width / p.bitmapResolution, p.height / p.bitmapResolution
 }
 func (p *costume) isAltas() bool {
@@ -326,6 +325,10 @@ func (p *baseObj) getCostumePath() string {
 }
 func (p *baseObj) getCostumeRenderScale() float64 {
 	return 1.0 / float64(p.costumes[p.costumeIndex_].bitmapResolution)
+}
+func (p *baseObj) getCostumeSize() (float64, float64) {
+	x, y := p.costumes[p.costumeIndex_].getSize()
+	return float64(x), float64(y)
 }
 func (p *baseObj) isCostumeAltas() bool {
 	//println("p.costumeIndex_ ", p.costumeIndex_, " len ", len(p.costumes), " isAltas ", p.costumes[p.costumeIndex_].isAltas())

@@ -1507,14 +1507,14 @@ func (p *Sprite) ShowVar(name string) {
 // CostumeWidth returns width of sprite current costume.
 func (p *Sprite) CostumeWidth() float64 {
 	c := p.costumes[p.costumeIndex_]
-	w, _ := c.getSize(p.g.fs)
+	w, _ := c.getSize()
 	return float64(w)
 }
 
 // CostumeHeight returns height of sprite current costume.
 func (p *Sprite) CostumeHeight() float64 {
 	c := p.costumes[p.costumeIndex_]
-	_, h := c.getSize(p.g.fs)
+	_, h := c.getSize()
 	return float64(h)
 }
 
