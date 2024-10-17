@@ -9,7 +9,7 @@ onStart => {
 }
 
 onCloned => {
-	life = 2
+	life = 1
 }
 
 onCloned => {

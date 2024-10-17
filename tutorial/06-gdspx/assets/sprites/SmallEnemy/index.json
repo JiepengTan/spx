@@ -59,11 +59,11 @@
 	"colliderType":"circle",
 	"colliderCenter":{"x":0,"y":0},
 	"colliderSize":{"x":0,"y":0},
-	"colliderRadius":100,
+	"colliderRadius":20,
 	"triggerType":"circle",
 	"triggerCenter":{"x":0,"y":0},
 	"triggerSize":{"x":0,"y":0},
-	"triggerRadius":100,
+	"triggerRadius":20,
 
   "None": 0
 }
