@@ -425,6 +425,17 @@ func SyncResGetImageSize(path string) Vec2 {
 	<-done
 	return __ret
 }
+func SyncResReadAllText(path string) string {
+	var __ret string
+	done := make(chan struct{})
+	job := func() {
+		__ret = ResMgr.ReadAllText(path)
+		done <- struct{}{}
+	}
+	updateJobQueue <- job
+	<-done
+	return __ret
+}
 
 // ISceneMgr
 func SyncSceneChangeSceneToFile(path string) {

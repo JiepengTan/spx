@@ -19,9 +19,11 @@ package spx
 import (
 	"encoding/json"
 	"io"
+	"path"
 	"syscall"
 
 	spxfs "github.com/goplus/spx/fs"
+	"github.com/goplus/spx/internal/engine"
 	"github.com/goplus/spx/internal/math32"
 )
 
@@ -34,6 +36,13 @@ func resourceDir(resource interface{}) (fs spxfs.Dir, err error) {
 }
 
 func loadJson(ret interface{}, fs spxfs.Dir, file string) (err error) {
+	if gdDir, ok := fs.(spxfs.GdDir); ok {
+		filePath := "res://" + path.Join(gdDir.GetPath(), file)
+		value := engine.SyncReadAllText(filePath)
+		println("LoadJson", filePath, value)
+		json.Unmarshal([]byte(value), ret)
+		return
+	}
 	f, err := fs.Open(file)
 	if err != nil {
 		return
