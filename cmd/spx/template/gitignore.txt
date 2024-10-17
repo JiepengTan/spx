@@ -1,7 +1,7 @@
 # gdspx specific ignores
 /.godot
 /.import
-/.godot
+/.build
 /engine
 /lib
 /Makefile
