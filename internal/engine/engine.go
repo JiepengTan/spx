@@ -43,7 +43,6 @@ func GdspxMain(g Gamer) {
 
 // callbacks
 func onStart() {
-	PlatformMgr.SetDebugMode(true)
 	tempTriggerPairs = make([]TriggerPair, 0)
 	TriggerPairs = make([]TriggerPair, 0)
 	game.OnEngineStart()

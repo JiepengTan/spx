@@ -91,3 +91,9 @@ func SyncSetRunnableOnUnfocused(flag bool) {
 func SyncReadAllText(path string) string {
 	return SyncResReadAllText(path)
 }
+
+// =============== setting ===================
+
+func SyncSetDebugMode(isDebug bool) {
+	SyncPlatformSetDebugMode(isDebug)
+}

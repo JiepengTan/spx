@@ -393,7 +393,7 @@ func spriteOf(sprite Spriter) *Sprite {
 }
 
 func (p *Game) loadIndex(g reflect.Value, proj *projConfig) (err error) {
-
+	engine.SyncSetDebugMode(proj.Debug)
 	if backdrops := proj.getBackdrops(); len(backdrops) > 0 {
 		p.baseObj.initBackdrops("", backdrops, proj.getBackdropIndex())
 		p.worldWidth_ = proj.Map.Width

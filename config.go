@@ -114,12 +114,14 @@ type projConfig struct {
 	Map           mapConfig         `json:"map"`
 	Camera        *cameraConfig     `json:"camera"`
 	Run           *Config           `json:"run"`
+	Debug         bool              `json:"debug"`
 
 	// deprecated properties
 	Scenes              []*backdropConfig `json:"scenes"`              //this property is deprecated, use Backdrops instead
 	Costumes            []*backdropConfig `json:"costumes"`            //this property is deprecated, use Backdrops instead
 	CurrentCostumeIndex *int              `json:"currentCostumeIndex"` //this property is deprecated, use BackdropIndex instead
 	SceneIndex          int               `json:"sceneIndex"`          //this property is deprecated, use BackdropIndex instead
+
 }
 
 func (p *projConfig) getBackdrops() []*backdropConfig {
