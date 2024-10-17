@@ -51,6 +51,9 @@ func main() {
 			fmt.Println("Not a spx project skip")
 		}
 		return
+	case "stopweb":
+		impl.StopWebServer()
+		return
 	case "init":
 		impl.PrepareGoEnv()
 	}
