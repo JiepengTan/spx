@@ -2,8 +2,8 @@ package engine
 
 import (
 	"encoding/json"
-	"path"
 	"path/filepath"
+	"strings"
 )
 
 var (
@@ -25,11 +25,10 @@ func SetAssetDir(dir string) {
 	if SyncResHasFile(configPath) {
 		configJson := SyncResReadAllText(configPath)
 		var config engineConfig
-		json.Unmarshal([]byte(configJson), config)
+		json.Unmarshal([]byte(configJson), &config)
 		extassetDir = config.ExtAsset
 	}
 	assetsDir = "res://" + dir + "/"
-	println("=========SetAssetDir:=======", assetsDir, "extasset", extassetDir)
 }
 
 func ToAssetPath(relPath string) string {
@@ -37,36 +36,18 @@ func ToAssetPath(relPath string) string {
 	if replacedPath != "" {
 		return replacedPath
 	}
-	return path.Join(assetsDir, relPath)
+	return assetsDir + relPath
 }
 
 func replacePathIfInExtAssetDir(path string, extassetDir string, newAssetDir string) string {
 	if extassetDir == "" {
 		return ""
 	}
-	absPath, err := filepath.Abs(path)
-	if err != nil {
-		println("path error", path, err.Error())
-		return ""
+	prefix := "../" + extassetDir
+	if strings.HasPrefix(path, prefix) || strings.HasPrefix(path, extassetDir) {
+		newPath := "res://" + filepath.Join(newAssetDir, path[len(prefix)+1:])
+		newPath = strings.ReplaceAll(newPath, "\\", "/")
+		return newPath
 	}
-
-	absExtassetDir, err := filepath.Abs(extassetDir)
-	if err != nil {
-		println("path error", path, err.Error())
-		return ""
-	}
-
-	relPath, err := filepath.Rel(absExtassetDir, absPath)
-	if err != nil {
-		println("path error", path, err.Error())
-		return ""
-	}
-
-	if filepath.IsAbs(relPath) || relPath == ".." {
-		println("path error", path, err.Error())
-		return path
-	}
-
-	newPath := filepath.Join("res://", newAssetDir, relPath)
-	return newPath
+	return ""
 }
