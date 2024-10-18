@@ -24,6 +24,7 @@ import (
 	"sync"
 
 	"github.com/goplus/spx/internal/anim"
+	"github.com/goplus/spx/internal/engine"
 	"github.com/goplus/spx/internal/gdi"
 	"github.com/goplus/spx/internal/math32"
 	"github.com/goplus/spx/internal/tools"
@@ -1381,6 +1382,10 @@ func checkTouchingDirection(dir float64) int {
 }
 
 func (p *Sprite) checkTouchingScreen(where int) (touching int) {
+	value := engine.SyncPhysicCheckTouchedCameraBoundary(p.proxy.Id, int64(where))
+	if value {
+		return where
+	}
 	return 0
 }
 

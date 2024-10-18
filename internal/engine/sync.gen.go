@@ -326,6 +326,17 @@ func SyncPhysicCheckCollision(from Vec2, to Vec2, collision_mask int64, collide_
 	<-done
 	return __ret
 }
+func SyncPhysicCheckTouchedCameraBoundary(obj Object, board_type int64) bool {
+	var __ret bool
+	done := make(chan struct{})
+	job := func() {
+		__ret = PhysicMgr.CheckTouchedCameraBoundary(obj, board_type)
+		done <- struct{}{}
+	}
+	updateJobQueue <- job
+	<-done
+	return __ret
+}
 
 // IPlatformMgr
 func SyncPlatformSetWindowSize(width int64, height int64) {
