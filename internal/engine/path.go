@@ -39,15 +39,25 @@ func ToAssetPath(relPath string) string {
 	return assetsDir + relPath
 }
 
-func replacePathIfInExtAssetDir(path string, extassetDir string, newAssetDir string) string {
+func replacePathIfInExtAssetDir(rpath string, extassetDir string, newAssetDir string) string {
 	if extassetDir == "" {
 		return ""
 	}
+	path := filepath.Clean(rpath)
+	path = strings.ReplaceAll(path, "\\", "/")
 	prefix := "../" + extassetDir
-	if strings.HasPrefix(path, prefix) || strings.HasPrefix(path, extassetDir) {
-		newPath := "res://" + filepath.Join(newAssetDir, path[len(prefix)+1:])
-		newPath = strings.ReplaceAll(newPath, "\\", "/")
-		return newPath
+	if strings.Contains(path, prefix) {
+		idx := strings.Index(path, prefix)
+		directDir := path[:idx]
+		directDir = strings.ReplaceAll(directDir, "../", "")
+		if len(directDir) <= 0 {
+			newPath := "res://" + filepath.Join(newAssetDir, path[:idx]+path[idx+len(prefix)+1:])
+			newPath = strings.ReplaceAll(newPath, "\\", "/")
+			return newPath
+		} else {
+			panic("extassetDir must be in the root directory" + rpath)
+		}
 	}
+
 	return ""
 }
