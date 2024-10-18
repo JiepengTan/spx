@@ -1,0 +1,13 @@
+{
+  "debug":true,
+  "backdrops": [
+    {
+      "bitmapResolution": 1,
+      "name": "backdrop1",
+      "path": "1.png"
+    }
+  ],
+  "zorder": [
+    "SmallEnemy"
+  ]
+}
