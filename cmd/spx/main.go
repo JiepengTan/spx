@@ -70,7 +70,7 @@ func main() {
 }
 
 func execCmds() error {
-	impl.CopyEmbed(engineFiles, "template/engine", filepath.Join(impl.TargetDir, "engine"))
+	//impl.CopyEmbed(engineFiles, "template/engine", filepath.Join(impl.TargetDir, "engine"))
 	return impl.ExecCmds(buildDll)
 }
 

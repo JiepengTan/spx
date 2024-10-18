@@ -624,7 +624,6 @@ func (p *Sprite) getFromAnToForAni(anitype aniTypeEnum, from interface{}, to int
 	if anitype == aniTypeFrame {
 		return p.getFromAnToForAniFrames(from, to)
 	}
-
 	return from, to
 
 }
@@ -698,8 +697,8 @@ func (p *Sprite) goAnimateInternal(name string, ani *aniConfig, isBlocking bool)
 	} else {
 		if ani.AniType != aniTypeGlide {
 			// glide animation, the type of value is vector2, not float
-			fromvalf = fromval.(float64)
-			tovalf = toval.(float64)
+			fromvalf, _ = tools.GetFloat(fromval)
+			tovalf, _ = tools.GetFloat(toval)
 		}
 	}
 

@@ -626,13 +626,25 @@ func (p *Game) currentTPS() float64 {
 type clicker interface {
 	threadObj
 	doWhenClick(this threadObj)
+	getProxy() *engine.ProxySprite
 }
 
 func (p *Game) doWhenLeftButtonDown(ev *eventLeftButtonDown) {
-	// TODO query the clicked sprite by engine api
-	//if o, ok := hr.Target.(clicker); ok {
-	//	o.doWhenClick(o)
-	//}
+	point := engine.NewVec2(float64(ev.X), float64(ev.Y))
+	// TOOD(tanjp) avoid new a array every frame
+	newItems := make([]Shape, len(p.items))
+	copy(newItems, p.items)
+	for _, item := range newItems {
+		if o, ok := item.(clicker); ok {
+			proxy := o.getProxy()
+			if proxy != nil {
+				isClicked := engine.SyncSpriteCheckCollisionWithPoint(proxy.GetId(), point, true)
+				if isClicked {
+					o.doWhenClick(o)
+				}
+			}
+		}
+	}
 }
 
 func (p *Game) handleEvent(event event) {
@@ -667,10 +679,25 @@ func (p *Game) eventLoop(me coroutine.Thread) int {
 	}
 }
 
-func (p *Game) initEventLoop() {
-	gco.Create(nil, p.eventLoop)
+const (
+	MOUSE_BUTTON_LEFT   int64 = 1
+	MOUSE_BUTTON_RIGHT  int64 = 2
+	MOUSE_BUTTON_MIDDLE int64 = 3
+)
+
+func (p *Game) logicLoop(me coroutine.Thread) int {
+	for {
+		p.Wait(0.01)
+		if engine.SyncInputGetMouseState(MOUSE_BUTTON_LEFT) {
+			p.fireEvent(&eventLeftButtonDown{X: int(p.gMouseX), Y: int(p.gMouseY)})
+		}
+	}
 }
 
+func (p *Game) initEventLoop() {
+	gco.Create(nil, p.eventLoop)
+	gco.Create(nil, p.logicLoop)
+}
 func init() {
 	gco = coroutine.New()
 	engine.SetCoroutines(gco)

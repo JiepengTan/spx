@@ -151,6 +151,10 @@ type baseObj struct {
 	HasDestroyed  bool
 }
 
+func (p *baseObj) getProxy() *engine.ProxySprite {
+	return p.proxy
+}
+
 func (p *baseObj) initWith(base string, sprite *spriteConfig) {
 	if sprite.CostumeSet != nil {
 		initWithCS(p, base, sprite.CostumeSet)
