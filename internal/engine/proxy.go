@@ -27,7 +27,7 @@ func (pself *ProxySprite) UpdateTexture(path string, renderScale float64) {
 	if path == "" {
 		return
 	}
-	resPath := ToEnginePath(path)
+	resPath := ToAssetPath(path)
 	pself.PicPath = resPath
 	pself.SetTexture(pself.PicPath)
 	pself.SetRenderScale(NewVec2(renderScale, renderScale))
@@ -36,7 +36,7 @@ func (pself *ProxySprite) UpdateTextureAltas(path string, rect2 Rect2, renderSca
 	if path == "" {
 		return
 	}
-	resPath := ToEnginePath(path)
+	resPath := ToAssetPath(path)
 	pself.PicPath = resPath
 	pself.SetTextureAltas(pself.PicPath, rect2)
 	pself.SetRenderScale(NewVec2(renderScale, renderScale))

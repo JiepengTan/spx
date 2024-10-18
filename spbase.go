@@ -124,7 +124,7 @@ func newCostume(base string, c *costumeConfig) *costume {
 }
 
 func getCustomeAssetPath(path string) gdspx.Vec2 {
-	assetPath := engine.ToEnginePath(path)
+	assetPath := engine.ToAssetPath(path)
 	return engine.SyncResGetImageSize(assetPath)
 }
 

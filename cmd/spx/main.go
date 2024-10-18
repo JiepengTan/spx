@@ -96,7 +96,7 @@ func deleteFilesAndDirs(dir string) error {
 	}
 	for _, file := range files {
 		fullPath := filepath.Join(dir, file.Name())
-		if file.Name() == "assets" || strings.HasSuffix(fullPath, ".spx") {
+		if file.Name() == "assets" || file.Name() == "res" || file.Name() == ".config" || strings.HasSuffix(fullPath, ".spx") {
 			continue
 		}
 

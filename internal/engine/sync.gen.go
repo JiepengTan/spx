@@ -447,6 +447,17 @@ func SyncResReadAllText(path string) string {
 	<-done
 	return __ret
 }
+func SyncResHasFile(path string) bool {
+	var __ret bool
+	done := make(chan struct{})
+	job := func() {
+		__ret = ResMgr.HasFile(path)
+		done <- struct{}{}
+	}
+	updateJobQueue <- job
+	<-done
+	return __ret
+}
 
 // ISceneMgr
 func SyncSceneChangeSceneToFile(path string) {

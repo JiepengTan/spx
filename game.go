@@ -182,6 +182,14 @@ func Gopt_Game_Main(game Gamer, sprites ...Spriter) {
 // Gopt_Game_Run runs the game.
 // resource can be a string or fs.Dir object.
 func Gopt_Game_Run(game Gamer, resource interface{}, gameConf ...*Config) {
+	switch resfld := resource.(type) {
+	case string:
+		if resfld != "" {
+			engine.SetAssetDir(resfld)
+		} else {
+			engine.SetAssetDir("assets")
+		}
+	}
 	fs, err := resourceDir(resource)
 	if err != nil {
 		panic(err)

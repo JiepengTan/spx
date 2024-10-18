@@ -6,10 +6,6 @@ import (
 	"sync"
 )
 
-const (
-	assetsDir = "res://assets/"
-)
-
 type TriggerPair struct {
 	Src *ProxySprite
 	Dst *ProxySprite
@@ -26,10 +22,6 @@ type Gamer interface {
 	OnEngineStart()
 	OnEngineUpdate(delta float32)
 	OnEngineDestroy()
-}
-
-func ToEnginePath(path string) string {
-	return assetsDir + path
 }
 
 func GdspxMain(g Gamer) {

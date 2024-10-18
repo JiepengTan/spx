@@ -56,7 +56,7 @@ func (p *soundMgr) stopAll() {
 }
 
 func (p *soundMgr) playSfx(media Sound, wait, loop bool) (err error) {
-	engine.SyncAudioPlaySfx(engine.ToEnginePath(media.Path))
+	engine.SyncAudioPlaySfx(engine.ToAssetPath(media.Path))
 	return
 }
 

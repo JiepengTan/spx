@@ -2,6 +2,7 @@
 /.godot
 /.import
 /.builds
+/extasset
 /engine
 /lib
 /Makefile
