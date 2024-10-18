@@ -46,6 +46,7 @@ func (p *Game) OnEngineUpdate(delta float32) {
 }
 
 func (p *Game) onStartAsync() {
+	initInput()
 	gamer := p.gamer_
 	if me, ok := gamer.(interface{ MainEntry() }); ok {
 		me.MainEntry()
