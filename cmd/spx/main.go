@@ -2,14 +2,19 @@ package main
 
 import (
 	"embed"
+	"encoding/json"
 	"fmt"
 	"godot-ext/gdspx/cmd/gdspx/pkg/impl"
+	"io"
+	"log"
 	"os"
 	"path"
 	"path/filepath"
 	"strings"
 
 	_ "embed"
+
+	cp "github.com/otiai10/copy"
 )
 
 var (
@@ -51,11 +56,11 @@ func main() {
 		impl.StopWebServer()
 		return
 	case "init":
-		impl.PrepareGoEnv()
+		prepareGoEnv()
 	}
 
 	if !impl.IsFileExist(path.Join(impl.TargetDir, "go.mod")) {
-		impl.PrepareGoEnv()
+		prepareGoEnv()
 	}
 
 	if err := execCmds(); err != nil {
@@ -83,6 +88,37 @@ func buildDll(project, outputPath string) {
 	os.Rename(path.Join(project, "gop_autogen.go"), path.Join(project, "main.go"))
 	os.Remove(path.Join(project, "gdspx-demo.exe"))
 	impl.BuildDll(project, outputPath)
+}
+
+type projctConfig struct {
+	ExtAsset string `json:"extasset"`
+}
+
+const (
+	extassetDir = "extasset"
+)
+
+func prepareGoEnv() {
+	impl.PrepareGoEnv()
+	configPath := path.Join(impl.TargetDir, ".config")
+	if impl.IsFileExist(configPath) && !impl.IsFileExist(path.Join(impl.TargetDir, extassetDir)) {
+		file, err := os.Open(configPath)
+		defer file.Close()
+		ctx, err := io.ReadAll(file)
+		if err != nil {
+			log.Fatalf("read config error:" + err.Error())
+		}
+		var config projctConfig
+		err = json.Unmarshal(ctx, &config)
+		if err != nil {
+			log.Fatalf("read config error:" + string(ctx) + err.Error())
+		}
+		println("src dir ", path.Join(impl.TargetDir, config.ExtAsset))
+		err = cp.Copy(path.Join(impl.TargetDir, config.ExtAsset), path.Join(impl.TargetDir, extassetDir))
+		if err != nil {
+			log.Fatalf("Error copying directory: %v", err)
+		}
+	}
 }
 
 func clearProject(dir string) {

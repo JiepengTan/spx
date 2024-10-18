@@ -16,7 +16,7 @@ const (
 	engineExtAssetPath = "extasset"
 )
 
-type engineConfig struct {
+type projectConfig struct {
 	ExtAsset string `json:"extasset"`
 }
 
@@ -24,7 +24,7 @@ func SetAssetDir(dir string) {
 	// load config
 	if SyncResHasFile(configPath) {
 		configJson := SyncResReadAllText(configPath)
-		var config engineConfig
+		var config projectConfig
 		json.Unmarshal([]byte(configJson), &config)
 		extassetDir = config.ExtAsset
 	}
