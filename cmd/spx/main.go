@@ -49,6 +49,10 @@ func main() {
 	case "help", "version":
 		showHelpInfo()
 		return
+	case "clearbuild":
+		impl.StopWebServer()
+		os.RemoveAll(path.Join(impl.TargetDir, ".builds"))
+		return
 	case "clear":
 		impl.StopWebServer()
 		if impl.IsFileExist(path.Join(impl.TargetDir, ".godot")) {
@@ -74,7 +78,14 @@ func main() {
 
 func execCmds() error {
 	impl.CopyEmbed(engineFiles, "template/engine", filepath.Join(impl.TargetDir, "engine"))
-	return impl.ExecCmds(buildDll)
+	err := impl.ExecCmds(buildDll)
+	switch os.Args[1] {
+	case "exportspx":
+		err = impl.ExportWebEditor(impl.GdspxPath, impl.ProjectPath, impl.LibPath)
+		impl.PackProject(impl.ProjectPath, path.Join(impl.ProjectPath, ".builds/web", "game.zip"))
+		return err
+	}
+	return err
 }
 
 func showHelpInfo() {
