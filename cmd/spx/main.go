@@ -10,6 +10,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	_ "embed"
@@ -29,6 +30,9 @@ var (
 
 	//go:embed template/gitignore.txt
 	gitignore string
+
+	//go:embed template/index.html
+	index_html string
 
 	//go:embed template/main.go
 	main_go string
@@ -78,13 +82,23 @@ func main() {
 
 func execCmds() error {
 	impl.CopyEmbed(engineFiles, "template/engine", filepath.Join(impl.TargetDir, "engine"))
-	err := impl.ExecCmds(buildDll)
+	webDir := path.Join(impl.ProjectPath, ".builds/web")
+	var err error = nil
 	switch os.Args[1] {
 	case "exportspx":
 		err = impl.ExportWebEditor(impl.GdspxPath, impl.ProjectPath, impl.LibPath)
-		impl.PackProject(impl.ProjectPath, path.Join(impl.ProjectPath, ".builds/web", "game.zip"))
+		impl.PackProject(impl.TargetDir, path.Join(webDir, "game.zip"))
+		impl.SetupFile(true, path.Join(webDir, "index.html"), index_html)
 		return err
+	case "runweb":
+		if len(os.Args) > 3 {
+			port := os.Args[3]
+			impl.ServerPort, _ = strconv.Atoi(port)
+			newText := strings.Replace(index_html, "127.0.0.1:8005", "127.0.0.1:"+port, -1)
+			os.WriteFile(path.Join(webDir, "index.html"), []byte(newText), 0)
+		}
 	}
+	err = impl.ExecCmds(buildDll)
 	return err
 }
 
