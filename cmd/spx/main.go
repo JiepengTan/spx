@@ -129,7 +129,7 @@ func packProject(baseFolder string, dstZipPath string) {
 	if impl.IsFileExist(dstZipPath) {
 		os.Remove(dstZipPath)
 	}
-	skipDirs := []string{"lib", ".godot", ".builds"}
+	skipDirs := []string{"lib", ".godot", ".builds", "gdspx.gdextension"}
 	file, err := os.Create(dstZipPath)
 	if err != nil {
 		panic(err)

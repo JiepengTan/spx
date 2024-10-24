@@ -439,7 +439,7 @@ function clearPersistence() { // eslint-disable-line no-unused-vars
 		return;
 	}
 	Promise.all([
-		deleteDB('/home/web_user'),
+		deleteDB('/home/web_user/Preload'),
 	]).then(function (results) {
 		alert('Done.');
 	}).catch(function (err) {
@@ -502,7 +502,7 @@ function closeEditor() { // eslint-disable-line no-unused-vars
 		editor.requestQuit();
 	}
 }
-
+var editorExitCount = 0
 function startEditor(zip) {
 	const INDETERMINATE_STATUS_STEP_MS = 100;
 	const persistentPaths = ['/home/web_user'];
@@ -641,10 +641,11 @@ function startEditor(zip) {
 				console.error('A game is already running. Close it first');
 				return;
 			}
+			gameCanvas = replaceCanvas(gameCanvas);
 			setGameTabEnabled(true);
 			game = new Engine(gameConfig);
 			showTab('game');
-			game.init().then(function () {
+			game.init('godot.editor').then(function () {
 				requestAnimationFrame(function () {
 					game.start({ 'args': args, 'canvas': gameCanvas }).then(function () {
 						gameCanvas.focus();
@@ -668,7 +669,7 @@ function startEditor(zip) {
 			};
 		}
 	}
-
+	
 	const editorConfig = {
 		'unloadAfterInit': false,
 		'onProgress': function progressFunction(current, total) {
@@ -688,9 +689,22 @@ function startEditor(zip) {
 		'canvas': editorCanvas,
 		'canvasResizePolicy': 0,
 		'onExit': function () {
+			editorExitCount++
 			editorCanvas = replaceCanvas(editorCanvas);
 			if (OnEditorExit) {
 				OnEditorExit();
+			}
+			if(editorExitCount == 2){
+				console.log("Start game")
+				Execute([
+					"--path",
+					"/home/web_user/Preload",
+					"--editor-pid",
+					"0",
+					"--position",
+					"-115,126",
+					"res://main.tscn"
+				])
 			}
 		},
 		'onExecute': Execute,
