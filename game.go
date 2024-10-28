@@ -182,6 +182,7 @@ func (p *Game) initGame(sprites []Spriter) *Game {
 
 // Gopt_Game_Main is required by Go+ compiler as the entry of a .gmx project.
 func Gopt_Game_Main(game Gamer, sprites ...Spriter) {
+	println("ispx start Gopt_Game_Main")
 	g := game.initGame(sprites)
 	if me, ok := game.(interface{ MainEntry() }); ok {
 		me.MainEntry()
