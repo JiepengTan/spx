@@ -8,10 +8,9 @@ import (
 	"io"
 	"log"
 	"os"
-	"os/exec"
 	"path"
 	"path/filepath"
-	"runtime"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -102,20 +101,9 @@ func execCmds() error {
 }
 func exportInterpreterMode(webDir string) error {
 	err := impl.ExportWebEditor(impl.GdspxPath, impl.ProjectPath, impl.LibPath)
-	packProject(impl.TargetDir, path.Join(webDir, "game2.zip"))
+	packProject(impl.TargetDir, path.Join(webDir, "game.zip"))
 	impl.SetupFile(true, path.Join(webDir, "index.html"), index_html)
 	impl.BuildWasm(impl.TargetDir)
-	// convert to the correct zip format
-	if runtime.GOOS == "windows" {
-		os.Chdir(webDir)
-		exec.Command("WinRAR.exe", "x", "./game2.zip", "./").Run()
-		exec.Command("WinRAR.exe", "a", "-afzip", "-ep1", "./game.zip", "./game").Run()
-		os.Remove("./game2.zip")
-		os.RemoveAll("./game")
-		os.Chdir("../..")
-	} else {
-		panic("TODO: Compress the project into the correct zip format. " + runtime.GOOS)
-	}
 	return err
 }
 
@@ -129,7 +117,13 @@ func runInterpreterMode(webDir string) error {
 	return impl.RunWebServer(impl.GdspxPath, impl.ProjectPath, impl.LibPath, impl.ServerPort)
 }
 
+type DirInfos struct {
+	path string
+	info os.FileInfo
+}
+
 func packProject(baseFolder string, dstZipPath string) {
+	paths := []DirInfos{}
 	if impl.IsFileExist(dstZipPath) {
 		os.Remove(dstZipPath)
 	}
@@ -147,39 +141,56 @@ func packProject(baseFolder string, dstZipPath string) {
 		if err != nil {
 			return err
 		}
-
 		for _, skipDir := range skipDirs {
 			if info.IsDir() && info.Name() == skipDir {
 				return filepath.SkipDir
 			}
 		}
+		paths = append(paths, DirInfos{path, info})
+		return nil
+	})
 
+	sort.Slice(paths, func(i, j int) bool {
+		return paths[i].path < paths[j].path
+	})
+
+	for _, dirInfo := range paths {
+		path := dirInfo.path
+		info := dirInfo.info
+
+		header, err := zip.FileInfoHeader(info)
+		if err != nil {
+			panic(err)
+		}
+
+		header.Name = strings.TrimPrefix(path, baseFolder)
+		header.Name = strings.ReplaceAll(header.Name, "\\", "/")
 		if info.IsDir() {
-			return nil
+			header.Name += "/"
+			_, err := zipWriter.CreateHeader(header)
+			if err != nil {
+				panic(err)
+			}
+			continue
 		}
 
 		fileToZip, err := os.Open(path)
 		if err != nil {
-			return err
+			panic(err)
 		}
 		defer fileToZip.Close()
 
-		header, err := zip.FileInfoHeader(info)
-		if err != nil {
-			return err
-		}
-
-		header.Name = "game/" + strings.TrimPrefix(path, baseFolder)
-		header.Name = strings.ReplaceAll(header.Name, "\\", "/")
-		header.Method = zip.Store
 		writer, err := zipWriter.CreateHeader(header)
 		if err != nil {
-			return err
+			panic(err)
 		}
 		_, err = io.Copy(writer, fileToZip)
-		return err
-	})
+		if err != nil {
+			panic(err)
+		}
+	}
 }
+
 func showHelpInfo() {
 	impl.ShowHelpInfo("spx")
 }
