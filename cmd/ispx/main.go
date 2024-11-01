@@ -12,13 +12,13 @@ import (
 
 	_ "github.com/realdream-ai/gdspx/pkg/gdspx"
 
-	_ "github.com/goplus/builder/ispx/pkg/github.com/goplus/spx"
-	"github.com/goplus/builder/ispx/zipfs"
 	"github.com/goplus/igop"
 	"github.com/goplus/igop/gopbuild"
 	_ "github.com/goplus/igop/pkg/fmt"
 	_ "github.com/goplus/igop/pkg/math"
 	_ "github.com/goplus/reflectx/icall/icall8192"
+	_ "github.com/goplus/spx/cmd/ispx/pkg/github.com/goplus/spx"
+	"github.com/goplus/spx/cmd/ispx/zipfs"
 	spxfs "github.com/goplus/spx/fs"
 )
 

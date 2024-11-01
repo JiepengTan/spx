@@ -23,7 +23,8 @@ func init() {
 		AliasTypes: map[string]reflect.Type{},
 		Vars:       map[string]reflect.Value{},
 		Funcs: map[string]reflect.Value{
-			"LinkEngine": reflect.ValueOf(q.LinkEngine),
+			"IsWebIntepreterMode": reflect.ValueOf(q.IsWebIntepreterMode),
+			"LinkEngine":          reflect.ValueOf(q.LinkEngine),
 		},
 		TypedConsts:   map[string]igop.TypedConst{},
 		UntypedConsts: map[string]igop.UntypedConst{},
