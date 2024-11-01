@@ -37,12 +37,10 @@ func loadData(this js.Value, args []js.Value) interface{} {
 }
 
 func goWasmInit(this js.Value, args []js.Value) interface{} {
-	println("ispx goWasmInit ")
 	return js.ValueOf(nil)
 }
 
 func gdspxOnEngineStart(this js.Value, args []js.Value) interface{} {
-	println("ispx gdspxOnEngineStart")
 	return nil
 }
 func gdspxOnEngineUpdate(this js.Value, args []js.Value) interface{} {
@@ -52,7 +50,6 @@ func gdspxOnEngineFixedUpdate(this js.Value, args []js.Value) interface{} {
 	return nil
 }
 func gdspxOnEngineDestroy(this js.Value, args []js.Value) interface{} {
-	println("ispx gdspxOnEngineDestroy")
 	return nil
 }
 
@@ -109,9 +106,7 @@ func Gopt_Game_Gopx_GetWidget[T any](sg ShapeGetter, name string) *T {
 		log.Fatalln("Failed to build Go+ source:", err)
 	}
 
-	println("run Go+ sourc")
 	code, err := ctx.RunFile("main.go", source, nil)
-	println("run Go+ source end")
 	if err != nil {
 		log.Fatalln("Failed to run Go+ source:", err, " Code:", code)
 	}
