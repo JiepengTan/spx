@@ -5,6 +5,7 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	"go/build"
 	"io"
 	"log"
 	"os"
@@ -39,8 +40,19 @@ var (
 
 	//go:embed template/main.go
 	main_go string
+
+	//go:embed template/game.js
+	game_js string
 )
 
+func stringInSlice(a string, list []string) bool {
+	for _, b := range list {
+		if b == a {
+			return true
+		}
+	}
+	return false
+}
 func main() {
 	impl.ReplaceTemplate(go_mode_txt, main_go, gitignore)
 	impl.CheckPresetEnvironment()
@@ -56,6 +68,14 @@ func main() {
 		port := os.Args[3]
 		impl.ServerPort, _ = strconv.Atoi(port)
 	}
+	if !stringInSlice(os.Args[1], []string{"help", "version", "init", "run", "editor", "build",
+		"export", "runweb", "buildweb", "exportweb", "clear",
+		"exporti", "runi", "clearbuild", "stopweb", "installispx"}) {
+		println("invalid cmd, please refer to help")
+		showHelpInfo()
+		return
+	}
+
 	switch os.Args[1] {
 	case "help", "version":
 		showHelpInfo()
@@ -63,6 +83,9 @@ func main() {
 	case "clearbuild":
 		impl.StopWebServer()
 		os.RemoveAll(path.Join(impl.TargetDir, ".builds"))
+		return
+	case "installispx":
+		installISpx()
 		return
 	case "clear":
 		impl.StopWebServer()
@@ -103,8 +126,28 @@ func exportInterpreterMode(webDir string) error {
 	err := impl.ExportWebEditor(impl.GdspxPath, impl.ProjectPath, impl.LibPath)
 	packProject(impl.TargetDir, path.Join(webDir, "game.zip"))
 	impl.SetupFile(true, path.Join(webDir, "index.html"), index_html)
-	impl.BuildWasm(impl.TargetDir)
+	impl.SetupFile(true, path.Join(webDir, "game.js"), game_js)
+	impl.CopyFile(getISpxPath(), path.Join(webDir, "gdspx.wasm"))
 	return err
+}
+
+func getISpxPath() string {
+	gopath := os.Getenv("GOPATH")
+	if gopath == "" {
+		gopath = build.Default.GOPATH
+	}
+	targetPath := path.Join(gopath, "bin")
+	filePath := path.Join(targetPath, "ispx2.wasm")
+	return filePath
+}
+
+func installISpx() {
+	filePath := getISpxPath()
+	rawdir, _ := os.Getwd()
+	os.Chdir("../ispx")
+	envVars := []string{"GOOS=js", "GOARCH=wasm"}
+	impl.RunGolang(envVars, "build", "-o", filePath)
+	os.Chdir(rawdir)
 }
 
 func runInterpreterMode(webDir string) error {
