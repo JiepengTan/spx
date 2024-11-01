@@ -55,12 +55,17 @@
 				showTab("game")
 			}
 		}
-		window.addEventListener('load', () => {
+		window.addEventListener('load',async () => {
+			projectZip = '/game.zip';
+			const zipResp = fetch(projectZip);
+			zipData = await (await zipResp).arrayBuffer();
+			console.log("Load data succ", zipData);
 			const config = {
 				'projectName': "Game",
 				'onProgress': onProgress,
 				"gameCanvas": document.getElementById('game-canvas'),
-			};
+				"zipData":zipData
+			}; 
 			const gameApp = new GameApp(config);
 			gameApp.Start();
 		});

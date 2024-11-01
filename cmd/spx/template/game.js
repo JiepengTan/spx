@@ -3,11 +3,10 @@ class GameApp {
         this.appConfig = config || null;
         this.editor = null;
         this.game = null;
-        this.projectZip = '/game.zip';
         this.persistentPath = '/home/web_user';
         this.tempZipPath = '/tmp/preload.zip';
         this.projectInstallName = config?.projectName || "Game";
-        this.zipData = null;
+        this.zipData = config.zipData;
         this.persistentPaths = [this.persistentPath];
         this.editorCanvas = config.editorCanvas;
         this.gameCanvas = config.gameCanvas;
@@ -133,9 +132,6 @@ class GameApp {
                 this.runGame();
             } else {
                 this.clearPersistence(this.tempZipPath);
-                const zipResp = fetch(this.projectZip);
-                this.zipData = await (await zipResp).arrayBuffer();
-                console.log("Load data succ", this.zipData);
                 this.onProgress(0.1);
                 this.editor = new Engine(this.editorConfig);
                 this.exitFunc = this.importProject.bind(this);
@@ -196,11 +192,6 @@ class GameApp {
             this.onProgress(0.7);
             this.game.start({ 'args': args, 'canvas': this.gameCanvas }).then(async () => {
                 this.gameCanvas.focus();
-                if (this.zipData == null) {
-                    const zipResp = fetch(this.projectZip);
-                    this.zipData = await (await zipResp).arrayBuffer();
-                    console.log("load game data ", this.zipData);
-                }
                 this.onProgress(0.9);
                 window.goLoadData(new Uint8Array(this.zipData));
                 this.onProgress(1.0);
