@@ -1,3 +1,4 @@
+
 async function GetZipDiffInfos(srcZip, dstZip) {
     function areBuffersEqual(buffer1, buffer2) {
         if (buffer1.byteLength !== buffer2.byteLength) return false;
@@ -73,6 +74,7 @@ async function GetZipDiffInfos(srcZip, dstZip) {
     return { addInfos, deleteInfos, updateInfos }
 }
 
+
 class GameApp {
     constructor(config) {
         this.appConfig = config || null;
@@ -83,9 +85,10 @@ class GameApp {
         this.projectInstallName = config?.projectName || "Game";
         this.projectData = config.projectData;
         this.persistentPaths = [this.persistentPath];
-        this.editorCanvas = config.editorCanvas;
         this.gameCanvas = config.gameCanvas;
+        this.editorCanvas = config.gameCanvas;// use the same canvas
         this.exitFunc = null;
+        this.isEditor = config.isEditor;
         this.editorConfig = {
             'unloadAfterInit': false,
             'canvas': this.editorCanvas,
@@ -105,7 +108,7 @@ class GameApp {
     Start() {
         this.installProject();
     }
-    
+
     async mergeZips(zipFile1, zipFile2) {
         const zip1 = new JSZip();
         const zip2 = new JSZip();
@@ -128,7 +131,7 @@ class GameApp {
         return newZip.generateAsync({ type: 'arraybuffer' });
     }
 
-    onProgress(value){
+    onProgress(value) {
         if (this.appConfig.onProgress != null) {
             this.appConfig.onProgress(value);
         }
@@ -202,21 +205,23 @@ class GameApp {
     async installProject() {
         try {
             console.log("merge zip files");
-			const engineDataResp = fetch("engineres.zip");
-			let engineData = await (await engineDataResp).arrayBuffer();
+            const engineDataResp = fetch("engineres.zip");
+            let engineData = await (await engineDataResp).arrayBuffer();
             this.projectData = await this.mergeZips(this.projectData, engineData);
 
             let dbExists = await this.checkDBExist(this.persistentPath, this.getInstallPath());
-            console.log(this.getInstallPath(), " DBExist result= ", dbExists);
-            if (dbExists) {
+            console.log(this.getInstallPath(), " DBExist result= ", dbExists,"this.isEditor", this.isEditor);
+            if (dbExists && !this.isEditor) {
                 this.runGame();
             } else {
-                this.clearPersistence(this.tempZipPath);
                 this.onProgress(0.1);
                 this.editor = new Engine(this.editorConfig);
                 this.exitFunc = this.importProject.bind(this);
                 this.editor.init('godot.editor').then(() => {
-                    this.editor.copyToFS(this.tempZipPath, this.projectData);
+                    this.clearPersistence(this.tempZipPath);
+                    if (!dbExists) {
+                        this.editor.copyToFS(this.tempZipPath, this.projectData);
+                    }
                     const args = ['--project-manager', '--single-window', "--install_project_name", this.projectInstallName];
                     this.editor.start({ 'args': args, 'persistentDrops': true });
                 });
@@ -227,19 +232,31 @@ class GameApp {
     }
 
     importProject() {
-        const args = [
+        let args = [
             "--path",
             this.getInstallPath(),
             "--single-window",
-            "--headless",
             "--editor",
-            "--quit-after",
-            "30"
         ];
+
+        this.exitFunc = null;
+        if (!this.isEditor) {
+            args.push("--headless");
+            args.push("--quit-after");
+            args.push("30");
+            this.exitFunc = this.runGame.bind(this);
+        }
+
         console.log("importProject ", args);
-        this.exitFunc = this.runGame.bind(this);
         this.editor.init().then(() => {
-            this.editor.start({ 'args': args, 'persistentDrops': false, 'canvas': this.editorCanvas });
+            this.editor.start({ 'args': args, 'persistentDrops': false, 'canvas': this.editorCanvas }).then(async () => {
+                if (this.isEditor) {
+                    this.editorCanvas.focus();
+                    this.onProgress(0.9);
+                    window.goLoadData(new Uint8Array(this.projectData));
+                    this.onProgress(1.0);
+                }
+            });
         });
     }
 
