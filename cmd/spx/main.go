@@ -48,6 +48,9 @@ var (
 	//go:embed template/game.js
 	game_js string
 
+	//go:embed template/gitignore.top.txt
+	gitignore_top_txt string
+
 	//go:embed template/jszip-3.10.1.min.js
 	jszip_min_js string
 )
@@ -67,6 +70,9 @@ func main() {
 	if len(os.Args) > 2 {
 		impl.TargetDir = os.Args[2]
 	}
+	impl.SetupFile(false, path.Join(impl.TargetDir, ".gitignore"), gitignore_top_txt)
+	impl.TargetDir = path.Join(impl.TargetDir, "project")
+
 	if len(os.Args) <= 1 {
 		showHelpInfo()
 		return
@@ -286,14 +292,16 @@ func showHelpInfo() {
 }
 
 func buildDll(project, outputPath string) {
+	spxProjPath := path.Join(project, "../")
+	os.Remove(path.Join(spxProjPath, "gop_autogen.go"))
 	os.Remove(path.Join(project, "main.go"))
 	rawdir, _ := os.Getwd()
-	os.Chdir(project)
+	os.Chdir(spxProjPath)
 	envVars := []string{""}
-	impl.RunGoplus(envVars, "build")
+	impl.RunGoplus(envVars, "build", "-o", "gdspx-demo.exe")
+	os.Rename(path.Join(spxProjPath, "gop_autogen.go"), path.Join(project, "main.go"))
+	os.Remove(path.Join(spxProjPath, "gdspx-demo.exe"))
 	os.Chdir(rawdir)
-	os.Rename(path.Join(project, "gop_autogen.go"), path.Join(project, "main.go"))
-	os.Remove(path.Join(project, "gdspx-demo.exe"))
 	impl.BuildDll(project, outputPath)
 
 }

@@ -5,7 +5,7 @@ go 1.21.3
 require (
 	github.com/goplus/spx v0.0.0-00010101000000-000000000000
 	github.com/otiai10/copy v1.14.0
-	github.com/realdream-ai/gdspx/cmd/gdspx v0.0.0-20241121072624-873747fd7b3a
+	github.com/realdream-ai/gdspx/cmd/gdspx v0.0.0
 )
 
 require (
@@ -18,3 +18,4 @@ require (
 )
 
 replace github.com/goplus/spx => ../../
+replace github.com/realdream-ai/gdspx/cmd/gdspx => ../../../cmd/gdspx
