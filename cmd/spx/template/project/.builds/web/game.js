@@ -8,6 +8,7 @@ class GameApp {
         this.game = null;
         this.persistentPath = '/home/web_user';
         this.tempZipPath = '/tmp/preload.zip';
+        this.tempGamePath = '/tmp/spx_game';
         this.projectInstallName = config.projectName || "Game";
         this.projectData = config.projectData;
         this.oldData = config.projectData;
@@ -91,29 +92,35 @@ class GameApp {
             console.error("project already loaded!")
         }
         this.isEditor = true
+
+        let url = this.assetURLs["engineres.zip"]
+        let engineData = await (await fetch(url)).arrayBuffer();
+
         try {
             this.onProgress(0.1);
             this.clearPersistence(this.tempZipPath);
-            let isCacheValid = await this.checkAndUpdateCache(this.projectData, true);
+            let isCacheValid = await this.checkAndUpdateCache(engineData, true);
             await this.checkEngineCache()
             this.editor = new Engine(this.editorConfig);
             if (!isCacheValid) {
                 this.exitFunc = () => {
                     this.exitFunc = null
                     this.editor = new Engine(this.editorConfig);
-                    this.runEditor(resolve, reject)
+                    this.runEditor(() => {
+                        this.runGame(resolve)
+                    }, reject)
                 };
                 // install project
                 this.editor.init().then(async () => {
-                    await this.mergeProjectWithEngineRes()
-                    this.writePersistence(this.tempZipPath, this.projectData);
+                    this.writePersistence(this.editor, this.tempZipPath, engineData);
                     const args = ['--project-manager', '--single-window', "--install_project_name", this.projectInstallName];
                     this.editor.start({ 'args': args, 'persistentDrops': true }).then(async () => {
                         this.editorCanvas.focus();
                     })
                 });
             } else {
-                this.runEditor(resolve, reject)
+                this.logVerbose("cache is valid, skip it")
+                this.runGame(resolve)
             }
         } catch (error) {
             console.error("Error checking database existence: ", error);
@@ -227,8 +234,10 @@ class GameApp {
         this.onProgress(0.5);
         this.game = new Engine(this.gameConfig);
         let curGame = this.game
-        curGame.init().then(() => {
+        curGame.init().then(async () => {
             this.onProgress(0.7);
+            await this.unpackGameData(curGame)
+            
             curGame.start({ 'args': args, 'canvas': this.gameCanvas }).then(async () => {
                 this.gameCanvas.focus();
                 await this.waitFsSyncDone(this.gameCanvas)
@@ -237,8 +246,22 @@ class GameApp {
                 this.onProgress(1.0);
                 this.logVerbose("==> game start done")
                 resolve()
+                this.stopGame() // just skip it
             });
         });
+    }
+
+    async unpackGameData(curGame) {
+        const zip1 = new JSZip();
+        const zip1Content = await zip1.loadAsync(this.projectData);
+        let datas = []
+        for (const [filePath, file] of Object.entries(zip1Content.files)) {
+            const content = await file.async('arraybuffer');
+            if (!file.dir) {
+                datas.push({ "path": filePath, "data": content })
+            }
+        }
+        curGame.unpackGameData(this.tempGamePath, datas)
     }
 
 
@@ -288,12 +311,12 @@ class GameApp {
         return `${this.persistentPath}/${this.projectInstallName}`;
     }
 
-    writePersistence(targetPath, value) {
-        if (this.editor == null) {
-            console.error("please init editor first!")
+    writePersistence(engine, targetPath, value) {
+        if (engine == null) {
+            console.error("please init egnine first!")
             return
         }
-        this.editor.copyToFS(targetPath, value);
+        engine.copyToFS(targetPath, value);
     }
     clearPersistence(targetPath) {
         const req = indexedDB.deleteDatabase(targetPath);
