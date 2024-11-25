@@ -110,14 +110,14 @@ func execCmds() error {
 	err = impl.ExecCmds(buildDll)
 	switch os.Args[1] {
 	case "exporti":
-		return exportInterpreterMode(webDir)
+		return exportWeb(webDir)
 	case "runi":
-		return runInterpreterMode(webDir)
+		return runWeb(webDir)
 	}
 	return err
 }
 
-func exportInterpreterMode(webDir string) error {
+func exportWeb(webDir string) error {
 	clearProject()
 	initProject()
 	err := impl.ExportWebEditor(impl.GdspxPath, impl.ProjectPath, impl.LibPath)
@@ -146,7 +146,7 @@ func installISpx() {
 	os.Chdir(rawdir)
 }
 
-func runInterpreterMode(webDir string) error {
+func runWeb(webDir string) error {
 	return impl.RunWebServer(impl.GdspxPath, impl.ProjectPath, impl.LibPath, impl.ServerPort)
 }
 
@@ -156,7 +156,6 @@ type DirInfos struct {
 }
 
 func packProject(baseFolder string, dstZipPath string) {
-	println("Packing project to ", baseFolder, dstZipPath)
 	paths := []DirInfos{}
 	if impl.IsFileExist(dstZipPath) {
 		os.Remove(dstZipPath)
@@ -192,7 +191,6 @@ func packProject(baseFolder string, dstZipPath string) {
 		}
 		parts := strings.Split(rel, string(filepath.Separator))
 		if len(parts) == 1 || (len(parts) == 2 && info.IsDir()) {
-			println(info.Name())
 			// Check if the file or directory is in the skip list
 			if _, ok := skipDirs[info.Name()]; ok {
 				if info.IsDir() {
