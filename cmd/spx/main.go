@@ -122,6 +122,7 @@ func exportWeb(webDir string) error {
 	initProject()
 	err := impl.ExportWebEditor(impl.GdspxPath, impl.ProjectPath, impl.LibPath)
 	packProject(rawProjPath, path.Join(webDir, "game.zip"))
+	packEngineRes(webDir)
 	impl.CopyFile(getISpxPath(), path.Join(webDir, "gdspx.wasm"))
 	saveEngineHash(webDir)
 	return err
@@ -327,4 +328,65 @@ function GetEngineHashes() {
 	if _, err := file.WriteString(js); err != nil {
 		panic(err)
 	}
+}
+
+func packEngineRes(webDir string) {
+	dstDir := path.Join(webDir, "project")
+	impl.CopyEmbed(engineFiles, "template/project", dstDir)
+	println(dstDir)
+
+	directories := []string{"engine"}
+	files := []string{"main.tscn", "project.godot"}
+	err := packDirFiles(path.Join(webDir, "engineres.zip"), dstDir, directories, files)
+	if err != nil {
+		panic(err)
+	}
+	os.RemoveAll(dstDir)
+}
+
+func packDirFiles(zipName string, targetDir string, directories, files []string) error {
+	zipFile, err := os.Create(zipName)
+	if err != nil {
+		return err
+	}
+	defer zipFile.Close()
+
+	zipWriter := zip.NewWriter(zipFile)
+	defer zipWriter.Close()
+	paths := []DirInfos{}
+	for _, dir := range directories {
+		paths = addDirToZip(path.Join(targetDir, dir), paths)
+	}
+
+	for _, file := range files {
+		paths = addFileToZip(path.Join(targetDir, file), paths)
+	}
+
+	packZip(zipWriter, targetDir, paths)
+	return nil
+}
+
+func addDirToZip(dirPath string, paths []DirInfos) []DirInfos {
+	filepath.Walk(dirPath, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		paths = append(paths, DirInfos{path, info})
+		return nil
+	})
+	return paths
+}
+
+func addFileToZip(path string, paths []DirInfos) []DirInfos {
+	file, err := os.Open(path)
+	if err != nil {
+		panic(err)
+	}
+	defer file.Close()
+	info, err := file.Stat()
+	if err != nil {
+		panic(err)
+	}
+	paths = append(paths, DirInfos{path, info})
+	return paths
 }
