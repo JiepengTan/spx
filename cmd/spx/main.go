@@ -149,6 +149,7 @@ func installISpx() {
 }
 
 func runWeb(webDir string) error {
+	println("impl.ProjectPath ", impl.ProjectPath)
 	return impl.RunWebServer(impl.GdspxPath, impl.ProjectPath, impl.LibPath, impl.ServerPort)
 }
 

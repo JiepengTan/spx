@@ -8,7 +8,7 @@ class GameApp {
         this.game = null;
         this.persistentPath = '/home/web_user';
         this.tempZipPath = '/tmp/preload.zip';
-        this.tempGamePath = '/tmp/spx_game';
+        this.tempGamePath = '/home/spx_game_cache';
         this.projectInstallName = config.projectName || "Game";
         this.projectData = config.projectData;
         this.oldData = config.projectData;
@@ -106,9 +106,7 @@ class GameApp {
                 this.exitFunc = () => {
                     this.exitFunc = null
                     this.editor = new Engine(this.editorConfig);
-                    this.runEditor(() => {
-                        this.runGame(resolve)
-                    }, reject)
+                    this.runEditor(resolve, reject)
                 };
                 // install project
                 this.editor.init().then(async () => {
@@ -120,7 +118,7 @@ class GameApp {
                 });
             } else {
                 this.logVerbose("cache is valid, skip it")
-                this.runGame(resolve)
+                resolve()
             }
         } catch (error) {
             console.error("Error checking database existence: ", error);
@@ -128,39 +126,8 @@ class GameApp {
     }
 
     async updateProject(resolve, reject, newData, addInfos, deleteInfos, updateInfos) {
-        if (addInfos == null) {
-            addInfos = []
-        }
-        if (deleteInfos == null) {
-            deleteInfos = []
-        }
-        if (updateInfos == null) {
-            updateInfos = []
-        }
-        this.oldData = newData
-        let mergedArray = addInfos.concat(updateInfos);
-        const zip = new JSZip();
-        const zipContent = await zip.loadAsync(newData);
-        let datas = []
-        for (let path of mergedArray) {
-            const dstFile = zipContent.files[path];
-            let data = await dstFile.async('arraybuffer');
-            if (!dstFile.dir) {
-                datas.push({ "path": path, "data": data })
-            }
-        }
-        deleteInfos = deleteInfos.map(info => `res://${info}`);
-        const evt = new CustomEvent('spx_update_project', {
-            detail: {
-                "resolve": async () => {
-                    await this.checkAndUpdateCache(newData)
-                    resolve()
-                },
-                "dirtyInfos": datas,
-                "deleteInfos": deleteInfos,
-            }
-        });
-        this.editorCanvas.dispatchEvent(evt);
+        this.projectData = newData
+        resolve()
     }
 
     async stopProject(resolve, reject) {
@@ -246,7 +213,6 @@ class GameApp {
                 this.onProgress(1.0);
                 this.logVerbose("==> game start done")
                 resolve()
-                this.stopGame() // just skip it
             });
         });
     }
