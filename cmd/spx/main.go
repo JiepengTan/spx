@@ -121,6 +121,7 @@ func exportWeb(webDir string) error {
 	clearProject()
 	initProject()
 	err := impl.ExportWebEditor(impl.GdspxPath, impl.ProjectPath, impl.LibPath)
+	impl.CopyEmbed(engineFiles, "template/project/.builds/web", webDir)
 	packProject(rawProjPath, path.Join(webDir, "game.zip"))
 	packEngineRes(webDir)
 	impl.CopyFile(getISpxPath(), path.Join(webDir, "gdspx.wasm"))
