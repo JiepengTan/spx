@@ -25,6 +25,8 @@ var (
 
 	//go:embed template/.gitignore.txt
 	gitignore_txt string
+
+	rawProjPath string
 )
 
 func stringInSlice(a string, list []string) bool {
@@ -41,11 +43,10 @@ func main() {
 	if len(os.Args) > 2 {
 		impl.TargetDir = os.Args[2]
 	}
-	impl.TargetDir = path.Join(impl.TargetDir, "project")
+	rawProjPath, _ = filepath.Abs(impl.TargetDir)
+	impl.TargetDir, _ = filepath.Abs(path.Join(impl.TargetDir, "project"))
 
-	if !impl.IsFileExist(impl.TargetDir) {
-		initProject(impl.TargetDir)
-	}
+	initProject()
 
 	if len(os.Args) <= 1 {
 		showHelpInfo()
@@ -76,7 +77,7 @@ func main() {
 		return
 	case "clear":
 		impl.StopWebServer()
-		clearProject(impl.TargetDir)
+		clearProject()
 		return
 	case "stopweb":
 		impl.StopWebServer()
@@ -89,10 +90,13 @@ func main() {
 	}
 }
 
-func initProject(dir string) {
-	targetDir := dir
-	if !impl.IsFileExist(targetDir) {
-		impl.CopyEmbed(engineFiles, "template/project", targetDir)
+func initProject() {
+	if impl.IsFileExist(impl.TargetDir) {
+		return
+	}
+	dir := impl.TargetDir
+	if !impl.IsFileExist(dir) {
+		impl.CopyEmbed(engineFiles, "template/project", dir)
 	}
 	impl.SetupFile(false, path.Join(dir, "../.gitignore"), gitignore_txt)
 	os.Rename(path.Join(dir, "../.gitignore.txt"), path.Join(dir, "../.gitignore"))
@@ -101,7 +105,7 @@ func initProject(dir string) {
 }
 
 func execCmds() error {
-	webDir := path.Join(impl.ProjectPath, ".builds/web")
+	webDir, _ := filepath.Abs(path.Join(impl.TargetDir, ".builds/web"))
 	var err error = nil
 	err = impl.ExecCmds(buildDll)
 	switch os.Args[1] {
@@ -114,9 +118,10 @@ func execCmds() error {
 }
 
 func exportInterpreterMode(webDir string) error {
+	clearProject()
+	initProject()
 	err := impl.ExportWebEditor(impl.GdspxPath, impl.ProjectPath, impl.LibPath)
-	packProject(impl.TargetDir, path.Join(webDir, "game.zip"))
-	packEngineRes(webDir)
+	packProject(rawProjPath, path.Join(webDir, "game.zip"))
 	impl.CopyFile(getISpxPath(), path.Join(webDir, "gdspx.wasm"))
 	saveEngineHash(webDir)
 	return err
@@ -151,14 +156,13 @@ type DirInfos struct {
 }
 
 func packProject(baseFolder string, dstZipPath string) {
+	println("Packing project to ", baseFolder, dstZipPath)
 	paths := []DirInfos{}
 	if impl.IsFileExist(dstZipPath) {
 		os.Remove(dstZipPath)
 	}
 	skipDirs := map[string]struct{}{
-		".git": {}, "lib": {}, ".godot": {}, ".builds": {},
-		"engine": {}, "main.tscn": {}, "project.godot": {},
-		"gdspx.gdextension": {}, "go.mod": {}, "go.sum": {}, "gop.mod": {}, "main.go": {}, "export_presets.cfg": {},
+		".git": {}, "project": {},
 	}
 
 	file, err := os.Create(dstZipPath)
@@ -188,6 +192,7 @@ func packProject(baseFolder string, dstZipPath string) {
 		}
 		parts := strings.Split(rel, string(filepath.Separator))
 		if len(parts) == 1 || (len(parts) == 2 && info.IsDir()) {
+			println(info.Name())
 			// Check if the file or directory is in the skip list
 			if _, ok := skipDirs[info.Name()]; ok {
 				if info.IsDir() {
@@ -202,6 +207,7 @@ func packProject(baseFolder string, dstZipPath string) {
 	if err != nil {
 		panic(err)
 	}
+
 	packZip(zipWriter, baseFolder, paths)
 }
 
@@ -272,20 +278,8 @@ func buildDll(project, outputPath string) {
 
 }
 
-type projctConfig struct {
-	ExtAsset string `json:"extasset"`
-}
-
-const (
-	extassetDir = "extasset"
-)
-
-func prepareGoEnv() {
-	clearProject(impl.TargetDir)
-	initProject(impl.TargetDir)
-}
-
-func clearProject(dir string) {
+func clearProject() {
+	dir := impl.TargetDir
 	os.RemoveAll(dir)
 	os.Remove(path.Join(dir, "../.gitignore"))
 }
@@ -335,82 +329,4 @@ function GetEngineHashes() {
 	if _, err := file.WriteString(js); err != nil {
 		panic(err)
 	}
-}
-
-func packEngineRes(webDir string) {
-	directories := []string{"engine"}
-	files := []string{"main.tscn", "project.godot"}
-	for _, dir := range directories {
-		impl.CopyEmbed(engineFiles, "template/"+dir, path.Join(webDir, dir))
-	}
-	for _, file := range files {
-		absPath, _ := filepath.Abs(path.Join(impl.TargetDir, file))
-		impl.CopyFile(absPath, path.Join(webDir, file))
-	}
-	err := compressAndDelete(path.Join(webDir, "engineres.zip"), webDir, directories, files)
-	if err != nil {
-		panic(err)
-	}
-}
-
-func compressAndDelete(zipName string, targetDir string, directories, files []string) error {
-	zipFile, err := os.Create(zipName)
-	if err != nil {
-		return err
-	}
-	defer zipFile.Close()
-
-	zipWriter := zip.NewWriter(zipFile)
-	defer zipWriter.Close()
-
-	paths := []DirInfos{}
-	for _, dir := range directories {
-		paths = addDirToZip(path.Join(targetDir, dir), paths)
-	}
-
-	for _, file := range files {
-		paths = addFileToZip(path.Join(targetDir, file), paths)
-	}
-
-	packZip(zipWriter, targetDir, paths)
-	for _, dir := range directories {
-		err := os.RemoveAll(dir)
-		if err != nil {
-			return err
-		}
-	}
-
-	for _, file := range files {
-		err := os.Remove(file)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func addDirToZip(dirPath string, paths []DirInfos) []DirInfos {
-	filepath.Walk(dirPath, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-		paths = append(paths, DirInfos{path, info})
-		return nil
-	})
-	return paths
-}
-
-func addFileToZip(path string, paths []DirInfos) []DirInfos {
-	file, err := os.Open(path)
-	if err != nil {
-		panic(err)
-	}
-	defer file.Close()
-	info, err := file.Stat()
-	if err != nil {
-		panic(err)
-	}
-	paths = append(paths, DirInfos{path, info})
-	return paths
 }
