@@ -8,6 +8,7 @@ import (
 	"go/build"
 	"io"
 	"os"
+	"os/exec"
 	"path"
 	"path/filepath"
 	"sort"
@@ -90,6 +91,33 @@ func main() {
 	}
 }
 
+func execCmds() error {
+	gdspxPath, project, libPath, err := impl.SetupEnv()
+	if err != nil {
+		return err
+	}
+	switch os.Args[1] {
+	case "init":
+		return nil
+	case "run", "editor", "export", "build":
+		buildDll(project, libPath)
+	}
+	webDir, _ := filepath.Abs(path.Join(impl.TargetDir, ".builds/web"))
+	switch os.Args[1] {
+	case "editor":
+		return impl.RunGdspx(gdspxPath, project, "-e")
+	case "export":
+		return impl.Export(gdspxPath, project)
+	case "run":
+		return impl.RunGdspx(gdspxPath, project, "")
+	case "exportweb":
+		return exportWeb(webDir)
+	case "runweb":
+		return runWeb(webDir)
+	}
+	return nil
+}
+
 func initProject() {
 	if impl.IsFileExist(impl.TargetDir) {
 		return
@@ -104,19 +132,6 @@ func initProject() {
 	os.Rename(path.Join(dir, "go.mod.txt"), path.Join(dir, "go.mod"))
 }
 
-func execCmds() error {
-	webDir, _ := filepath.Abs(path.Join(impl.TargetDir, ".builds/web"))
-	var err error = nil
-	err = impl.ExecCmds(buildDll)
-	switch os.Args[1] {
-	case "exporti":
-		return exportWeb(webDir)
-	case "runi":
-		return runWeb(webDir)
-	}
-	return err
-}
-
 func exportWeb(webDir string) error {
 	clearProject()
 	initProject()
@@ -127,6 +142,26 @@ func exportWeb(webDir string) error {
 	impl.CopyFile(getISpxPath(), path.Join(webDir, "gdspx.wasm"))
 	saveEngineHash(webDir)
 	return err
+}
+
+func runWeb(webDir string) error {
+	port := impl.ServerPort
+	projPath := impl.ProjectPath
+	if !impl.IsFileExist(filepath.Join(projPath, ".builds", "web", "engineres.zip")) {
+		exportWeb(webDir)
+	}
+	impl.StopWebServer()
+	scriptPath := filepath.Join(projPath, ".godot", "gdspx_web_server.py")
+	scriptPath = strings.ReplaceAll(scriptPath, "\\", "/")
+	executeDir := filepath.Join(projPath, ".builds/web")
+	executeDir = strings.ReplaceAll(executeDir, "\\", "/")
+	println("web server running at http://127.0.0.1:" + fmt.Sprint(port))
+	cmd := exec.Command("python", scriptPath, "-r", executeDir, "-p", fmt.Sprint(port))
+	err := cmd.Start()
+	if err != nil {
+		return fmt.Errorf("error starting server: %v", err)
+	}
+	return nil
 }
 
 func getISpxPath() string {
@@ -146,11 +181,6 @@ func installISpx() {
 	envVars := []string{"GOOS=js", "GOARCH=wasm"}
 	impl.RunGolang(envVars, "build", "-o", filePath)
 	os.Chdir(rawdir)
-}
-
-func runWeb(webDir string) error {
-	println("impl.ProjectPath ", impl.ProjectPath)
-	return impl.RunWebServer(impl.GdspxPath, impl.ProjectPath, impl.LibPath, impl.ServerPort)
 }
 
 type DirInfos struct {

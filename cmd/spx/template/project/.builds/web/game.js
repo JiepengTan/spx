@@ -324,6 +324,10 @@ class GameApp {
             request.onerror = function (event) {
                 reject('Error opening database: ' + dbName + " " + storeName + " " + event.target.error);
             };
+            
+            request.onblocked = function (event) {
+                reject('Database is blocked. Please close other tabs or windows using this database. ', dbName + " " + storeName + " " + event.target.error);
+            }
         });
     }
 
