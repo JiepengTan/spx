@@ -58,7 +58,7 @@ func (p *SpriteImpl) quote_(message, description string) {
 }
 
 func (p *SpriteImpl) waitStopQuote(secs float64) {
-	p.g.Wait(secs)
+	p.g.Wait__1(secs)
 	p.doStopQuote()
 }
 

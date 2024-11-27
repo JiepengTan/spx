@@ -1035,6 +1035,7 @@ func (p *SpriteImpl) doMoveTo(x, y float64) {
 
 func (p *SpriteImpl) doMoveToForAnim(x, y float64, ani *anim.Anim) {
 	if p.hasOnMoving {
+		panic("doMoveToForAnim")
 		mi := &MovingInfo{OldX: p.x, OldY: p.y, NewX: x, NewY: y, Obj: p, ani: ani}
 		p.doWhenMoving(p, mi)
 	}
@@ -1177,6 +1178,9 @@ func (p *SpriteImpl) SetYpos(y float64) {
 
 func (p *SpriteImpl) ChangeYpos(dy float64) {
 	p.doMoveTo(p.x, p.y+dy)
+}
+func (p *SpriteImpl) AddY(dy float64) {
+	p.y += dy
 }
 
 // -----------------------------------------------------------------------------
@@ -1490,6 +1494,9 @@ func checkTouchingDirection(dir float64) int {
 }
 
 func (p *SpriteImpl) checkTouchingScreen(where int) (touching int) {
+	if p.proxy == nil {
+		return 0
+	}
 	value := engine.SyncPhysicCheckTouchedCameraBoundary(p.proxy.Id, int64(where))
 	if value {
 		return where
