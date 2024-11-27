@@ -228,7 +228,7 @@ func (p *Coroutines) HandleJobs() {
 	nextQueue := p.nextQueue
 	curFrame := time.Frame()
 	curTime := time.TimeSinceLevelLoad()
-	startTime := time.SystemNow()
+	startTime := time.RealTimeSinceStart()
 
 	for curQueue.Count() > 0 {
 		task, _ := curQueue.Dequeue()
@@ -248,7 +248,7 @@ func (p *Coroutines) HandleJobs() {
 		case waitTypeMainThread:
 			task.Call()
 		}
-		if time.SystemSince(startTime) > 1 {
+		if time.RealTimeSinceStart()-startTime > 1 {
 			println("Warning: engine update > 1 seconds, please check your code !")
 		}
 	}

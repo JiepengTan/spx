@@ -27,7 +27,6 @@ func WaitMainThread() float64 {
 	gco.WaitMainThread()
 	return time.TimeSinceLevelLoad() - startTime
 }
-
-func handleEngineCoroutines() {
+func updateCoroutines() {
 	gco.HandleJobs()
 }

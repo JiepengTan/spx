@@ -5,20 +5,17 @@ import (
 )
 
 var (
-	realTimeSinceStartup float64
-	timeSinceLevelLoad   float64
-	deltaTime            float64
-	unscaledDeltaTime    float64
-	timeScale            float64
-	curFrame             int64
-	setTimeScaleCallback func(float64)
-	startTimestamp       stime.Time
+	unscaledTimeSinceLevelLoad float64
+	timeSinceLevelLoad         float64
+	deltaTime                  float64
+	unscaledDeltaTime          float64
+	timeScale                  float64
+	curFrame                   int64
+	setTimeScaleCallback       func(float64)
+	startTimestamp             stime.Time
 )
 
-func SystemSince(startTime float64) float64 {
-	return SystemNow() - startTime
-}
-func SystemNow() float64 {
+func RealTimeSinceStart() float64 {
 	return stime.Since(startTimestamp).Seconds()
 }
 
@@ -46,8 +43,8 @@ func UnscaledDeltaTime() float64 {
 }
 
 // no time scale
-func RealTimeSinceStartup() float64 {
-	return realTimeSinceStartup
+func UnscaledTimeSinceLevelLoad() float64 {
+	return unscaledTimeSinceLevelLoad
 }
 
 func TimeSinceLevelLoad() float64 {
@@ -62,7 +59,7 @@ func Start(setTimeScaleCB func(float64)) {
 func Update(scale float64, realDuration float64, duration float64, delta float64, unscaledDelta float64) {
 	timeScale = scale
 	unscaledDeltaTime = unscaledDelta
-	realTimeSinceStartup = realDuration
+	unscaledTimeSinceLevelLoad = realDuration
 	timeSinceLevelLoad = duration
 	deltaTime = delta
 	curFrame += 1

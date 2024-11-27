@@ -731,24 +731,22 @@ func (p *Game) eventLoop(me coroutine.Thread) int {
 	}
 }
 func (p *Game) logicLoop(me coroutine.Thread) int {
-	deltaTime := 0.03
 	for {
-		p.Wait(deltaTime)
+		p.Wait__0()
 		tempItems := p.getTempShapes()
 		for _, item := range tempItems {
 			if result, ok := item.(interface{ onUpdate(float64) }); ok {
-				result.onUpdate(deltaTime)
+				result.onUpdate(gtime.DeltaTime())
 			}
 		}
 	}
 }
 
 func (p *Game) inputEventLoop(me coroutine.Thread) int {
-
 	lastLbtnPressed := false
 	keyEvents := make([]engine.KeyEvent, 0)
 	for {
-		p.Wait(0.01)
+		p.Wait__0()
 		curLbtnPressed := engine.SyncInputGetMouseState(MOUSE_BUTTON_LEFT)
 		if curLbtnPressed != lastLbtnPressed {
 			if lastLbtnPressed {

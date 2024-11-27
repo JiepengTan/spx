@@ -6,62 +6,27 @@ import (
 
 // =============== factory ===================
 func SyncCreateUiNode[T any](path string) *T {
-	var __ret *T
-	done := make(chan struct{})
-	job := func() {
-		__ret = CreateUI[T](path)
-		done <- struct{}{}
-	}
-	updateJobQueue <- job
-	<-done
-	return __ret
+	WaitMainThread()
+	return CreateUI[T](path)
 }
 func SyncCreateEngineUiNode[T any](path string) *T {
-	var __ret *T
-	done := make(chan struct{})
-	job := func() {
-		__ret = CreateEngineUI[T](path)
-		done <- struct{}{}
-	}
-	updateJobQueue <- job
-	<-done
-	return __ret
+	WaitMainThread()
+	return CreateEngineUI[T](path)
 }
 
 func SyncCreateSprite[T any]() *T {
-	var __ret *T
-	done := make(chan struct{})
-	job := func() {
-		__ret = CreateSprite[T]()
-		done <- struct{}{}
-	}
-	updateJobQueue <- job
-	<-done
-	return __ret
+	WaitMainThread()
+	return CreateSprite[T]()
 }
 
 func SyncCreateEmptySprite[T any]() *T {
-	var __ret *T
-	done := make(chan struct{})
-	job := func() {
-		__ret = CreateEmptySprite[T]()
-		done <- struct{}{}
-	}
-	updateJobQueue <- job
-	<-done
-	return __ret
+	WaitMainThread()
+	return CreateEmptySprite[T]()
 }
 
 func SyncNewBackdropProxy(obj interface{}, path string, renderScale float64) *ProxySprite {
-	var __ret *ProxySprite
-	done := make(chan struct{})
-	job := func() {
-		__ret = newBackdropProxy(obj, path, renderScale)
-		done <- struct{}{}
-	}
-	updateJobQueue <- job
-	<-done
-	return __ret
+	WaitMainThread()
+	return newBackdropProxy(obj, path, renderScale)
 }
 
 func newBackdropProxy(obj interface{}, path string, renderScale float64) *ProxySprite {
@@ -118,26 +83,12 @@ func WorldToScreen(x, y float64) (float64, float64) {
 }
 
 func SyncScreenToWorld(x, y float64) (float64, float64) {
-	var _x, _y float64
-	done := make(chan struct{})
-	job := func() {
-		_x, _y = ScreenToWorld(x, y)
-		done <- struct{}{}
-	}
-	updateJobQueue <- job
-	<-done
-	return _x, _y
+	WaitMainThread()
+	return ScreenToWorld(x, y)
 }
 func SyncWorldToScreen(x, y float64) (float64, float64) {
-	var _x, _y float64
-	done := make(chan struct{})
-	job := func() {
-		_x, _y = WorldToScreen(x, y)
-		done <- struct{}{}
-	}
-	updateJobQueue <- job
-	<-done
-	return _x, _y
+	WaitMainThread()
+	return WorldToScreen(x, y)
 }
 
 func SyncGetCameraLocalPosition(x, y float64) (float64, float64) {

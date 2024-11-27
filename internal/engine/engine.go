@@ -59,9 +59,9 @@ func onStart() {
 	keyEventsTemp = make([]KeyEvent, 0)
 	keyEvents = make([]KeyEvent, 0)
 
+	time.Start(onSetTimeScale)
 	startTimestamp = stime.Now()
 	lastTimestamp = stime.Now()
-	time.Start(onSetTimeScale)
 	game.OnEngineStart()
 }
 
@@ -70,7 +70,7 @@ func onUpdate(delta float32) {
 	cacheTriggerEvents()
 	cacheKeyEvents()
 	game.OnEngineUpdate(delta)
-	handleEngineCoroutines()
+	updateCoroutines()
 }
 
 func onSetTimeScale(scale float64) {
@@ -82,11 +82,11 @@ func updateTime(delta float64) {
 	timeSinceLevelLoad += deltaTime
 
 	curTime := stime.Now()
-	realTimeSinceStartup := curTime.Sub(startTimestamp).Seconds()
+	unscaledTimeSinceLevelLoad := curTime.Sub(startTimestamp).Seconds()
 	unscaledDeltaTime := curTime.Sub(lastTimestamp).Seconds()
 	lastTimestamp = curTime
 	timeScale := PlatformMgr.GetTimeScale()
-	time.Update(float64(timeScale), realTimeSinceStartup, timeSinceLevelLoad, deltaTime, unscaledDeltaTime)
+	time.Update(float64(timeScale), unscaledTimeSinceLevelLoad, timeSinceLevelLoad, deltaTime, unscaledDeltaTime)
 }
 
 func onDestroy() {
