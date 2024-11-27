@@ -6,36 +6,51 @@ import (
 
 // =============== factory ===================
 func SyncCreateUiNode[T any](path string) *T {
-	WaitMainThread()
-	return CreateUI[T](path)
+	var _ret1 *T
+	CallOnMainThread(func() {
+		_ret1 = CreateUI[T](path)
+	})
+	return _ret1
 }
 func SyncCreateEngineUiNode[T any](path string) *T {
-	WaitMainThread()
-	return CreateEngineUI[T](path)
+	var _ret1 *T
+	CallOnMainThread(func() {
+		_ret1 = CreateEngineUI[T](path)
+	})
+	return _ret1
 }
 
 func SyncCreateSprite[T any]() *T {
-	WaitMainThread()
-	return CreateSprite[T]()
+	var _ret1 *T
+	CallOnMainThread(func() {
+		_ret1 = CreateSprite[T]()
+	})
+	return _ret1
 }
 
 func SyncCreateEmptySprite[T any]() *T {
-	WaitMainThread()
-	return CreateEmptySprite[T]()
+	var _ret1 *T
+	CallOnMainThread(func() {
+		_ret1 = CreateEmptySprite[T]()
+	})
+	return _ret1
 }
 
 func SyncNewBackdropProxy(obj interface{}, path string, renderScale float64) *ProxySprite {
-	WaitMainThread()
-	return newBackdropProxy(obj, path, renderScale)
+	var _ret1 *ProxySprite
+	CallOnMainThread(func() {
+		_ret1 = newBackdropProxy(obj, path, renderScale)
+	})
+	return _ret1
 }
 
 func newBackdropProxy(obj interface{}, path string, renderScale float64) *ProxySprite {
-	__ret := CreateEmptySprite[ProxySprite]()
-	__ret.Target = obj
-	__ret.SetZIndex(-1)
-	__ret.DisablePhysic()
-	__ret.UpdateTexture(path, renderScale)
-	return __ret
+	ret := CreateEmptySprite[ProxySprite]()
+	ret.Target = obj
+	ret.SetZIndex(-1)
+	ret.DisablePhysic()
+	ret.UpdateTexture(path, renderScale)
+	return ret
 }
 
 // =============== input ===================
@@ -83,12 +98,18 @@ func WorldToScreen(x, y float64) (float64, float64) {
 }
 
 func SyncScreenToWorld(x, y float64) (float64, float64) {
-	WaitMainThread()
-	return ScreenToWorld(x, y)
+	var _ret1, _ret2 float64
+	CallOnMainThread(func() {
+		_ret1, _ret2 = ScreenToWorld(x, y)
+	})
+	return _ret1, _ret2
 }
 func SyncWorldToScreen(x, y float64) (float64, float64) {
-	WaitMainThread()
-	return WorldToScreen(x, y)
+	var _ret1, _ret2 float64
+	CallOnMainThread(func() {
+		_ret1, _ret2 = WorldToScreen(x, y)
+	})
+	return _ret1, _ret2
 }
 
 func SyncGetCameraLocalPosition(x, y float64) (float64, float64) {

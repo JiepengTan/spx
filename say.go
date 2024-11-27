@@ -84,7 +84,7 @@ func (p *SpriteImpl) sayOrThink(msgv interface{}, style int) {
 }
 
 func (p *SpriteImpl) waitStopSay(secs float64) {
-	p.g.Wait(secs)
+	p.g.Wait__1(secs)
 	p.doStopSay()
 }
 

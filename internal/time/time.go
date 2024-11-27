@@ -54,6 +54,7 @@ func TimeSinceLevelLoad() float64 {
 func Start(setTimeScaleCB func(float64)) {
 	Update(1, 0, 0, 0, 0)
 	setTimeScaleCallback = setTimeScaleCB
+	startTimestamp = stime.Now()
 }
 
 func Update(scale float64, realDuration float64, duration float64, delta float64, unscaledDelta float64) {

@@ -206,21 +206,17 @@ func (p *Coroutines) WaitNextFrame() {
 	p.Yield(me)
 }
 
-func (p *Coroutines) WaitMainThread() {
-	me := p.Current()
-	go func() {
-		done := make(chan int)
-		job := &WaitJob{
-			Type: waitTypeMainThread,
-			Call: func() {
-				done <- 1
-			},
-		}
-		p.curQueue.Enqueue(job)
-		<-done
-		p.Resume(me)
-	}()
-	p.Yield(me)
+func (p *Coroutines) CallOnMainThread(call func()) {
+	done := make(chan int)
+	job := &WaitJob{
+		Type: waitTypeMainThread,
+		Call: func() {
+			call()
+			done <- 1
+		},
+	}
+	p.curQueue.Enqueue(job)
+	<-done
 }
 
 func (p *Coroutines) HandleJobs() {

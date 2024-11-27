@@ -22,11 +22,10 @@ func WaitNextFrame() float64 {
 	gco.WaitNextFrame()
 	return time.DeltaTime()
 }
-func WaitMainThread() float64 {
-	startTime := time.TimeSinceLevelLoad()
-	gco.WaitMainThread()
-	return time.TimeSinceLevelLoad() - startTime
+func CallOnMainThread(call func()) {
+	gco.CallOnMainThread(call)
 }
+
 func updateCoroutines() {
 	gco.HandleJobs()
 }

@@ -33,6 +33,11 @@ var (
 	startTimestamp     stime.Time
 	lastTimestamp      stime.Time
 	timeSinceLevelLoad float64
+	FPS                float64
+)
+var (
+	debugTimer     float64 = 0
+	debugLastFrame int64   = 0
 )
 
 type Gamer interface {
@@ -71,8 +76,20 @@ func onUpdate(delta float32) {
 	cacheKeyEvents()
 	game.OnEngineUpdate(delta)
 	updateCoroutines()
+	calcFPS()
 }
 
+func calcFPS() {
+	timer := time.RealTimeSinceStart()
+	timeDiff := timer - debugTimer
+	frameDiff := float64(time.Frame() - debugLastFrame)
+	if timeDiff > 1 {
+		FPS = frameDiff / timeDiff
+		debugLastFrame = time.Frame()
+		debugTimer = timer
+		println("fps:", int(FPS))
+	}
+}
 func onSetTimeScale(scale float64) {
 	SyncPlatformSetTimeScale(float32(scale))
 }
