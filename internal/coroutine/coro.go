@@ -2,6 +2,7 @@ package coroutine
 
 import (
 	"errors"
+	"fmt"
 	"runtime"
 	"sync"
 	"sync/atomic"
@@ -44,6 +45,7 @@ type Coroutines struct {
 	frame     int
 	curQueue  *Queue[*WaitJob]
 	nextQueue *Queue[*WaitJob]
+	curId     int64
 }
 
 const (
@@ -53,6 +55,7 @@ const (
 )
 
 type WaitJob struct {
+	Id    int64
 	Type  int
 	Call  func()
 	Time  float64
@@ -169,11 +172,14 @@ func (p *Coroutines) Sched(me Thread) {
 }
 
 func (p *Coroutines) Wait(t float64) {
+	id := atomic.AddInt64(&p.curId, 1)
+	//println("Wait ", p.curId, id)
 	me := p.Current()
 	dstTime := time.TimeSinceLevelLoad() + t
 	go func() {
 		done := make(chan int)
 		job := &WaitJob{
+			Id:   id,
 			Type: waitTypeTime,
 			Call: func() {
 				done <- 1
@@ -188,11 +194,13 @@ func (p *Coroutines) Wait(t float64) {
 }
 
 func (p *Coroutines) WaitNextFrame() {
+	id := atomic.AddInt64(&p.curId, 1)
 	me := p.Current()
 	frame := time.Frame()
 	go func() {
 		done := make(chan int)
 		job := &WaitJob{
+			Id:   id,
 			Type: waitTypeFrame,
 			Call: func() {
 				done <- 1
@@ -201,22 +209,31 @@ func (p *Coroutines) WaitNextFrame() {
 		}
 		p.curQueue.Enqueue(job)
 		<-done
+		if time.Frame()-frame > 1 {
+			println("time.Frame() - frame 多帧才完成", id)
+		}
 		p.Resume(me)
 	}()
 	p.Yield(me)
 }
 
 func (p *Coroutines) CallOnMainThread(call func()) {
-	done := make(chan int)
-	job := &WaitJob{
-		Type: waitTypeMainThread,
-		Call: func() {
-			call()
-			done <- 1
-		},
-	}
-	p.curQueue.Enqueue(job)
-	<-done
+	//id := atomic.AddInt64(&p.curId, 1)
+	me := p.Current()
+	go func() {
+		done := make(chan int)
+		job := &WaitJob{
+			Id:   0,
+			Type: waitTypeMainThread,
+			Call: func() {
+				call()
+				done <- 1
+			},
+		}
+		p.curQueue.Enqueue(job)
+		<-done
+	}()
+	p.Yield(me)
 }
 
 func (p *Coroutines) HandleJobs() {
@@ -224,30 +241,36 @@ func (p *Coroutines) HandleJobs() {
 	nextQueue := p.nextQueue
 	curFrame := time.Frame()
 	curTime := time.TimeSinceLevelLoad()
-	startTime := time.RealTimeSinceStart()
-
+	debugStartTime := time.RealTimeSinceStart()
+	taskCount := 0
+	//println("===== HandleJobs ======")
 	for curQueue.Count() > 0 {
-		task, _ := curQueue.Dequeue()
+		task := curQueue.Dequeue()
 		switch task.Type {
 		case waitTypeFrame:
+			taskCount++
 			if task.Frame >= curFrame {
 				nextQueue.Enqueue(task)
 			} else {
 				task.Call()
+				//println("frame call: ", task.Id)
 			}
 		case waitTypeTime:
+			//println("wait call:", task.Id)
 			if task.Time >= curTime {
 				nextQueue.Enqueue(task)
 			} else {
 				task.Call()
 			}
 		case waitTypeMainThread:
+			//println("main call:", task.Id)
 			task.Call()
 		}
-		if time.RealTimeSinceStart()-startTime > 1 {
+		if time.RealTimeSinceStart()-debugStartTime > 1 {
 			println("Warning: engine update > 1 seconds, please check your code !")
 		}
 	}
+	fmt.Printf("curFrame%d ,taskCount %d ,curTime %f , moveCount %d \n", curFrame, taskCount, curTime, nextQueue.Count())
 	curQueue.Move(nextQueue)
 }
 

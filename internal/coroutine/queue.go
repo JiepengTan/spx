@@ -36,14 +36,10 @@ func (s *Queue[T]) Enqueue(value T) {
 	s.tasks = append(s.tasks, value)
 }
 
-func (s *Queue[T]) Dequeue() (T, bool) {
+func (s *Queue[T]) Dequeue() T {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	if len(s.tasks) == 0 {
-		var zeroValue T
-		return zeroValue, false
-	}
 	value := s.tasks[0]
 	s.tasks = s.tasks[1:]
-	return value, true
+	return value
 }

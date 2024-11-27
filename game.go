@@ -216,7 +216,7 @@ func Gopt_Game_Run(game Gamer, resource interface{}, gameConf ...*Config) {
 	if err != nil {
 		panic(err)
 	}
-
+	println("rungame =-=-=-=-=-=-=-=-=-=-=-")
 	if !conf.DontParseFlags {
 		f := flag.CommandLine
 		verbose := f.Bool("v", false, "print verbose information")
@@ -731,6 +731,7 @@ func (p *Game) eventLoop(me coroutine.Thread) int {
 	}
 }
 func (p *Game) logicLoop(me coroutine.Thread) int {
+	return 0 // TODO tanjp
 	for {
 		p.Wait__0()
 		tempItems := p.getTempShapes()
@@ -743,6 +744,7 @@ func (p *Game) logicLoop(me coroutine.Thread) int {
 }
 
 func (p *Game) inputEventLoop(me coroutine.Thread) int {
+	return 0 // TODO tanjp
 	lastLbtnPressed := false
 	keyEvents := make([]engine.KeyEvent, 0)
 	for {
@@ -776,6 +778,7 @@ func (p *Game) initEventLoop() {
 }
 
 func init() {
+	println("============ create gco============= ")
 	gco = coroutine.New()
 	engine.SetCoroutines(gco)
 }
@@ -805,20 +808,10 @@ func waitForChan(done chan bool) {
 }
 
 func SchedNow() int {
-	if me := gco.Current(); me != nil {
-		gco.Sched(me)
-	}
 	return 0
 }
 
 func Sched() int {
-	now := time.Now()
-	if now.Sub(lastSched) >= 3e7 {
-		if me := gco.Current(); me != nil {
-			gco.Sched(me)
-		}
-		lastSched = now
-	}
 	return 0
 }
 
@@ -1151,14 +1144,19 @@ func (p *Game) Username() string {
 // -----------------------------------------------------------------------------
 
 func (p *Game) Wait__0() float64 {
-	engine.WaitNextFrame()
-	return gtime.DeltaTime()
+	return engine.WaitNextFrame()
 }
 
 func (p *Game) Wait__1(secs float64) float64 {
-	startTime := gtime.TimeSinceLevelLoad()
-	gco.Wait(secs)
-	return gtime.TimeSinceLevelLoad() - startTime
+	return engine.Wait(secs)
+}
+
+func (p *Game) GetFrame() int64 {
+	return gtime.Frame()
+}
+
+func (p *Game) DeltaTime() float64 {
+	return gtime.DeltaTime()
 }
 
 func (p *Game) Timer() float64 {
