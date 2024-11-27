@@ -1,5 +1,9 @@
 package time
 
+import (
+	stime "time"
+)
+
 var (
 	realTimeSinceStartup float64
 	timeSinceLevelLoad   float64
@@ -8,7 +12,15 @@ var (
 	timeScale            float64
 	curFrame             int64
 	setTimeScaleCallback func(float64)
+	startTimestamp       stime.Time
 )
+
+func SystemSince(startTime float64) float64 {
+	return SystemNow() - startTime
+}
+func SystemNow() float64 {
+	return stime.Since(startTimestamp).Seconds()
+}
 
 func Frame() int64 {
 	return curFrame

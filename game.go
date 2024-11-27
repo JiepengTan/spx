@@ -32,6 +32,7 @@ import (
 	"github.com/goplus/spx/internal/audiorecord"
 	"github.com/goplus/spx/internal/coroutine"
 	"github.com/goplus/spx/internal/engine"
+	gtime "github.com/goplus/spx/internal/time"
 
 	spxfs "github.com/goplus/spx/fs"
 	_ "github.com/goplus/spx/fs/asset"
@@ -1151,8 +1152,15 @@ func (p *Game) Username() string {
 
 // -----------------------------------------------------------------------------
 
-func (p *Game) Wait(secs float64) {
-	gco.Sleep(time.Duration(secs * 1e9))
+func (p *Game) Wait__0() float64 {
+	engine.WaitNextFrame()
+	return gtime.DeltaTime()
+}
+
+func (p *Game) Wait__1(secs float64) float64 {
+	startTime := gtime.TimeSinceLevelLoad()
+	gco.Wait(secs)
+	return gtime.TimeSinceLevelLoad() - startTime
 }
 
 func (p *Game) Timer() float64 {
