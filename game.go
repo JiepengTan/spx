@@ -720,7 +720,7 @@ func (p *Game) fireEvent(ev event) {
 func (p *Game) eventLoop(me coroutine.Thread) int {
 	for {
 		var ev event
-		coroutine.WaitForChan(gco, p.events, &ev)
+		engine.WaitForChan(p.events, &ev)
 		p.handleEvent(ev)
 	}
 }
@@ -732,7 +732,7 @@ func (p *Game) logicLoop(me coroutine.Thread) int {
 				result.onUpdate(gtime.DeltaTime())
 			}
 		}
-		p.Wait__0()
+		engine.WaitNextFrame()
 	}
 }
 
@@ -759,7 +759,7 @@ func (p *Game) inputEventLoop(me coroutine.Thread) int {
 			}
 		}
 		keyEvents = keyEvents[:0]
-		p.Wait__0()
+		engine.WaitNextFrame()
 	}
 }
 
@@ -779,15 +779,6 @@ var (
 )
 
 type threadObj = coroutine.ThreadObj
-
-func waitToDo(fn func()) {
-	gco.WaitToDo(fn)
-}
-
-func waitForChan(done chan bool) {
-	var val bool
-	coroutine.WaitForChan(gco, done, &val)
-}
 
 func SchedNow() int {
 	return 0
@@ -1131,14 +1122,6 @@ func (p *Game) Wait__1(secs float64) float64 {
 	return engine.Wait(secs)
 }
 
-func (p *Game) GetFrame() int64 {
-	return gtime.Frame()
-}
-
-func (p *Game) DeltaTime() float64 {
-	return gtime.DeltaTime()
-}
-
 func (p *Game) Timer() float64 {
 	panic("todo")
 }
@@ -1384,4 +1367,30 @@ func Gopt_Game_Gopx_GetWidget[T any](sg ShapeGetter, name string) *T {
 	} else {
 		panic("GetWidget: type mismatch")
 	}
+}
+
+//------------ time ------------
+
+func (p *Game) GetFrame() int64 {
+	return gtime.Frame()
+}
+
+func (p *Game) GetDeltaTime() float64 {
+	return gtime.DeltaTime()
+}
+
+func (p *Game) GetTimeSinceLevelLoad() float64 {
+	return gtime.TimeSinceLevelLoad()
+}
+
+func (p *Game) GetRealTimeSinceStart() float64 {
+	return gtime.RealTimeSinceStart()
+}
+
+func (p *Game) GetTimeScale() float64 {
+	return gtime.TimeScale()
+}
+
+func (p *Game) SetTimeScale(scale float64) {
+	gtime.SetTimeScale(scale)
 }

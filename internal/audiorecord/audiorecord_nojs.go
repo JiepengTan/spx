@@ -8,6 +8,7 @@ import (
 	"math"
 
 	"github.com/goplus/spx/internal/coroutine"
+	"github.com/goplus/spx/internal/engine"
 )
 
 const (
@@ -49,7 +50,7 @@ func Open(gco *coroutine.Coroutines) *Recorder {
 				int16Buffer[i] = int16(binary.LittleEndian.Uint16(buff[i*2 : (i+1)*2]))
 			}
 			p.deviceVolume = p.doubleCalculateVolume(int16Buffer)
-			gco.Wait(audioInterval)
+			engine.Wait(audioInterval)
 		}
 	})
 	return p

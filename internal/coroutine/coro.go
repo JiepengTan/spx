@@ -297,7 +297,7 @@ func WaitForChan[T any](p *Coroutines, done chan T, data *T) {
 	p.Yield(me)
 }
 
-func (p *Coroutines) HandleJobs() {
+func (p *Coroutines) UpdateJobs() {
 	timestamp := time.RealTimeSinceStart()
 	curQueue := p.curQueue
 	nextQueue := p.nextQueue

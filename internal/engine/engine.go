@@ -38,7 +38,7 @@ var (
 	fps float64
 )
 var (
-	debugTimer     float64 = 0
+	debugLastTime  float64 = 0
 	debugLastFrame int64   = 0
 )
 
@@ -60,6 +60,10 @@ func GdspxMain(g Gamer) {
 	})
 }
 
+func OnGameStarted() {
+	gco.OnInited()
+}
+
 // callbacks
 func onStart() {
 	triggerEventsTemp = make([]TriggerEvent, 0)
@@ -78,18 +82,18 @@ func onUpdate(delta float32) {
 	cacheTriggerEvents()
 	cacheKeyEvents()
 	game.OnEngineUpdate(delta)
-	gco.HandleJobs()
+	gco.UpdateJobs()
 	game.OnEngineRender(delta)
 }
 
 func calcfps() {
-	timer := time.RealTimeSinceStart()
-	timeDiff := timer - debugTimer
-	frameDiff := float64(time.Frame() - debugLastFrame)
+	curTime := time.RealTimeSinceStart()
+	timeDiff := curTime - debugLastTime
+	frameDiff := time.Frame() - debugLastFrame
 	if timeDiff > 0.25 {
-		fps = frameDiff / timeDiff
+		fps = float64(frameDiff) / timeDiff
 		debugLastFrame = time.Frame()
-		debugTimer = timer
+		debugLastTime = curTime
 	}
 }
 func onSetTimeScale(scale float64) {

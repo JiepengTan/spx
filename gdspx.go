@@ -64,7 +64,7 @@ func (p *Game) onStartAsync() {
 	if !p.isRunned {
 		Gopt_Game_Run(gamer, "assets")
 	}
-	gco.OnInited()
+	engine.OnGameStarted()
 }
 
 func (p *Game) updateLogic() error {

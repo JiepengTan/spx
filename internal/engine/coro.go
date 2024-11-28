@@ -18,10 +18,20 @@ func Wait(secs float64) float64 {
 	gco.Wait(secs)
 	return time.TimeSinceLevelLoad() - startTime
 }
+
 func WaitNextFrame() float64 {
 	gco.WaitNextFrame()
 	return time.DeltaTime()
 }
+
 func WaitMainThread(call func()) {
 	gco.WaitMainThread(call)
+}
+
+func WaitToDo(fn func()) {
+	gco.WaitToDo(fn)
+}
+
+func WaitForChan[T any](done chan T, data *T) {
+	coroutine.WaitForChan(gco, done, data)
 }
