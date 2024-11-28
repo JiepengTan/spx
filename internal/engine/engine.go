@@ -33,7 +33,9 @@ var (
 	startTimestamp     stime.Time
 	lastTimestamp      stime.Time
 	timeSinceLevelLoad float64
-	FPS                float64
+
+	// statistic info
+	fps float64
 )
 var (
 	debugTimer     float64 = 0
@@ -43,6 +45,7 @@ var (
 type Gamer interface {
 	OnEngineStart()
 	OnEngineUpdate(delta float32)
+	OnEngineRender(delta float32)
 	OnEngineDestroy()
 }
 
@@ -75,19 +78,19 @@ func onUpdate(delta float32) {
 	cacheTriggerEvents()
 	cacheKeyEvents()
 	game.OnEngineUpdate(delta)
-	updateCoroutines()
-	calcFPS()
+	gco.HandleJobs()
+	game.OnEngineRender(delta)
+	calcfps()
 }
 
-func calcFPS() {
+func calcfps() {
 	timer := time.RealTimeSinceStart()
 	timeDiff := timer - debugTimer
 	frameDiff := float64(time.Frame() - debugLastFrame)
 	if timeDiff > 1 {
-		FPS = frameDiff / timeDiff
+		fps = frameDiff / timeDiff
 		debugLastFrame = time.Frame()
 		debugTimer = timer
-		println("fps:", int(FPS))
 	}
 }
 func onSetTimeScale(scale float64) {
@@ -146,4 +149,11 @@ func GetKeyEvents(lst []KeyEvent) []KeyEvent {
 	keyEvents = keyEvents[:0]
 	keyMutex.Unlock()
 	return lst
+}
+
+func GetFPS() float64 {
+	return fps
+}
+func GetTPS() float64 {
+	return 30
 }

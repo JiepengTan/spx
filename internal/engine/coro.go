@@ -23,10 +23,6 @@ func WaitNextFrame() float64 {
 	gco.WaitNextFrame()
 	return time.RealTimeSinceStart() - startTime
 }
-func CallOnMainThread(call func()) {
-	gco.CallOnMainThread(call)
-}
-
-func updateCoroutines() {
-	gco.HandleJobs()
+func WaitMainThread(call func()) {
+	gco.WaitMainThread(call)
 }

@@ -2,10 +2,10 @@ package coroutine
 
 import (
 	"errors"
-	"fmt"
 	"runtime"
 	"sync"
 	"sync/atomic"
+	stime "time"
 	"unsafe"
 
 	"github.com/goplus/spx/internal/time"
@@ -46,6 +46,7 @@ type Coroutines struct {
 	curQueue  *Queue[*WaitJob]
 	nextQueue *Queue[*WaitJob]
 	curId     int64
+	HasInited bool
 }
 
 const (
@@ -210,17 +211,17 @@ func (p *Coroutines) WaitNextFrame() {
 		p.curQueue.Enqueue(job)
 		<-done
 		if time.Frame()-frame > 1 {
-			println("time.Frame() - frame 多帧才完成", id)
+			println("Warning!!!: WaitNextFrame use mutil times ", time.Frame()-frame, "id", id)
 		}
 		p.Resume(me)
 	}()
 	p.Yield(me)
 }
 
-func (p *Coroutines) CallOnMainThread(call func()) {
+func (p *Coroutines) WaitMainThread(call func()) {
 	//id := atomic.AddInt64(&p.curId, 1)
 	me := p.Current()
-	go func() {
+	coro := func(isResume bool) {
 		done := make(chan int)
 		job := &WaitJob{
 			Id:   0,
@@ -232,6 +233,31 @@ func (p *Coroutines) CallOnMainThread(call func()) {
 		}
 		p.curQueue.Enqueue(job)
 		<-done
+		if isResume {
+			p.Resume(me)
+		}
+	}
+	if p.HasInited {
+		go coro(true)
+		p.Yield(me)
+	} else {
+		coro(false)
+	}
+}
+func (p *Coroutines) WaitToDo(fn func()) {
+	me := p.Current()
+	go func() {
+		fn()
+		p.Resume(me)
+	}()
+	p.Yield(me)
+}
+
+func (p *Coroutines) WaitForChan(done chan bool) {
+	me := p.Current()
+	go func() {
+		<-done
+		p.Resume(me)
 	}()
 	p.Yield(me)
 }
@@ -244,7 +270,11 @@ func (p *Coroutines) HandleJobs() {
 	debugStartTime := time.RealTimeSinceStart()
 	taskCount := 0
 	//println("===== HandleJobs ======")
-	for curQueue.Count() > 0 {
+	for curQueue.Count() > 0 || !p.HasInited {
+		if curQueue.Count() == 0 {
+			stime.Sleep(stime.Millisecond)
+			continue
+		}
 		task := curQueue.Dequeue()
 		switch task.Type {
 		case waitTypeFrame:
@@ -270,7 +300,7 @@ func (p *Coroutines) HandleJobs() {
 			println("Warning: engine update > 1 seconds, please check your code !")
 		}
 	}
-	fmt.Printf("curFrame%d ,taskCount %d ,curTime %f , moveCount %d \n", curFrame, taskCount, curTime, nextQueue.Count())
+	//fmt.Printf("curFrame%d ,taskCount %d ,curTime %f , moveCount %d \n", curFrame, taskCount, curTime, nextQueue.Count())
 	curQueue.Move(nextQueue)
 }
 

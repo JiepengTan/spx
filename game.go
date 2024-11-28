@@ -26,7 +26,6 @@ import (
 	"reflect"
 	"sync"
 	"sync/atomic"
-	"time"
 	"unsafe"
 
 	"github.com/goplus/spx/internal/audiorecord"
@@ -216,7 +215,6 @@ func Gopt_Game_Run(game Gamer, resource interface{}, gameConf ...*Config) {
 	if err != nil {
 		panic(err)
 	}
-	println("rungame =-=-=-=-=-=-=-=-=-=-=-")
 	if !conf.DontParseFlags {
 		f := flag.CommandLine
 		verbose := f.Bool("v", false, "print verbose information")
@@ -778,7 +776,6 @@ func (p *Game) initEventLoop() {
 }
 
 func init() {
-	println("============ create gco============= ")
 	gco = coroutine.New()
 	engine.SetCoroutines(gco)
 }
@@ -790,21 +787,11 @@ var (
 type threadObj = coroutine.ThreadObj
 
 func waitToDo(fn func()) {
-	me := gco.Current()
-	go func() {
-		fn()
-		gco.Resume(me)
-	}()
-	gco.Yield(me)
+	gco.WaitToDo(fn)
 }
 
 func waitForChan(done chan bool) {
-	me := gco.Current()
-	go func() {
-		<-done
-		gco.Resume(me)
-	}()
-	gco.Yield(me)
+	gco.WaitForChan(done)
 }
 
 func SchedNow() int {
@@ -814,8 +801,6 @@ func SchedNow() int {
 func Sched() int {
 	return 0
 }
-
-var lastSched time.Time
 
 // -----------------------------------------------------------------------------
 

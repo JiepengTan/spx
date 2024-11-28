@@ -3,7 +3,9 @@ package coroutine
 import "sync"
 
 type Queue[T any] struct {
-	mu    sync.Mutex
+	mu sync.Mutex
+	// TODO Use a linked list to avoid moving a whole
+	// block of memory when dequeuing
 	tasks []T
 }
 

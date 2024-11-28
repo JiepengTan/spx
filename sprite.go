@@ -1494,6 +1494,9 @@ func checkTouchingDirection(dir float64) int {
 }
 
 func (p *SpriteImpl) checkTouchingScreen(where int) (touching int) {
+	if p.proxy == nil {
+		return 0
+	}
 	value := engine.SyncPhysicCheckTouchedCameraBoundary(p.proxy.Id, int64(where))
 	if value {
 		return where

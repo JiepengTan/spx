@@ -20,7 +20,6 @@ import (
 	"math"
 	"sync/atomic"
 
-	"github.com/goplus/spx/internal/coroutine"
 	"github.com/goplus/spx/internal/engine"
 	"github.com/goplus/spx/internal/math32"
 
@@ -32,9 +31,8 @@ var (
 )
 
 func (p *Game) OnEngineStart() {
-	println("=====OnEngineStart ==========")
 	cachedBounds = make(map[string]gdspx.Rect2)
-	gco.CreateAndStart(true, nil, p.onStartAsync)
+	go p.onStartAsync()
 }
 
 func (p *Game) OnEngineDestroy() {
@@ -48,11 +46,17 @@ func (p *Game) OnEngineUpdate(delta float32) {
 	p.updateInput()
 	p.updateCamera()
 	p.updateLogic()
+}
+func (p *Game) OnEngineRender(delta float32) {
+	if !p.isRunned {
+		return
+	}
 	p.updateProxy()
 	p.updatePhysic()
 }
-func (p *Game) onStartAsync(me coroutine.Thread) int {
-	println("onStartAsync              ===========")
+
+func (p *Game) onStartAsync() {
+	gco.HasInited = false
 	initInput()
 	gamer := p.gamer_
 	if me, ok := gamer.(interface{ MainEntry() }); ok {
@@ -61,7 +65,7 @@ func (p *Game) onStartAsync(me coroutine.Thread) int {
 	if !p.isRunned {
 		Gopt_Game_Run(gamer, "assets")
 	}
-	return 0
+	gco.HasInited = true
 }
 
 func (p *Game) updateLogic() error {

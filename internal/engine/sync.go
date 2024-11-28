@@ -7,14 +7,14 @@ import (
 // =============== factory ===================
 func SyncCreateUiNode[T any](path string) *T {
 	var _ret1 *T
-	CallOnMainThread(func() {
+	WaitMainThread(func() {
 		_ret1 = CreateUI[T](path)
 	})
 	return _ret1
 }
 func SyncCreateEngineUiNode[T any](path string) *T {
 	var _ret1 *T
-	CallOnMainThread(func() {
+	WaitMainThread(func() {
 		_ret1 = CreateEngineUI[T](path)
 	})
 	return _ret1
@@ -22,7 +22,7 @@ func SyncCreateEngineUiNode[T any](path string) *T {
 
 func SyncCreateSprite[T any]() *T {
 	var _ret1 *T
-	CallOnMainThread(func() {
+	WaitMainThread(func() {
 		_ret1 = CreateSprite[T]()
 	})
 	return _ret1
@@ -30,7 +30,7 @@ func SyncCreateSprite[T any]() *T {
 
 func SyncCreateEmptySprite[T any]() *T {
 	var _ret1 *T
-	CallOnMainThread(func() {
+	WaitMainThread(func() {
 		_ret1 = CreateEmptySprite[T]()
 	})
 	return _ret1
@@ -38,7 +38,7 @@ func SyncCreateEmptySprite[T any]() *T {
 
 func SyncNewBackdropProxy(obj interface{}, path string, renderScale float64) *ProxySprite {
 	var _ret1 *ProxySprite
-	CallOnMainThread(func() {
+	WaitMainThread(func() {
 		_ret1 = newBackdropProxy(obj, path, renderScale)
 	})
 	return _ret1
@@ -56,11 +56,6 @@ func newBackdropProxy(obj interface{}, path string, renderScale float64) *ProxyS
 // =============== input ===================
 func SyncInputMousePressed() bool {
 	return SyncInputGetMouseState(0) || SyncInputGetMouseState(1)
-}
-
-// =============== time ===================
-func SyncGetCurrentTPS() float64 {
-	return 30 // TODO(tanjp) use engine api
 }
 
 // =============== window ===================
@@ -99,14 +94,14 @@ func WorldToScreen(x, y float64) (float64, float64) {
 
 func SyncScreenToWorld(x, y float64) (float64, float64) {
 	var _ret1, _ret2 float64
-	CallOnMainThread(func() {
+	WaitMainThread(func() {
 		_ret1, _ret2 = ScreenToWorld(x, y)
 	})
 	return _ret1, _ret2
 }
 func SyncWorldToScreen(x, y float64) (float64, float64) {
 	var _ret1, _ret2 float64
-	CallOnMainThread(func() {
+	WaitMainThread(func() {
 		_ret1, _ret2 = WorldToScreen(x, y)
 	})
 	return _ret1, _ret2
