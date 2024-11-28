@@ -720,33 +720,26 @@ func (p *Game) fireEvent(ev event) {
 func (p *Game) eventLoop(me coroutine.Thread) int {
 	for {
 		var ev event
-		go func() {
-			ev = <-p.events
-			gco.Resume(me)
-		}()
-		gco.Yield(me)
+		coroutine.WaitForChan(gco, p.events, &ev)
 		p.handleEvent(ev)
 	}
 }
 func (p *Game) logicLoop(me coroutine.Thread) int {
-	return 0 // TODO tanjp
 	for {
-		p.Wait__0()
 		tempItems := p.getTempShapes()
 		for _, item := range tempItems {
 			if result, ok := item.(interface{ onUpdate(float64) }); ok {
 				result.onUpdate(gtime.DeltaTime())
 			}
 		}
+		p.Wait__0()
 	}
 }
 
 func (p *Game) inputEventLoop(me coroutine.Thread) int {
-	return 0 // TODO tanjp
 	lastLbtnPressed := false
 	keyEvents := make([]engine.KeyEvent, 0)
 	for {
-		p.Wait__0()
 		curLbtnPressed := engine.SyncInputGetMouseState(MOUSE_BUTTON_LEFT)
 		if curLbtnPressed != lastLbtnPressed {
 			if lastLbtnPressed {
@@ -766,6 +759,7 @@ func (p *Game) inputEventLoop(me coroutine.Thread) int {
 			}
 		}
 		keyEvents = keyEvents[:0]
+		p.Wait__0()
 	}
 }
 
@@ -791,7 +785,8 @@ func waitToDo(fn func()) {
 }
 
 func waitForChan(done chan bool) {
-	gco.WaitForChan(done)
+	var val bool
+	coroutine.WaitForChan(gco, done, &val)
 }
 
 func SchedNow() int {

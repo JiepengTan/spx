@@ -2,6 +2,7 @@ package coroutine
 
 import (
 	"errors"
+	"fmt"
 	"runtime"
 	"sync"
 	"sync/atomic"
@@ -37,6 +38,7 @@ type Thread = *threadImpl
 
 // Coroutines represents a coroutine manager.
 type Coroutines struct {
+	hasInited bool
 	suspended map[Thread]bool
 	current   Thread
 	mutex     sync.Mutex
@@ -46,7 +48,8 @@ type Coroutines struct {
 	curQueue  *Queue[*WaitJob]
 	nextQueue *Queue[*WaitJob]
 	curId     int64
-	HasInited bool
+
+	waitingFrame map[Thread]bool
 }
 
 const (
@@ -66,12 +69,18 @@ type WaitJob struct {
 // New creates a coroutine manager.
 func New() *Coroutines {
 	p := &Coroutines{
-		suspended: make(map[Thread]bool),
+		suspended:    make(map[Thread]bool),
+		waitingFrame: make(map[Thread]bool),
 	}
 	p.cond.L = &p.mutex
 	p.curQueue = NewQueue[*WaitJob]()
 	p.nextQueue = NewQueue[*WaitJob]()
+	p.hasInited = false
 	return p
+}
+
+func (p *Coroutines) OnInited() {
+	p.hasInited = true
 }
 
 // Create creates a new coroutine.
@@ -96,6 +105,8 @@ func (p *Coroutines) CreateAndStart(start bool, tobj ThreadObj, fn func(me Threa
 		defer func() {
 			p.mutex.Lock()
 			delete(p.suspended, id)
+			delete(p.waitingFrame, id)
+
 			p.mutex.Unlock()
 			p.sema.Unlock()
 			if e := recover(); e != nil {
@@ -104,6 +115,9 @@ func (p *Coroutines) CreateAndStart(start bool, tobj ThreadObj, fn func(me Threa
 				}
 			}
 		}()
+		p.mutex.Lock()
+		p.waitingFrame[id] = false
+		p.mutex.Unlock()
 		fn(id)
 	}()
 	if start {
@@ -125,9 +139,33 @@ func (p *Coroutines) StopIf(filter func(th Thread) bool) {
 		}
 	}
 }
+func (p *Coroutines) GetActiveCount() int {
+	p.mutex.Lock()
+	defer p.mutex.Unlock()
+	count := 0
+	for _, val := range p.waitingFrame {
+		if !val {
+			count++
+		}
+	}
+	return count
+}
 
 // Yield suspends a running coroutine.
 func (p *Coroutines) Yield(me Thread) {
+	p.yield(me, true)
+}
+
+func (p *Coroutines) Resume(me Thread) {
+	p.resume(me, true)
+}
+
+func (p *Coroutines) yield(me Thread, isWaiting bool) {
+	if isWaiting {
+		p.mutex.Lock()
+		p.waitingFrame[me] = true
+		p.mutex.Unlock()
+	}
 	if p.Current() != me {
 		panic(ErrCannotYieldANonrunningThread)
 	}
@@ -147,12 +185,17 @@ func (p *Coroutines) Yield(me Thread) {
 }
 
 // Resume resumes a suspended coroutine.
-func (p *Coroutines) Resume(th Thread) {
+func (p *Coroutines) resume(me Thread, isWaiting bool) {
+	if isWaiting {
+		p.mutex.Lock()
+		p.waitingFrame[me] = false
+		p.mutex.Unlock()
+	}
 	for {
 		done := false
 		p.mutex.Lock()
-		if p.suspended[th] {
-			p.suspended[th] = false
+		if p.suspended[me] {
+			p.suspended[me] = false
 			p.cond.Broadcast()
 			done = true
 		}
@@ -162,14 +205,6 @@ func (p *Coroutines) Resume(th Thread) {
 		}
 		runtime.Gosched()
 	}
-}
-
-// Sched func.
-func (p *Coroutines) Sched(me Thread) {
-	go func() {
-		p.Resume(me)
-	}()
-	p.Yield(me)
 }
 
 func (p *Coroutines) Wait(t float64) {
@@ -211,7 +246,7 @@ func (p *Coroutines) WaitNextFrame() {
 		p.curQueue.Enqueue(job)
 		<-done
 		if time.Frame()-frame > 1 {
-			println("Warning!!!: WaitNextFrame use mutil times ", time.Frame()-frame, "id", id)
+			println("Warning!!!: WaitNextFrame wait too many frames, count=", time.Frame()-frame, "id", id)
 		}
 		p.Resume(me)
 	}()
@@ -234,12 +269,14 @@ func (p *Coroutines) WaitMainThread(call func()) {
 		p.curQueue.Enqueue(job)
 		<-done
 		if isResume {
-			p.Resume(me)
+			// main thread call does NOT count as blocking
+			p.resume(me, false)
 		}
 	}
-	if p.HasInited {
+	if p.hasInited {
 		go coro(true)
-		p.Yield(me)
+		// main thread call does NOT count as blocking
+		p.yield(me, false)
 	} else {
 		coro(false)
 	}
@@ -252,17 +289,22 @@ func (p *Coroutines) WaitToDo(fn func()) {
 	}()
 	p.Yield(me)
 }
-
-func (p *Coroutines) WaitForChan(done chan bool) {
+func WaitForChan[T any](p *Coroutines, done chan T, data *T) {
 	me := p.Current()
 	go func() {
-		<-done
+		*data = <-done
 		p.Resume(me)
 	}()
 	p.Yield(me)
 }
 
 func (p *Coroutines) HandleJobs() {
+	timer := time.RealTimeSinceStart()
+	msg := p.handleJobs()
+	delta := (time.RealTimeSinceStart() - timer) * 1000
+	fmt.Printf("HandleJobs use time %f ms %s \n", delta, msg)
+}
+func (p *Coroutines) handleJobs() string {
 	curQueue := p.curQueue
 	nextQueue := p.nextQueue
 	curFrame := time.Frame()
@@ -270,19 +312,20 @@ func (p *Coroutines) HandleJobs() {
 	debugStartTime := time.RealTimeSinceStart()
 	taskCount := 0
 	//println("===== HandleJobs ======")
-	for curQueue.Count() > 0 || !p.HasInited {
+	for !p.hasInited || curQueue.Count() > 0 ||
+		p.GetActiveCount() > 0 {
 		if curQueue.Count() == 0 {
-			stime.Sleep(stime.Millisecond)
+			stime.Sleep(stime.Microsecond * 100) // sleep 0.05 ms
 			continue
 		}
 		task := curQueue.Dequeue()
 		switch task.Type {
 		case waitTypeFrame:
-			taskCount++
 			if task.Frame >= curFrame {
 				nextQueue.Enqueue(task)
 			} else {
 				task.Call()
+				taskCount++
 				//println("frame call: ", task.Id)
 			}
 		case waitTypeTime:
@@ -300,8 +343,9 @@ func (p *Coroutines) HandleJobs() {
 			println("Warning: engine update > 1 seconds, please check your code !")
 		}
 	}
-	//fmt.Printf("curFrame%d ,taskCount %d ,curTime %f , moveCount %d \n", curFrame, taskCount, curTime, nextQueue.Count())
 	curQueue.Move(nextQueue)
+	return fmt.Sprintf("curFrame%d \t,taskCount %d\t ,curTime %f , moveCount %d\t", curFrame, taskCount, curTime, nextQueue.Count())
+
 }
 
 // -------------------------------------------------------------------------------------

@@ -56,7 +56,6 @@ func (p *Game) OnEngineRender(delta float32) {
 }
 
 func (p *Game) onStartAsync() {
-	gco.HasInited = false
 	initInput()
 	gamer := p.gamer_
 	if me, ok := gamer.(interface{ MainEntry() }); ok {
@@ -65,7 +64,7 @@ func (p *Game) onStartAsync() {
 	if !p.isRunned {
 		Gopt_Game_Run(gamer, "assets")
 	}
-	gco.HasInited = true
+	gco.OnInited()
 }
 
 func (p *Game) updateLogic() error {
