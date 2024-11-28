@@ -13,12 +13,15 @@ var (
 	curFrame                   int64
 	setTimeScaleCallback       func(float64)
 	startTimestamp             stime.Time
+	fps                        float64
 )
 
 func RealTimeSinceStart() float64 {
 	return stime.Since(startTimestamp).Seconds()
 }
-
+func FPS() float64 {
+	return fps
+}
 func Frame() int64 {
 	return curFrame
 }
@@ -52,16 +55,17 @@ func TimeSinceLevelLoad() float64 {
 }
 
 func Start(setTimeScaleCB func(float64)) {
-	Update(1, 0, 0, 0, 0)
+	Update(1, 0, 0, 0, 0, 30)
 	setTimeScaleCallback = setTimeScaleCB
 	startTimestamp = stime.Now()
 }
 
-func Update(scale float64, realDuration float64, duration float64, delta float64, unscaledDelta float64) {
+func Update(scale float64, realDuration float64, duration float64, delta float64, unscaledDelta float64, pfps float64) {
 	timeScale = scale
 	unscaledDeltaTime = unscaledDelta
 	unscaledTimeSinceLevelLoad = realDuration
 	timeSinceLevelLoad = duration
 	deltaTime = delta
 	curFrame += 1
+	fps = pfps
 }

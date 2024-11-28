@@ -19,9 +19,8 @@ func Wait(secs float64) float64 {
 	return time.TimeSinceLevelLoad() - startTime
 }
 func WaitNextFrame() float64 {
-	startTime := time.RealTimeSinceStart()
 	gco.WaitNextFrame()
-	return time.RealTimeSinceStart() - startTime
+	return time.DeltaTime()
 }
 func WaitMainThread(call func()) {
 	gco.WaitMainThread(call)

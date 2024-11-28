@@ -27,12 +27,8 @@ type threadImpl struct {
 	Obj      ThreadObj
 	stopped_ bool
 	frame    int
-	stack    string
 }
 
-func (p *threadImpl) keepStackInfo() {
-	//p.stack = getStack()
-}
 func (p *threadImpl) Stopped() bool {
 	return p.stopped_
 }
@@ -54,6 +50,7 @@ type Coroutines struct {
 	curId     int64
 
 	waitingFrame map[Thread]bool
+	debug        bool
 }
 
 const (
@@ -75,6 +72,7 @@ func New() *Coroutines {
 	p := &Coroutines{
 		suspended:    make(map[Thread]bool),
 		waitingFrame: make(map[Thread]bool),
+		debug:        false,
 	}
 	p.cond.L = &p.mutex
 	p.curQueue = NewQueue[*WaitJob]()
@@ -143,7 +141,7 @@ func (p *Coroutines) StopIf(filter func(th Thread) bool) {
 		}
 	}
 }
-func (p *Coroutines) GetActiveCount() int {
+func (p *Coroutines) getActiveCount() int {
 	p.mutex.Lock()
 	defer p.mutex.Unlock()
 	count := 0
@@ -152,13 +150,11 @@ func (p *Coroutines) GetActiveCount() int {
 			count++
 		}
 	}
-	//println("GetActiveCount", count)
 	return count
 }
 
 // Yield suspends a running coroutine.
 func (p *Coroutines) Yield(me Thread) {
-	me.keepStackInfo()
 	if p.Current() != me {
 		panic(ErrCannotYieldANonrunningThread)
 	}
@@ -179,7 +175,6 @@ func (p *Coroutines) Yield(me Thread) {
 
 // Resume resumes a suspended coroutine.
 func (p *Coroutines) Resume(me Thread) {
-	me.keepStackInfo()
 	for {
 		done := false
 		p.mutex.Lock()
@@ -204,7 +199,6 @@ func (p *Coroutines) markWaiting(me *threadImpl, isWaiting bool) {
 
 func (p *Coroutines) Wait(t float64) {
 	id := atomic.AddInt64(&p.curId, 1)
-	//println("Wait ", p.curId, id)
 	me := p.Current()
 	dstTime := time.TimeSinceLevelLoad() + t
 	go func() {
@@ -245,7 +239,7 @@ func (p *Coroutines) WaitNextFrame() {
 		<-done
 		p.Resume(me)
 		if time.Frame()-frame > 1 {
-			println("Warning!!!: WaitNextFrame wait too many frames, count=", time.Frame()-frame, "id", id)
+			println("Warning: Logic error! WaitNextFrame wait too many frames, count=", time.Frame()-frame, "id", id)
 		}
 	}()
 	p.markWaiting(me, true)
@@ -253,12 +247,12 @@ func (p *Coroutines) WaitNextFrame() {
 }
 
 func (p *Coroutines) WaitMainThread(call func()) {
-	//id := atomic.AddInt64(&p.curId, 1)
+	id := atomic.AddInt64(&p.curId, 1)
 	me := p.Current()
 	coro := func(isResume bool) {
 		done := make(chan int)
 		job := &WaitJob{
-			Id:   0,
+			Id:   id,
 			Type: waitTypeMainThread,
 			Call: func() {
 				call()
@@ -280,6 +274,7 @@ func (p *Coroutines) WaitMainThread(call func()) {
 		coro(false)
 	}
 }
+
 func (p *Coroutines) WaitToDo(fn func()) {
 	me := p.Current()
 	go func() {
@@ -290,6 +285,7 @@ func (p *Coroutines) WaitToDo(fn func()) {
 	p.markWaiting(me, true)
 	p.Yield(me)
 }
+
 func WaitForChan[T any](p *Coroutines, done chan T, data *T) {
 	me := p.Current()
 	go func() {
@@ -302,22 +298,16 @@ func WaitForChan[T any](p *Coroutines, done chan T, data *T) {
 }
 
 func (p *Coroutines) HandleJobs() {
-	timer := stime.Now()
-	msg := p.handleJobs()
-	timer2 := stime.Now()
-	delta := timer2.Sub(timer).Seconds()
-	fmt.Printf("%d %f ms %s \n", time.Frame(), delta, msg)
-}
-func (p *Coroutines) handleJobs() string {
+	timestamp := time.RealTimeSinceStart()
 	curQueue := p.curQueue
 	nextQueue := p.nextQueue
 	curFrame := time.Frame()
 	curTime := time.TimeSinceLevelLoad()
 	debugStartTime := time.RealTimeSinceStart()
 	taskCount := 0
-	for curQueue.Count() > 0 || !p.hasInited || p.GetActiveCount() > 0 {
+	for curQueue.Count() > 0 || !p.hasInited || p.getActiveCount() > 0 {
 		if curQueue.Count() == 0 {
-			stime.Sleep(stime.Microsecond * 1000) // sleep 0.05 ms
+			stime.Sleep(stime.Microsecond * 100) // sleep 0.1 ms
 			continue
 		}
 		task := curQueue.Dequeue()
@@ -328,41 +318,26 @@ func (p *Coroutines) handleJobs() string {
 			} else {
 				task.Call()
 				taskCount++
-				//println("frame call: ", task.Id)
 			}
 		case waitTypeTime:
-			//println("wait call:", task.Id)
 			if task.Time >= curTime {
 				nextQueue.Enqueue(task)
 			} else {
 				task.Call()
 			}
 		case waitTypeMainThread:
-			//println("main call:", task.Id)
 			task.Call()
 		}
 		if time.RealTimeSinceStart()-debugStartTime > 1 {
 			println("Warning: engine update > 1 seconds, please check your code !")
 		}
 	}
-	//}
 	nextCount := nextQueue.Count()
 	curQueue.Move(nextQueue)
-	return fmt.Sprintf("curFrame %d\t,taskCount %d\t ,curTime %f , moveCount %d\t", curFrame, taskCount, curTime, nextCount)
-
-}
-func getStack() string {
-	buf := make([]byte, 4096)
-	for {
-		n := runtime.Stack(buf, false)
-		if n < len(buf) {
-			buf = buf[:n]
-			break
-		}
-		// Increase buffer size and try again
-		buf = make([]byte, 2*len(buf))
+	delta := (time.RealTimeSinceStart() - timestamp) * 1000
+	if p.debug {
+		fmt.Printf("curFrame %d,useTime %fms,fps %d, taskCount %d,curTime %f , moveCount %d \n", curFrame, delta, int(time.FPS()), taskCount, curTime, nextCount)
 	}
-	return fmt.Sprintf("Current goroutine stack trace:\n%s\n", buf)
 }
 
 // -------------------------------------------------------------------------------------

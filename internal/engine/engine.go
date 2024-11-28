@@ -80,14 +80,13 @@ func onUpdate(delta float32) {
 	game.OnEngineUpdate(delta)
 	gco.HandleJobs()
 	game.OnEngineRender(delta)
-	calcfps()
 }
 
 func calcfps() {
 	timer := time.RealTimeSinceStart()
 	timeDiff := timer - debugTimer
 	frameDiff := float64(time.Frame() - debugLastFrame)
-	if timeDiff > 1 {
+	if timeDiff > 0.25 {
 		fps = frameDiff / timeDiff
 		debugLastFrame = time.Frame()
 		debugTimer = timer
@@ -106,7 +105,8 @@ func updateTime(delta float64) {
 	unscaledDeltaTime := curTime.Sub(lastTimestamp).Seconds()
 	lastTimestamp = curTime
 	timeScale := PlatformMgr.GetTimeScale()
-	time.Update(float64(timeScale), unscaledTimeSinceLevelLoad, timeSinceLevelLoad, deltaTime, unscaledDeltaTime)
+	calcfps()
+	time.Update(float64(timeScale), unscaledTimeSinceLevelLoad, timeSinceLevelLoad, deltaTime, unscaledDeltaTime, fps)
 }
 
 func onDestroy() {
