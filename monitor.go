@@ -63,7 +63,11 @@ type Monitor struct {
 func newMonitor(g reflect.Value, v specsp) (*Monitor, error) {
 	target := v["target"].(string)
 	val := v["val"].(string)
-	name := v["name"].(string)
+	label := v["label"].(string)
+	name := label
+	if v["name"] != nil {
+		name = v["name"].(string)
+	}
 	size := 1.0
 	if v["size"] != nil {
 		size, _ = tools.GetFloat(v["size"])
@@ -77,7 +81,6 @@ func newMonitor(g reflect.Value, v specsp) (*Monitor, error) {
 	if err != nil {
 		color = RGBA(0x28, 0x9c, 0xfc, 0xff)
 	}
-	label := v["label"].(string)
 	x := v["x"].(float64)
 	y := v["y"].(float64)
 	visible := v["visible"].(bool)
