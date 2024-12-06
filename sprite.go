@@ -63,7 +63,6 @@ type Sprite interface {
 	IEventSinks
 	Shape
 	Main()
-
 	Animate(name SpriteAnimationName)
 	Ask(msg interface{})
 	BounceOffEdge()
@@ -108,6 +107,7 @@ type Sprite interface {
 	IsCloned() bool
 	Move__0(step float64)
 	Move__1(step int)
+	Name() string
 	NextCostume()
 	OnCloned__0(onCloned func(data interface{}))
 	OnCloned__1(onCloned func())
@@ -164,9 +164,9 @@ type Sprite interface {
 	Turn__2(ti *TurningInfo)
 	TurnTo__0(sprite Sprite)
 	TurnTo__1(sprite SpriteName)
-	TurnTo__2(obj specialObj)
-	TurnTo__3(degree float64)
-	TurnTo__4(dir specialDir)
+	TurnTo__2(degree float64)
+	TurnTo__3(dir specialDir)
+	TurnTo__4(obj specialObj)
 	Visible() bool
 	Xpos() float64
 	Ypos() float64
@@ -1289,18 +1289,17 @@ func (p *SpriteImpl) TurnTo__1(sprite SpriteName) {
 	p.turnTo(sprite)
 }
 
-func (p *SpriteImpl) TurnTo__2(obj specialObj) {
-	p.turnTo(obj)
-}
-
-func (p *SpriteImpl) TurnTo__3(degree float64) {
+func (p *SpriteImpl) TurnTo__2(degree float64) {
 	p.turnTo(degree)
 }
 
-func (p *SpriteImpl) TurnTo__4(dir specialDir) {
+func (p *SpriteImpl) TurnTo__3(dir specialDir) {
 	p.turnTo(dir)
 }
 
+func (p *SpriteImpl) TurnTo__4(obj specialObj) {
+	p.turnTo(obj)
+}
 func (p *SpriteImpl) SetHeading(dir float64) {
 	p.setDirection(dir, false)
 }
