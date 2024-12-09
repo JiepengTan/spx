@@ -1,21 +1,28 @@
 var life int
 onStart => {
-	for {
+	for i := 1; i <= 1; i++ {
 		wait 0.3
 		clone
+
 	}
+	
 }
 
 onCloned => {
 	life = 3
-	setXYpos rand(-131, 131), 237
+	setXYpos rand(-0, 0), 200
 	show
 	for {
+		debugLog("====waitNextFrame ", this.GameFrame())
 		waitNextFrame
+		startTimer := realTimeSinceStart
 		changeYpos -48 * deltaTime
 		if touching(EdgeBottom) {
-			destroy
+			setXYpos xpos, 200
 		}
+		dt := (realTimeSinceStart - startTimer) *1000
+		debugLog("====frame ", gameFrame," dt = ", dt)
+		println("====frame ", this.GameFrame(), " dt = ", dt)
 	}
 }
 

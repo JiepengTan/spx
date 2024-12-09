@@ -106,6 +106,7 @@ func Gopt_Game_Gopx_GetWidget[T any](sg ShapeGetter, name string) *T {
 		log.Fatalln("Failed to build Go+ source:", err)
 	}
 
+	println("code : ", string(source))
 	code, err := ctx.RunFile("main.go", source, nil)
 	if err != nil {
 		log.Fatalln("Failed to run Go+ source:", err, " Code:", code)
