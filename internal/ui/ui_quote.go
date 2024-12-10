@@ -1,10 +1,10 @@
 package ui
 
 import (
-	. "github.com/realdream-ai/gdspx/pkg/engine"
 	"github.com/realdream-ai/mathf"
 
 	"github.com/goplus/spx/internal/engine"
+	. "github.com/goplus/spx/internal/engine"
 )
 
 type UiQuote struct {
@@ -29,10 +29,11 @@ func (pself *UiQuote) OnStart() {
 	pself.labelMsg = BindUI[UiNode](pself.GetId(), "C/LabelMsg")
 }
 
-func (pself *UiQuote) SetText(x, y float64, width, height float64, msg, description string) {
-	x, y = engine.SyncGetCameraLocalPosition(x, y)
-	engine.SyncUiSetGlobalPosition(pself.container.GetId(), WorldToScreen(x-width, y+height))
-	engine.SyncUiSetSize(pself.container.GetId(), mathf.NewVec2(width*2, height*2))
-	engine.SyncUiSetText(pself.labelMsg.GetId(), msg)
-	engine.SyncUiSetText(pself.labelDes.GetId(), description)
+func (pself *UiQuote) SetText(pos mathf.Vec2, width, height float64, msg, description string) {
+	pos = CameraMgr.GetLocalPosition(pos)
+	x, y := pos.X, pos.Y
+	UiMgr.SetGlobalPosition(pself.container.GetId(), WorldToUI(x-width, y+height))
+	UiMgr.SetSize(pself.container.GetId(), mathf.NewVec2(width*2, height*2))
+	UiMgr.SetText(pself.labelMsg.GetId(), msg)
+	UiMgr.SetText(pself.labelDes.GetId(), description)
 }

@@ -68,7 +68,7 @@ var (
 )
 
 func SetDebug(flags dbgFlags) {
-	debugLoad = (flags & DbgFlagLoad) != 0
+	debugLoad = true
 	debugInstr = (flags & DbgFlagInstr) != 0
 	debugEvent = (flags & DbgFlagEvent) != 0
 	debugPerf = (flags & DbgFlagPerf) != 0
@@ -115,7 +115,7 @@ type Game struct {
 }
 
 type Gamer interface {
-	engine.Gamer
+	engine.IGame
 	initGame(sprites []Sprite) *Game
 }
 
@@ -441,7 +441,7 @@ func (p *Game) loadIndex(g reflect.Value, proj *projConfig) (err error) {
 	if p.windowHeight_ > p.worldHeight_ {
 		p.windowHeight_ = p.worldHeight_
 	}
-	engine.SyncPlatformSetWindowSize(int64(p.windowWidth_), int64(p.windowHeight_))
+	engine.PlatformMgr.SetWindowSize(int64(p.windowWidth_), int64(p.windowHeight_))
 
 	p.Camera.init(p)
 
@@ -520,7 +520,7 @@ func (p *Game) setupBackdrop() {
 	scaleY := dstH / imgH
 	p.scale = 1
 	checkUpdateCostume(&p.baseObj, true)
-	engine.SyncSpriteSetScale(p.proxy.GetId(), mathf.NewVec2(scaleX, scaleY))
+	engine.SpriteMgr.SetScale(p.proxy.GetId(), mathf.NewVec2(scaleX, scaleY))
 }
 
 func (p *Game) endLoad(g reflect.Value, proj *projConfig) (err error) {
@@ -654,10 +654,10 @@ func (p *Game) runLoop(cfg *Config) (err error) {
 		engine.SyncSetRunnableOnUnfocused(true)
 	}
 	if cfg.FullScreen {
-		engine.SyncPlatformSetWindowFullscreen(true)
+		engine.PlatformMgr.SetWindowFullscreen(true)
 	}
 	p.initEventLoop()
-	engine.SyncPlatformSetWindowTitle(cfg.Title)
+	engine.PlatformMgr.SetWindowTitle(cfg.Title)
 	p.isRunned = true
 	return nil
 }
@@ -681,7 +681,7 @@ func (p *Game) currentTPS() float64 {
 type clicker interface {
 	threadObj
 	doWhenClick(this threadObj)
-	getProxy() *engine.ProxySprite
+	getProxy() *engine.SpriteProxy
 }
 
 func (p *Game) doWhenLeftButtonDown(ev *eventLeftButtonDown) {
@@ -693,7 +693,7 @@ func (p *Game) doWhenLeftButtonDown(ev *eventLeftButtonDown) {
 		if o, ok := item.(clicker); ok {
 			proxy := o.getProxy()
 			if proxy != nil {
-				isClicked := engine.SyncSpriteCheckCollisionWithPoint(proxy.GetId(), point, true)
+				isClicked := engine.SpriteMgr.CheckCollisionWithPoint(proxy.GetId(), point, true)
 				if isClicked && p.inputs.canTriggerClickEvent(proxy.GetId()) {
 					o.doWhenClick(o)
 					return
@@ -746,7 +746,7 @@ func (p *Game) inputEventLoop(me coroutine.Thread) int {
 	lastLbtnPressed := false
 	keyEvents := make([]engine.KeyEvent, 0)
 	for {
-		curLbtnPressed := engine.SyncInputGetMouseState(MOUSE_BUTTON_LEFT)
+		curLbtnPressed := engine.InputMgr.GetMouseState(MOUSE_BUTTON_LEFT)
 		if curLbtnPressed != lastLbtnPressed {
 			if lastLbtnPressed {
 				p.fireEvent(&eventLeftButtonUp{X: int(p.gMouseX), Y: int(p.gMouseY)})
@@ -1137,7 +1137,7 @@ func (p *Game) PrevBackdrop__1(wait bool) {
 // -----------------------------------------------------------------------------
 
 func (p *Game) KeyPressed(key Key) bool {
-	return engine.SyncInputGetKey(key)
+	return engine.InputMgr.GetKey(key)
 }
 
 func (p *Game) MouseX() float64 {
@@ -1149,7 +1149,7 @@ func (p *Game) MouseY() float64 {
 }
 
 func (p *Game) MousePressed() bool {
-	return engine.SyncInputMousePressed()
+	return engine.InputMgr.MousePressed()
 }
 
 func (p *Game) getMousePos() (x, y float64) {
@@ -1227,7 +1227,7 @@ type SoundName = string
 
 func hasAsset(path string) bool {
 	finalPath := engine.ToAssetPath(path)
-	return engine.SyncResHasFile(finalPath)
+	return engine.ResMgr.HasFile(finalPath)
 }
 
 func (p *Game) canBindSound(name string) bool {

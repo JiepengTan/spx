@@ -814,7 +814,7 @@ func doAnimation(p *SpriteImpl, info *animState) {
 		p.g.Play__3(info.OnStart.Play)
 	}
 	if info.AniType == aniTypeFrame {
-		for engine.SyncSpriteIsPlayingAnim(p.proxy.Id) {
+		for engine.SpriteMgr.IsPlayingAnim(p.proxy.Id) {
 			if info.IsCanceled {
 				break
 			}
@@ -1503,7 +1503,7 @@ func (p *SpriteImpl) checkTouchingScreen(where int) (touching int) {
 	if p.proxy == nil {
 		return 0
 	}
-	value := engine.SyncPhysicCheckTouchedCameraBoundary(p.proxy.Id, int64(where))
+	value := engine.PhysicMgr.CheckTouchedCameraBoundary(p.proxy.Id, int64(where))
 	if value {
 		return where
 	}

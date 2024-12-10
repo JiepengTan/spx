@@ -19,7 +19,8 @@ package spx
 import (
 	"log"
 
-	"github.com/goplus/spx/internal/engine"
+	. "github.com/goplus/spx/internal/engine"
+	"github.com/realdream-ai/mathf"
 )
 
 type Camera struct {
@@ -32,11 +33,12 @@ func (c *Camera) init(g *Game) {
 }
 
 func (c *Camera) GetXYpos() (float64, float64) {
-	return engine.SyncGetCameraPosition()
+	pos := CameraMgr.GetPosition()
+	return pos.X, pos.Y
 }
 
 func (c *Camera) SetXYpos(x float64, y float64) {
-	engine.SyncSetCameraPosition(x, y)
+	CameraMgr.SetPosition(mathf.NewVec2(x, y))
 }
 
 func (c *Camera) ChangeXYpos(x float64, y float64) {

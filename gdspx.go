@@ -192,7 +192,7 @@ func (*Game) updatePhysic() {
 	}
 }
 
-func initSpritePhysicInfo(sprite *SpriteImpl, proxy *engine.ProxySprite) {
+func initSpritePhysicInfo(sprite *SpriteImpl, proxy *engine.SpriteProxy) {
 	// update collision layers
 	proxy.SetTriggerLayer(sprite.triggerLayer)
 	proxy.SetTriggerMask(sprite.triggerMask)
@@ -333,5 +333,5 @@ func registerAnimToEngine(spriteName string, animName string, animCfg *aniConfig
 			}
 		}
 	}
-	engine.SyncResCreateAnimation(spriteName, animName, sb.String(), int64(animCfg.FrameFps), isCostumeSet)
+	engine.ResMgr.CreateAnimation(spriteName, animName, sb.String(), int64(animCfg.FrameFps), isCostumeSet)
 }

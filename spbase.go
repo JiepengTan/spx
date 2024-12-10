@@ -128,7 +128,7 @@ func newCostume(base string, c *costumeConfig) *costume {
 
 func getCustomeAssetSize(path string) mathf.Vec2 {
 	assetPath := engine.ToAssetPath(path)
-	return engine.SyncResGetImageSize(assetPath)
+	return engine.ResMgr.GetImageSize(assetPath)
 }
 
 func toBitmapResolution(v int) int {
@@ -150,7 +150,7 @@ func (p *costume) isAltas() bool {
 type baseObj struct {
 	costumes       []*costume
 	costumeIndex_  int
-	proxy          *engine.ProxySprite
+	proxy          *engine.SpriteProxy
 	scale          float64
 	HasDestroyed   bool
 	isCostumeSet   bool
@@ -162,7 +162,7 @@ func (p *baseObj) setCustumeIndex(value int) {
 	p.isCostumeDirty = true
 }
 
-func (p *baseObj) getProxy() *engine.ProxySprite {
+func (p *baseObj) getProxy() *engine.SpriteProxy {
 	return p.proxy
 }
 

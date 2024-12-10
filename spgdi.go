@@ -17,7 +17,7 @@
 package spx
 
 import (
-	"github.com/goplus/spx/internal/engine"
+	. "github.com/goplus/spx/internal/engine"
 	"github.com/realdream-ai/mathf"
 )
 
@@ -30,12 +30,12 @@ func (p *SpriteImpl) touchPoint(x, y float64) bool {
 	if p.proxy == nil {
 		return false
 	}
-	return engine.SyncSpriteCheckCollisionWithPoint(p.proxy.GetId(), mathf.NewVec2(x, y), true)
+	return SpriteMgr.CheckCollisionWithPoint(p.proxy.GetId(), mathf.NewVec2(x, y), true)
 }
 
 func (p *SpriteImpl) touchingSprite(dst *SpriteImpl) bool {
 	if p.proxy == nil || dst.proxy == nil {
 		return false
 	}
-	return engine.SyncSpriteCheckCollision(p.proxy.GetId(), dst.proxy.GetId(), true, true)
+	return SpriteMgr.CheckCollision(p.proxy.GetId(), dst.proxy.GetId(), true, true)
 }

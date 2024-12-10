@@ -4,10 +4,10 @@ import (
 	"math"
 	"strings"
 
-	. "github.com/realdream-ai/gdspx/pkg/engine"
-
 	"github.com/goplus/spx/internal/engine"
+	. "github.com/goplus/spx/internal/engine"
 	"github.com/goplus/spx/internal/text"
+	"github.com/realdream-ai/mathf"
 )
 
 const (
@@ -37,12 +37,13 @@ func (pself *UiSay) OnStart() {
 }
 
 func (pself *UiSay) SetText(winX, winY float64, x, y float64, w, h float64, msg string) {
-	x, y = engine.SyncGetCameraLocalPosition(x, y)
+	camPos := CameraMgr.GetLocalPosition(mathf.NewVec2(x, y))
+	x, y = camPos.X, camPos.Y
 	isLeft := x <= 0
 	xPos := x
 	yPos := y + h/2
-	engine.SyncUiSetVisible(pself.vboxL.GetId(), isLeft)
-	engine.SyncUiSetVisible(pself.vboxR.GetId(), !isLeft)
+	UiMgr.SetVisible(pself.vboxL.GetId(), isLeft)
+	UiMgr.SetVisible(pself.vboxR.GetId(), !isLeft)
 	label := pself.labelL.GetId()
 	if !isLeft {
 		label = pself.labelR.GetId()
@@ -58,6 +59,6 @@ func (pself *UiSay) SetText(winX, winY float64, x, y float64, w, h float64, msg 
 	yPos = math.Max(-winY/2, math.Min(yPos, maxYPos))
 	xPos = math.Max(-winX/2, math.Min(x, winX/2))
 
-	engine.SyncUiSetPosition(pself.GetId(), WorldToScreen(xPos, yPos))
-	engine.SyncUiSetText(label, finalMsg)
+	UiMgr.SetPosition(pself.GetId(), WorldToUI(xPos, yPos))
+	UiMgr.SetText(label, finalMsg)
 }

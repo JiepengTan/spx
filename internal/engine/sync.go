@@ -1,22 +1,29 @@
 package engine
 
 import (
-	. "github.com/realdream-ai/gdspx/pkg/engine"
-	. "github.com/realdream-ai/mathf"
+	gdx "github.com/realdream-ai/gdspx/pkg/engine"
 )
 
 // =============== factory ===================
+
+// it's always called in main thread
+func BindUI[T any](parentNode gdx.Object, path string) *T {
+	return gdx.BindUI[T](parentNode, path)
+}
+func CreateEmptySprite[T any]() *T {
+	return gdx.CreateEmptySprite[T]()
+}
 func SyncCreateUiNode[T any](path string) *T {
 	var _ret1 *T
 	WaitMainThread(func() {
-		_ret1 = CreateUI[T](path)
+		_ret1 = gdx.CreateUI[T](path)
 	})
 	return _ret1
 }
 func SyncCreateEngineUiNode[T any](path string) *T {
 	var _ret1 *T
 	WaitMainThread(func() {
-		_ret1 = CreateEngineUI[T](path)
+		_ret1 = gdx.CreateEngineUI[T](path)
 	})
 	return _ret1
 }
@@ -24,7 +31,7 @@ func SyncCreateEngineUiNode[T any](path string) *T {
 func SyncCreateSprite[T any]() *T {
 	var _ret1 *T
 	WaitMainThread(func() {
-		_ret1 = CreateSprite[T]()
+		_ret1 = gdx.CreateSprite[T]()
 	})
 	return _ret1
 }
@@ -32,31 +39,26 @@ func SyncCreateSprite[T any]() *T {
 func SyncCreateEmptySprite[T any]() *T {
 	var _ret1 *T
 	WaitMainThread(func() {
-		_ret1 = CreateEmptySprite[T]()
+		_ret1 = gdx.CreateEmptySprite[T]()
 	})
 	return _ret1
 }
 
-func SyncNewBackdropProxy(obj interface{}, path string, renderScale float64) *ProxySprite {
-	var _ret1 *ProxySprite
+func SyncNewBackdropProxy(obj interface{}, path string, renderScale float64) *SpriteProxy {
+	var _ret1 *SpriteProxy
 	WaitMainThread(func() {
-		_ret1 = newBackdropProxy(obj, path, renderScale)
+		_ret1 := gdx.CreateEmptySprite[SpriteProxy]()
+		_ret1.Target = obj
+		_ret1.SetZIndex(-1)
+		_ret1.DisablePhysic()
+		_ret1.UpdateTexture(path, renderScale)
 	})
 	return _ret1
-}
-
-func newBackdropProxy(obj interface{}, path string, renderScale float64) *ProxySprite {
-	ret := CreateEmptySprite[ProxySprite]()
-	ret.Target = obj
-	ret.SetZIndex(-1)
-	ret.DisablePhysic()
-	ret.UpdateTexture(path, renderScale)
-	return ret
 }
 
 // =============== input ===================
-func SyncInputMousePressed() bool {
-	return SyncInputGetMouseState(0) || SyncInputGetMouseState(1)
+func (pself *inputMgr) MousePressed() bool {
+	return InputMgr.GetMouseState(0) || InputMgr.GetMouseState(1)
 }
 
 // =============== window ===================
@@ -67,13 +69,13 @@ func SyncSetRunnableOnUnfocused(flag bool) {
 }
 
 func SyncReadAllText(path string) string {
-	return SyncResReadAllText(path)
+	return ResMgr.ReadAllText(path)
 }
 
 // =============== setting ===================
 
 func SyncSetDebugMode(isDebug bool) {
-	SyncPlatformSetDebugMode(isDebug)
+	PlatformMgr.SetDebugMode(isDebug)
 }
 
 // =============== setting ===================
@@ -108,22 +110,11 @@ func SyncWorldToScreen(x, y float64) (float64, float64) {
 	return _ret1, _ret2
 }
 
-func SyncGetCameraLocalPosition(x, y float64) (float64, float64) {
-	posX, posY := SyncGetCameraPosition()
-	x -= posX
-	y -= posY
-	return x, y
-}
-func SyncGetCameraPosition() (float64, float64) {
-	pos := SyncCameraGetCameraPosition()
-	return float64(pos.X), -float64(pos.Y)
-}
-func SyncSetCameraPosition(x, y float64) {
-	SyncCameraSetCameraPosition(NewVec2(float64(x), -float64(y)))
-}
-
 func SyncReloadScene() {
 	WaitMainThread(func() {
-		ClearAllSprites()
+		gdx.ClearAllSprites()
 	})
+}
+func DegToRad(p_y float64) float64 {
+	return p_y * (gdx.Math_PI / 180.0)
 }

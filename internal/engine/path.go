@@ -20,8 +20,8 @@ type projectConfig struct {
 
 func SetAssetDir(dir string) {
 	// load config
-	if SyncResHasFile(configPath) {
-		configJson := SyncResReadAllText(configPath)
+	if ResMgr.HasFile(configPath) {
+		configJson := ResMgr.ReadAllText(configPath)
 		var config projectConfig
 		json.Unmarshal([]byte(configJson), &config)
 		extassetDir = config.ExtAsset

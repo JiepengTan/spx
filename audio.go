@@ -17,7 +17,7 @@
 package spx
 
 import (
-	"github.com/goplus/spx/internal/engine"
+	. "github.com/goplus/spx/internal/engine"
 	"github.com/realdream-ai/mathf"
 )
 
@@ -58,7 +58,7 @@ func (p *soundMgr) play(media Sound, opts *PlayOptions) (err error) {
 }
 
 func (p *soundMgr) stopAll() {
-	engine.SyncAudioStopAll()
+	AudioMgr.StopAll()
 }
 
 func (p *soundMgr) playBgm(media Sound, action PlayAction) (err error) {
@@ -78,34 +78,34 @@ func (p *soundMgr) playBgm(media Sound, action PlayAction) (err error) {
 }
 
 func (p *soundMgr) playSfx(media Sound) (err error) {
-	engine.SyncAudioPlaySfx(engine.ToAssetPath(media.Path))
+	AudioMgr.PlaySfx(ToAssetPath(media.Path))
 	return
 }
 
 func (p *soundMgr) playMusic(media Sound) (err error) {
-	engine.SyncAudioPlayMusic(engine.ToAssetPath(media.Path))
+	AudioMgr.PlayMusic(ToAssetPath(media.Path))
 	return
 }
 
 func (p *soundMgr) stopMusic(media Sound) {
-	engine.SyncAudioPauseMusic()
+	AudioMgr.PauseMusic()
 }
 
 func (p *soundMgr) pauseMusic(media Sound) {
-	engine.SyncAudioPauseMusic()
+	AudioMgr.PauseMusic()
 }
 
 func (p *soundMgr) resumeMusic(media Sound) {
-	engine.SyncAudioResumeMusic()
+	AudioMgr.ResumeMusic()
 }
 
 func (p *soundMgr) getVolume() float64 {
-	volume := engine.SyncAudioGetMasterVolume()
+	volume := AudioMgr.GetMasterVolume()
 	return float64(volume)
 }
 
 func (p *soundMgr) setVolume(volume float64) {
-	engine.SyncAudioSetMasterVolume(volume)
+	AudioMgr.SetMasterVolume(volume)
 }
 
 func (p *soundMgr) changeVolume(delta float64) {
@@ -115,12 +115,12 @@ func (p *soundMgr) changeVolume(delta float64) {
 }
 
 func (p *soundMgr) getSfxVolume() float64 {
-	volume := engine.SyncAudioGetSfxVolume()
+	volume := AudioMgr.GetSfxVolume()
 	return float64(volume)
 }
 
 func (p *soundMgr) setSfxVolume(volume float64) {
-	engine.SyncAudioSetSfxVolume(volume)
+	AudioMgr.SetSfxVolume(volume)
 }
 
 func (p *soundMgr) changeSfxVolume(delta float64) {
@@ -130,12 +130,12 @@ func (p *soundMgr) changeSfxVolume(delta float64) {
 }
 
 func (p *soundMgr) getMusicVolume() float64 {
-	volume := engine.SyncAudioGetMusicVolume()
+	volume := AudioMgr.GetMusicVolume()
 	return float64(volume)
 }
 
 func (p *soundMgr) setMusicVolume(volume float64) {
-	engine.SyncAudioSetMusicVolume(volume)
+	AudioMgr.SetMusicVolume(volume)
 }
 
 func (p *soundMgr) changeMusicVolume(delta float64) {

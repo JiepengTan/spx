@@ -3,11 +3,11 @@ package ui
 import (
 	"math"
 
-	. "github.com/realdream-ai/gdspx/pkg/engine"
 	"github.com/realdream-ai/mathf"
 	. "github.com/realdream-ai/mathf"
 
 	"github.com/goplus/spx/internal/engine"
+	. "github.com/goplus/spx/internal/engine"
 )
 
 type UiMeasure struct {
@@ -36,16 +36,16 @@ func (pself *UiMeasure) UpdateInfo(x, y float64, length, heading float64, name s
 	rad := DegToRad(heading - 90)
 	s, c := math.Sincos(float64(rad))
 	halfX, halfY := (c * length / 2), (s * length / 2)
-	pos := WorldToScreen(x, y)
+	pos := WorldToUI(x, y)
 	labelPos := pos
 	pos.X -= float64(halfX)
 	pos.Y -= float64(halfY)
-	engine.SyncUiSetGlobalPosition(pself.container.GetId(), pos)
-	engine.SyncUiSetColor(pself.container.GetId(), color)
-	engine.SyncUiSetSize(pself.container.GetId(), mathf.NewVec2(length+extraLen, 26))
-	engine.SyncUiSetRotation(pself.container.GetId(), rad)
+	UiMgr.SetGlobalPosition(pself.container.GetId(), pos)
+	UiMgr.SetColor(pself.container.GetId(), color)
+	UiMgr.SetSize(pself.container.GetId(), mathf.NewVec2(length+extraLen, 26))
+	UiMgr.SetRotation(pself.container.GetId(), rad)
 
-	engine.SyncUiSetGlobalPosition(pself.labelContainer.GetId(), labelPos)
-	engine.SyncUiSetColor(pself.labelContainer.GetId(), color)
-	engine.SyncUiSetText(pself.labelValue.GetId(), name)
+	UiMgr.SetGlobalPosition(pself.labelContainer.GetId(), labelPos)
+	UiMgr.SetColor(pself.labelContainer.GetId(), color)
+	UiMgr.SetText(pself.labelValue.GetId(), name)
 }

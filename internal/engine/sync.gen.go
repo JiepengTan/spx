@@ -8,1155 +8,1211 @@
 package engine
 
 import (
-	. "github.com/realdream-ai/gdspx/pkg/engine"
+	gdx "github.com/realdream-ai/gdspx/pkg/engine"
 	. "github.com/realdream-ai/mathf"
 )
 
+var AudioMgr audioMgr
+var CameraMgr cameraMgr
+var InputMgr inputMgr
+var PhysicMgr physicMgr
+var PlatformMgr platformMgr
+var ResMgr resMgr
+var SceneMgr sceneMgr
+var SpriteMgr spriteMgr
+var UiMgr uiMgr
+
+type audioMgrImpl struct {
+}
+type audioMgr struct {
+	audioMgrImpl
+}
+type cameraMgrImpl struct {
+}
+type cameraMgr struct {
+	cameraMgrImpl
+}
+type inputMgrImpl struct {
+}
+type inputMgr struct {
+	inputMgrImpl
+}
+type physicMgrImpl struct {
+}
+type physicMgr struct {
+	physicMgrImpl
+}
+type platformMgrImpl struct {
+}
+type platformMgr struct {
+	platformMgrImpl
+}
+type resMgrImpl struct {
+}
+type resMgr struct {
+	resMgrImpl
+}
+type sceneMgrImpl struct {
+}
+type sceneMgr struct {
+	sceneMgrImpl
+}
+type spriteMgrImpl struct {
+}
+type spriteMgr struct {
+	spriteMgrImpl
+}
+type uiMgrImpl struct {
+}
+type uiMgr struct {
+	uiMgrImpl
+}
+
 // IAudioMgr
-func SyncAudioStopAll() {
+func (pself *audioMgrImpl) StopAll() {
 	WaitMainThread(func() {
-		AudioMgr.StopAll()
+		gdx.AudioMgr.StopAll()
 	})
 }
-func SyncAudioPlaySfx(path string) {
+func (pself *audioMgrImpl) PlaySfx(path string) {
 	WaitMainThread(func() {
-		AudioMgr.PlaySfx(path)
+		gdx.AudioMgr.PlaySfx(path)
 	})
 }
-func SyncAudioPlayMusic(path string) {
+func (pself *audioMgrImpl) PlayMusic(path string) {
 	WaitMainThread(func() {
-		AudioMgr.PlayMusic(path)
+		gdx.AudioMgr.PlayMusic(path)
 	})
 }
-func SyncAudioPauseMusic() {
+func (pself *audioMgrImpl) PauseMusic() {
 	WaitMainThread(func() {
-		AudioMgr.PauseMusic()
+		gdx.AudioMgr.PauseMusic()
 	})
 }
-func SyncAudioResumeMusic() {
+func (pself *audioMgrImpl) ResumeMusic() {
 	WaitMainThread(func() {
-		AudioMgr.ResumeMusic()
+		gdx.AudioMgr.ResumeMusic()
 	})
 }
-func SyncAudioGetMusicTimer() float64 {
+func (pself *audioMgrImpl) GetMusicTimer() float64 {
 	var _ret1 float64
 	WaitMainThread(func() {
-		_ret1 = AudioMgr.GetMusicTimer()
+		_ret1 = gdx.AudioMgr.GetMusicTimer()
 	})
 	return _ret1
 }
-func SyncAudioSetMusicTimer(time float64) {
+func (pself *audioMgrImpl) SetMusicTimer(time float64) {
 	WaitMainThread(func() {
-		AudioMgr.SetMusicTimer(time)
+		gdx.AudioMgr.SetMusicTimer(time)
 	})
 }
-func SyncAudioIsMusicPlaying() bool {
+func (pself *audioMgrImpl) IsMusicPlaying() bool {
 	var _ret1 bool
 	WaitMainThread(func() {
-		_ret1 = AudioMgr.IsMusicPlaying()
+		_ret1 = gdx.AudioMgr.IsMusicPlaying()
 	})
 	return _ret1
 }
-func SyncAudioSetSfxVolume(volume float64) {
+func (pself *audioMgrImpl) SetSfxVolume(volume float64) {
 	WaitMainThread(func() {
-		AudioMgr.SetSfxVolume(volume)
+		gdx.AudioMgr.SetSfxVolume(volume)
 	})
 }
-func SyncAudioGetSfxVolume() float64 {
+func (pself *audioMgrImpl) GetSfxVolume() float64 {
 	var _ret1 float64
 	WaitMainThread(func() {
-		_ret1 = AudioMgr.GetSfxVolume()
+		_ret1 = gdx.AudioMgr.GetSfxVolume()
 	})
 	return _ret1
 }
-func SyncAudioSetMusicVolume(volume float64) {
+func (pself *audioMgrImpl) SetMusicVolume(volume float64) {
 	WaitMainThread(func() {
-		AudioMgr.SetMusicVolume(volume)
+		gdx.AudioMgr.SetMusicVolume(volume)
 	})
 }
-func SyncAudioGetMusicVolume() float64 {
+func (pself *audioMgrImpl) GetMusicVolume() float64 {
 	var _ret1 float64
 	WaitMainThread(func() {
-		_ret1 = AudioMgr.GetMusicVolume()
+		_ret1 = gdx.AudioMgr.GetMusicVolume()
 	})
 	return _ret1
 }
-func SyncAudioSetMasterVolume(volume float64) {
+func (pself *audioMgrImpl) SetMasterVolume(volume float64) {
 	WaitMainThread(func() {
-		AudioMgr.SetMasterVolume(volume)
+		gdx.AudioMgr.SetMasterVolume(volume)
 	})
 }
-func SyncAudioGetMasterVolume() float64 {
+func (pself *audioMgrImpl) GetMasterVolume() float64 {
 	var _ret1 float64
 	WaitMainThread(func() {
-		_ret1 = AudioMgr.GetMasterVolume()
+		_ret1 = gdx.AudioMgr.GetMasterVolume()
 	})
 	return _ret1
 }
 
 // ICameraMgr
-func SyncCameraGetCameraPosition() Vec2 {
+func (pself *cameraMgrImpl) GetCameraPosition() Vec2 {
 	var _ret1 Vec2
 	WaitMainThread(func() {
-		_ret1 = CameraMgr.GetCameraPosition()
+		_ret1 = gdx.CameraMgr.GetCameraPosition()
 	})
 	return _ret1
 }
-func SyncCameraSetCameraPosition(position Vec2) {
+func (pself *cameraMgrImpl) SetCameraPosition(position Vec2) {
 	WaitMainThread(func() {
-		CameraMgr.SetCameraPosition(position)
+		gdx.CameraMgr.SetCameraPosition(position)
 	})
 }
-func SyncCameraGetCameraZoom() Vec2 {
+func (pself *cameraMgrImpl) GetCameraZoom() Vec2 {
 	var _ret1 Vec2
 	WaitMainThread(func() {
-		_ret1 = CameraMgr.GetCameraZoom()
+		_ret1 = gdx.CameraMgr.GetCameraZoom()
 	})
 	return _ret1
 }
-func SyncCameraSetCameraZoom(size Vec2) {
+func (pself *cameraMgrImpl) SetCameraZoom(size Vec2) {
 	WaitMainThread(func() {
-		CameraMgr.SetCameraZoom(size)
+		gdx.CameraMgr.SetCameraZoom(size)
 	})
 }
-func SyncCameraGetViewportRect() Rect2 {
+func (pself *cameraMgrImpl) GetViewportRect() Rect2 {
 	var _ret1 Rect2
 	WaitMainThread(func() {
-		_ret1 = CameraMgr.GetViewportRect()
+		_ret1 = gdx.CameraMgr.GetViewportRect()
 	})
 	return _ret1
 }
 
 // IInputMgr
-func SyncInputGetMousePos() Vec2 {
+func (pself *inputMgrImpl) GetMousePos() Vec2 {
 	var _ret1 Vec2
 	WaitMainThread(func() {
-		_ret1 = InputMgr.GetMousePos()
+		_ret1 = gdx.InputMgr.GetMousePos()
 	})
 	return _ret1
 }
-func SyncInputGetKey(key int64) bool {
+func (pself *inputMgrImpl) GetKey(key int64) bool {
 	var _ret1 bool
 	WaitMainThread(func() {
-		_ret1 = InputMgr.GetKey(key)
+		_ret1 = gdx.InputMgr.GetKey(key)
 	})
 	return _ret1
 }
-func SyncInputGetMouseState(mouse_id int64) bool {
+func (pself *inputMgrImpl) GetMouseState(mouse_id int64) bool {
 	var _ret1 bool
 	WaitMainThread(func() {
-		_ret1 = InputMgr.GetMouseState(mouse_id)
+		_ret1 = gdx.InputMgr.GetMouseState(mouse_id)
 	})
 	return _ret1
 }
-func SyncInputGetKeyState(key int64) int64 {
+func (pself *inputMgrImpl) GetKeyState(key int64) int64 {
 	var _ret1 int64
 	WaitMainThread(func() {
-		_ret1 = InputMgr.GetKeyState(key)
+		_ret1 = gdx.InputMgr.GetKeyState(key)
 	})
 	return _ret1
 }
-func SyncInputGetAxis(neg_action string, pos_action string) float64 {
+func (pself *inputMgrImpl) GetAxis(neg_action string, pos_action string) float64 {
 	var _ret1 float64
 	WaitMainThread(func() {
-		_ret1 = InputMgr.GetAxis(neg_action, pos_action)
+		_ret1 = gdx.InputMgr.GetAxis(neg_action, pos_action)
 	})
 	return _ret1
 }
-func SyncInputIsActionPressed(action string) bool {
+func (pself *inputMgrImpl) IsActionPressed(action string) bool {
 	var _ret1 bool
 	WaitMainThread(func() {
-		_ret1 = InputMgr.IsActionPressed(action)
+		_ret1 = gdx.InputMgr.IsActionPressed(action)
 	})
 	return _ret1
 }
-func SyncInputIsActionJustPressed(action string) bool {
+func (pself *inputMgrImpl) IsActionJustPressed(action string) bool {
 	var _ret1 bool
 	WaitMainThread(func() {
-		_ret1 = InputMgr.IsActionJustPressed(action)
+		_ret1 = gdx.InputMgr.IsActionJustPressed(action)
 	})
 	return _ret1
 }
-func SyncInputIsActionJustReleased(action string) bool {
+func (pself *inputMgrImpl) IsActionJustReleased(action string) bool {
 	var _ret1 bool
 	WaitMainThread(func() {
-		_ret1 = InputMgr.IsActionJustReleased(action)
+		_ret1 = gdx.InputMgr.IsActionJustReleased(action)
 	})
 	return _ret1
 }
 
 // IPhysicMgr
-func SyncPhysicRaycast(from Vec2, to Vec2, collision_mask int64) Object {
-	var _ret1 Object
+func (pself *physicMgrImpl) Raycast(from Vec2, to Vec2, collision_mask int64) gdx.Object {
+	var _ret1 gdx.Object
 	WaitMainThread(func() {
-		_ret1 = PhysicMgr.Raycast(from, to, collision_mask)
+		_ret1 = gdx.PhysicMgr.Raycast(from, to, collision_mask)
 	})
 	return _ret1
 }
-func SyncPhysicCheckCollision(from Vec2, to Vec2, collision_mask int64, collide_with_areas bool, collide_with_bodies bool) bool {
+func (pself *physicMgrImpl) CheckCollision(from Vec2, to Vec2, collision_mask int64, collide_with_areas bool, collide_with_bodies bool) bool {
 	var _ret1 bool
 	WaitMainThread(func() {
-		_ret1 = PhysicMgr.CheckCollision(from, to, collision_mask, collide_with_areas, collide_with_bodies)
+		_ret1 = gdx.PhysicMgr.CheckCollision(from, to, collision_mask, collide_with_areas, collide_with_bodies)
 	})
 	return _ret1
 }
-func SyncPhysicCheckTouchedCameraBoundary(obj Object, board_type int64) bool {
+func (pself *physicMgrImpl) CheckTouchedCameraBoundary(obj gdx.Object, board_type int64) bool {
 	var _ret1 bool
 	WaitMainThread(func() {
-		_ret1 = PhysicMgr.CheckTouchedCameraBoundary(obj, board_type)
+		_ret1 = gdx.PhysicMgr.CheckTouchedCameraBoundary(obj, board_type)
 	})
 	return _ret1
 }
 
 // IPlatformMgr
-func SyncPlatformSetWindowPosition(pos Vec2) {
+func (pself *platformMgrImpl) SetWindowPosition(pos Vec2) {
 	WaitMainThread(func() {
-		PlatformMgr.SetWindowPosition(pos)
+		gdx.PlatformMgr.SetWindowPosition(pos)
 	})
 }
-func SyncPlatformGetWindowPosition() Vec2 {
+func (pself *platformMgrImpl) GetWindowPosition() Vec2 {
 	var _ret1 Vec2
 	WaitMainThread(func() {
-		_ret1 = PlatformMgr.GetWindowPosition()
+		_ret1 = gdx.PlatformMgr.GetWindowPosition()
 	})
 	return _ret1
 }
-func SyncPlatformSetWindowSize(width int64, height int64) {
+func (pself *platformMgrImpl) SetWindowSize(width int64, height int64) {
 	WaitMainThread(func() {
-		PlatformMgr.SetWindowSize(width, height)
+		gdx.PlatformMgr.SetWindowSize(width, height)
 	})
 }
-func SyncPlatformGetWindowSize() Vec2 {
+func (pself *platformMgrImpl) GetWindowSize() Vec2 {
 	var _ret1 Vec2
 	WaitMainThread(func() {
-		_ret1 = PlatformMgr.GetWindowSize()
+		_ret1 = gdx.PlatformMgr.GetWindowSize()
 	})
 	return _ret1
 }
-func SyncPlatformSetWindowTitle(title string) {
+func (pself *platformMgrImpl) SetWindowTitle(title string) {
 	WaitMainThread(func() {
-		PlatformMgr.SetWindowTitle(title)
+		gdx.PlatformMgr.SetWindowTitle(title)
 	})
 }
-func SyncPlatformGetWindowTitle() string {
+func (pself *platformMgrImpl) GetWindowTitle() string {
 	var _ret1 string
 	WaitMainThread(func() {
-		_ret1 = PlatformMgr.GetWindowTitle()
+		_ret1 = gdx.PlatformMgr.GetWindowTitle()
 	})
 	return _ret1
 }
-func SyncPlatformSetWindowFullscreen(enable bool) {
+func (pself *platformMgrImpl) SetWindowFullscreen(enable bool) {
 	WaitMainThread(func() {
-		PlatformMgr.SetWindowFullscreen(enable)
+		gdx.PlatformMgr.SetWindowFullscreen(enable)
 	})
 }
-func SyncPlatformIsWindowFullscreen() bool {
+func (pself *platformMgrImpl) IsWindowFullscreen() bool {
 	var _ret1 bool
 	WaitMainThread(func() {
-		_ret1 = PlatformMgr.IsWindowFullscreen()
+		_ret1 = gdx.PlatformMgr.IsWindowFullscreen()
 	})
 	return _ret1
 }
-func SyncPlatformSetDebugMode(enable bool) {
+func (pself *platformMgrImpl) SetDebugMode(enable bool) {
 	WaitMainThread(func() {
-		PlatformMgr.SetDebugMode(enable)
+		gdx.PlatformMgr.SetDebugMode(enable)
 	})
 }
-func SyncPlatformIsDebugMode() bool {
+func (pself *platformMgrImpl) IsDebugMode() bool {
 	var _ret1 bool
 	WaitMainThread(func() {
-		_ret1 = PlatformMgr.IsDebugMode()
+		_ret1 = gdx.PlatformMgr.IsDebugMode()
 	})
 	return _ret1
 }
-func SyncPlatformGetTimeScale() float64 {
+func (pself *platformMgrImpl) GetTimeScale() float64 {
 	var _ret1 float64
 	WaitMainThread(func() {
-		_ret1 = PlatformMgr.GetTimeScale()
+		_ret1 = gdx.PlatformMgr.GetTimeScale()
 	})
 	return _ret1
 }
-func SyncPlatformSetTimeScale(time_scale float64) {
+func (pself *platformMgrImpl) SetTimeScale(time_scale float64) {
 	WaitMainThread(func() {
-		PlatformMgr.SetTimeScale(time_scale)
+		gdx.PlatformMgr.SetTimeScale(time_scale)
 	})
 }
 
 // IResMgr
-func SyncResCreateAnimation(sprite_type_name string, anim_name string, context string, fps int64, is_altas bool) {
+func (pself *resMgrImpl) CreateAnimation(sprite_type_name string, anim_name string, context string, fps int64, is_altas bool) {
 	WaitMainThread(func() {
-		ResMgr.CreateAnimation(sprite_type_name, anim_name, context, fps, is_altas)
+		gdx.ResMgr.CreateAnimation(sprite_type_name, anim_name, context, fps, is_altas)
 	})
 }
-func SyncResSetLoadMode(is_direct_mode bool) {
+func (pself *resMgrImpl) SetLoadMode(is_direct_mode bool) {
 	WaitMainThread(func() {
-		ResMgr.SetLoadMode(is_direct_mode)
+		gdx.ResMgr.SetLoadMode(is_direct_mode)
 	})
 }
-func SyncResGetLoadMode() bool {
+func (pself *resMgrImpl) GetLoadMode() bool {
 	var _ret1 bool
 	WaitMainThread(func() {
-		_ret1 = ResMgr.GetLoadMode()
+		_ret1 = gdx.ResMgr.GetLoadMode()
 	})
 	return _ret1
 }
-func SyncResGetBoundFromAlpha(p_path string) Rect2 {
+func (pself *resMgrImpl) GetBoundFromAlpha(p_path string) Rect2 {
 	var _ret1 Rect2
 	WaitMainThread(func() {
-		_ret1 = ResMgr.GetBoundFromAlpha(p_path)
+		_ret1 = gdx.ResMgr.GetBoundFromAlpha(p_path)
 	})
 	return _ret1
 }
-func SyncResGetImageSize(p_path string) Vec2 {
+func (pself *resMgrImpl) GetImageSize(p_path string) Vec2 {
 	var _ret1 Vec2
 	WaitMainThread(func() {
-		_ret1 = ResMgr.GetImageSize(p_path)
+		_ret1 = gdx.ResMgr.GetImageSize(p_path)
 	})
 	return _ret1
 }
-func SyncResReadAllText(p_path string) string {
+func (pself *resMgrImpl) ReadAllText(p_path string) string {
 	var _ret1 string
 	WaitMainThread(func() {
-		_ret1 = ResMgr.ReadAllText(p_path)
+		_ret1 = gdx.ResMgr.ReadAllText(p_path)
 	})
 	return _ret1
 }
-func SyncResHasFile(p_path string) bool {
+func (pself *resMgrImpl) HasFile(p_path string) bool {
 	var _ret1 bool
 	WaitMainThread(func() {
-		_ret1 = ResMgr.HasFile(p_path)
+		_ret1 = gdx.ResMgr.HasFile(p_path)
 	})
 	return _ret1
 }
 
 // ISceneMgr
-func SyncSceneChangeSceneToFile(path string) {
+func (pself *sceneMgrImpl) ChangeSceneToFile(path string) {
 	WaitMainThread(func() {
-		SceneMgr.ChangeSceneToFile(path)
+		gdx.SceneMgr.ChangeSceneToFile(path)
 	})
 }
-func SyncSceneReloadCurrentScene() int64 {
+func (pself *sceneMgrImpl) ReloadCurrentScene() int64 {
 	var _ret1 int64
 	WaitMainThread(func() {
-		_ret1 = SceneMgr.ReloadCurrentScene()
+		_ret1 = gdx.SceneMgr.ReloadCurrentScene()
 	})
 	return _ret1
 }
-func SyncSceneUnloadCurrentScene() {
+func (pself *sceneMgrImpl) UnloadCurrentScene() {
 	WaitMainThread(func() {
-		SceneMgr.UnloadCurrentScene()
+		gdx.SceneMgr.UnloadCurrentScene()
 	})
 }
 
 // ISpriteMgr
-func SyncSpriteSetDontDestroyOnLoad(obj Object) {
+func (pself *spriteMgrImpl) SetDontDestroyOnLoad(obj gdx.Object) {
 	WaitMainThread(func() {
-		SpriteMgr.SetDontDestroyOnLoad(obj)
+		gdx.SpriteMgr.SetDontDestroyOnLoad(obj)
 	})
 }
-func SyncSpriteSetProcess(obj Object, is_on bool) {
+func (pself *spriteMgrImpl) SetProcess(obj gdx.Object, is_on bool) {
 	WaitMainThread(func() {
-		SpriteMgr.SetProcess(obj, is_on)
+		gdx.SpriteMgr.SetProcess(obj, is_on)
 	})
 }
-func SyncSpriteSetPhysicProcess(obj Object, is_on bool) {
+func (pself *spriteMgrImpl) SetPhysicProcess(obj gdx.Object, is_on bool) {
 	WaitMainThread(func() {
-		SpriteMgr.SetPhysicProcess(obj, is_on)
+		gdx.SpriteMgr.SetPhysicProcess(obj, is_on)
 	})
 }
-func SyncSpriteSetTypeName(obj Object, type_name string) {
+func (pself *spriteMgrImpl) SetTypeName(obj gdx.Object, type_name string) {
 	WaitMainThread(func() {
-		SpriteMgr.SetTypeName(obj, type_name)
+		gdx.SpriteMgr.SetTypeName(obj, type_name)
 	})
 }
-func SyncSpriteSetChildPosition(obj Object, path string, pos Vec2) {
+func (pself *spriteMgrImpl) SetChildPosition(obj gdx.Object, path string, pos Vec2) {
 	WaitMainThread(func() {
-		SpriteMgr.SetChildPosition(obj, path, pos)
+		gdx.SpriteMgr.SetChildPosition(obj, path, pos)
 	})
 }
-func SyncSpriteGetChildPosition(obj Object, path string) Vec2 {
+func (pself *spriteMgrImpl) GetChildPosition(obj gdx.Object, path string) Vec2 {
 	var _ret1 Vec2
 	WaitMainThread(func() {
-		_ret1 = SpriteMgr.GetChildPosition(obj, path)
+		_ret1 = gdx.SpriteMgr.GetChildPosition(obj, path)
 	})
 	return _ret1
 }
-func SyncSpriteSetChildRotation(obj Object, path string, rot float64) {
+func (pself *spriteMgrImpl) SetChildRotation(obj gdx.Object, path string, rot float64) {
 	WaitMainThread(func() {
-		SpriteMgr.SetChildRotation(obj, path, rot)
+		gdx.SpriteMgr.SetChildRotation(obj, path, rot)
 	})
 }
-func SyncSpriteGetChildRotation(obj Object, path string) float64 {
+func (pself *spriteMgrImpl) GetChildRotation(obj gdx.Object, path string) float64 {
 	var _ret1 float64
 	WaitMainThread(func() {
-		_ret1 = SpriteMgr.GetChildRotation(obj, path)
+		_ret1 = gdx.SpriteMgr.GetChildRotation(obj, path)
 	})
 	return _ret1
 }
-func SyncSpriteSetChildScale(obj Object, path string, scale Vec2) {
+func (pself *spriteMgrImpl) SetChildScale(obj gdx.Object, path string, scale Vec2) {
 	WaitMainThread(func() {
-		SpriteMgr.SetChildScale(obj, path, scale)
+		gdx.SpriteMgr.SetChildScale(obj, path, scale)
 	})
 }
-func SyncSpriteGetChildScale(obj Object, path string) Vec2 {
+func (pself *spriteMgrImpl) GetChildScale(obj gdx.Object, path string) Vec2 {
 	var _ret1 Vec2
 	WaitMainThread(func() {
-		_ret1 = SpriteMgr.GetChildScale(obj, path)
+		_ret1 = gdx.SpriteMgr.GetChildScale(obj, path)
 	})
 	return _ret1
 }
-func SyncSpriteCheckCollision(obj Object, target Object, is_src_trigger bool, is_dst_trigger bool) bool {
+func (pself *spriteMgrImpl) CheckCollision(obj gdx.Object, target gdx.Object, is_src_trigger bool, is_dst_trigger bool) bool {
 	var _ret1 bool
 	WaitMainThread(func() {
-		_ret1 = SpriteMgr.CheckCollision(obj, target, is_src_trigger, is_dst_trigger)
+		_ret1 = gdx.SpriteMgr.CheckCollision(obj, target, is_src_trigger, is_dst_trigger)
 	})
 	return _ret1
 }
-func SyncSpriteCheckCollisionWithPoint(obj Object, point Vec2, is_trigger bool) bool {
+func (pself *spriteMgrImpl) CheckCollisionWithPoint(obj gdx.Object, point Vec2, is_trigger bool) bool {
 	var _ret1 bool
 	WaitMainThread(func() {
-		_ret1 = SpriteMgr.CheckCollisionWithPoint(obj, point, is_trigger)
+		_ret1 = gdx.SpriteMgr.CheckCollisionWithPoint(obj, point, is_trigger)
 	})
 	return _ret1
 }
-func SyncSpriteCreateSprite(path string) Object {
-	var _ret1 Object
+func (pself *spriteMgrImpl) CreateSprite(path string) gdx.Object {
+	var _ret1 gdx.Object
 	WaitMainThread(func() {
-		_ret1 = SpriteMgr.CreateSprite(path)
+		_ret1 = gdx.SpriteMgr.CreateSprite(path)
 	})
 	return _ret1
 }
-func SyncSpriteCloneSprite(obj Object) Object {
-	var _ret1 Object
+func (pself *spriteMgrImpl) CloneSprite(obj gdx.Object) gdx.Object {
+	var _ret1 gdx.Object
 	WaitMainThread(func() {
-		_ret1 = SpriteMgr.CloneSprite(obj)
+		_ret1 = gdx.SpriteMgr.CloneSprite(obj)
 	})
 	return _ret1
 }
-func SyncSpriteDestroySprite(obj Object) bool {
+func (pself *spriteMgrImpl) DestroySprite(obj gdx.Object) bool {
 	var _ret1 bool
 	WaitMainThread(func() {
-		_ret1 = SpriteMgr.DestroySprite(obj)
+		_ret1 = gdx.SpriteMgr.DestroySprite(obj)
 	})
 	return _ret1
 }
-func SyncSpriteIsSpriteAlive(obj Object) bool {
+func (pself *spriteMgrImpl) IsSpriteAlive(obj gdx.Object) bool {
 	var _ret1 bool
 	WaitMainThread(func() {
-		_ret1 = SpriteMgr.IsSpriteAlive(obj)
+		_ret1 = gdx.SpriteMgr.IsSpriteAlive(obj)
 	})
 	return _ret1
 }
-func SyncSpriteSetPosition(obj Object, pos Vec2) {
+func (pself *spriteMgrImpl) SetPosition(obj gdx.Object, pos Vec2) {
 	WaitMainThread(func() {
-		SpriteMgr.SetPosition(obj, pos)
+		gdx.SpriteMgr.SetPosition(obj, pos)
 	})
 }
-func SyncSpriteGetPosition(obj Object) Vec2 {
+func (pself *spriteMgrImpl) GetPosition(obj gdx.Object) Vec2 {
 	var _ret1 Vec2
 	WaitMainThread(func() {
-		_ret1 = SpriteMgr.GetPosition(obj)
+		_ret1 = gdx.SpriteMgr.GetPosition(obj)
 	})
 	return _ret1
 }
-func SyncSpriteSetRotation(obj Object, rot float64) {
+func (pself *spriteMgrImpl) SetRotation(obj gdx.Object, rot float64) {
 	WaitMainThread(func() {
-		SpriteMgr.SetRotation(obj, rot)
+		gdx.SpriteMgr.SetRotation(obj, rot)
 	})
 }
-func SyncSpriteGetRotation(obj Object) float64 {
+func (pself *spriteMgrImpl) GetRotation(obj gdx.Object) float64 {
 	var _ret1 float64
 	WaitMainThread(func() {
-		_ret1 = SpriteMgr.GetRotation(obj)
+		_ret1 = gdx.SpriteMgr.GetRotation(obj)
 	})
 	return _ret1
 }
-func SyncSpriteSetScale(obj Object, scale Vec2) {
+func (pself *spriteMgrImpl) SetScale(obj gdx.Object, scale Vec2) {
 	WaitMainThread(func() {
-		SpriteMgr.SetScale(obj, scale)
+		gdx.SpriteMgr.SetScale(obj, scale)
 	})
 }
-func SyncSpriteGetScale(obj Object) Vec2 {
+func (pself *spriteMgrImpl) GetScale(obj gdx.Object) Vec2 {
 	var _ret1 Vec2
 	WaitMainThread(func() {
-		_ret1 = SpriteMgr.GetScale(obj)
+		_ret1 = gdx.SpriteMgr.GetScale(obj)
 	})
 	return _ret1
 }
-func SyncSpriteSetRenderScale(obj Object, scale Vec2) {
+func (pself *spriteMgrImpl) SetRenderScale(obj gdx.Object, scale Vec2) {
 	WaitMainThread(func() {
-		SpriteMgr.SetRenderScale(obj, scale)
+		gdx.SpriteMgr.SetRenderScale(obj, scale)
 	})
 }
-func SyncSpriteGetRenderScale(obj Object) Vec2 {
+func (pself *spriteMgrImpl) GetRenderScale(obj gdx.Object) Vec2 {
 	var _ret1 Vec2
 	WaitMainThread(func() {
-		_ret1 = SpriteMgr.GetRenderScale(obj)
+		_ret1 = gdx.SpriteMgr.GetRenderScale(obj)
 	})
 	return _ret1
 }
-func SyncSpriteSetColor(obj Object, color Color) {
+func (pself *spriteMgrImpl) SetColor(obj gdx.Object, color Color) {
 	WaitMainThread(func() {
-		SpriteMgr.SetColor(obj, color)
+		gdx.SpriteMgr.SetColor(obj, color)
 	})
 }
-func SyncSpriteGetColor(obj Object) Color {
+func (pself *spriteMgrImpl) GetColor(obj gdx.Object) Color {
 	var _ret1 Color
 	WaitMainThread(func() {
-		_ret1 = SpriteMgr.GetColor(obj)
+		_ret1 = gdx.SpriteMgr.GetColor(obj)
 	})
 	return _ret1
 }
-func SyncSpriteSetTextureAltas(obj Object, path string, rect2 Rect2) {
+func (pself *spriteMgrImpl) SetTextureAltas(obj gdx.Object, path string, rect2 Rect2) {
 	WaitMainThread(func() {
-		SpriteMgr.SetTextureAltas(obj, path, rect2)
+		gdx.SpriteMgr.SetTextureAltas(obj, path, rect2)
 	})
 }
-func SyncSpriteSetTexture(obj Object, path string) {
+func (pself *spriteMgrImpl) SetTexture(obj gdx.Object, path string) {
 	WaitMainThread(func() {
-		SpriteMgr.SetTexture(obj, path)
+		gdx.SpriteMgr.SetTexture(obj, path)
 	})
 }
-func SyncSpriteGetTexture(obj Object) string {
+func (pself *spriteMgrImpl) GetTexture(obj gdx.Object) string {
 	var _ret1 string
 	WaitMainThread(func() {
-		_ret1 = SpriteMgr.GetTexture(obj)
+		_ret1 = gdx.SpriteMgr.GetTexture(obj)
 	})
 	return _ret1
 }
-func SyncSpriteSetVisible(obj Object, visible bool) {
+func (pself *spriteMgrImpl) SetVisible(obj gdx.Object, visible bool) {
 	WaitMainThread(func() {
-		SpriteMgr.SetVisible(obj, visible)
+		gdx.SpriteMgr.SetVisible(obj, visible)
 	})
 }
-func SyncSpriteGetVisible(obj Object) bool {
+func (pself *spriteMgrImpl) GetVisible(obj gdx.Object) bool {
 	var _ret1 bool
 	WaitMainThread(func() {
-		_ret1 = SpriteMgr.GetVisible(obj)
+		_ret1 = gdx.SpriteMgr.GetVisible(obj)
 	})
 	return _ret1
 }
-func SyncSpriteGetZIndex(obj Object) int64 {
+func (pself *spriteMgrImpl) GetZIndex(obj gdx.Object) int64 {
 	var _ret1 int64
 	WaitMainThread(func() {
-		_ret1 = SpriteMgr.GetZIndex(obj)
+		_ret1 = gdx.SpriteMgr.GetZIndex(obj)
 	})
 	return _ret1
 }
-func SyncSpriteSetZIndex(obj Object, z int64) {
+func (pself *spriteMgrImpl) SetZIndex(obj gdx.Object, z int64) {
 	WaitMainThread(func() {
-		SpriteMgr.SetZIndex(obj, z)
+		gdx.SpriteMgr.SetZIndex(obj, z)
 	})
 }
-func SyncSpritePlayAnim(obj Object, p_name string, p_speed float64, isLoop bool, p_revert bool) {
+func (pself *spriteMgrImpl) PlayAnim(obj gdx.Object, p_name string, p_speed float64, isLoop bool, p_revert bool) {
 	WaitMainThread(func() {
-		SpriteMgr.PlayAnim(obj, p_name, p_speed, isLoop, p_revert)
+		gdx.SpriteMgr.PlayAnim(obj, p_name, p_speed, isLoop, p_revert)
 	})
 }
-func SyncSpritePlayBackwardsAnim(obj Object, p_name string) {
+func (pself *spriteMgrImpl) PlayBackwardsAnim(obj gdx.Object, p_name string) {
 	WaitMainThread(func() {
-		SpriteMgr.PlayBackwardsAnim(obj, p_name)
+		gdx.SpriteMgr.PlayBackwardsAnim(obj, p_name)
 	})
 }
-func SyncSpritePauseAnim(obj Object) {
+func (pself *spriteMgrImpl) PauseAnim(obj gdx.Object) {
 	WaitMainThread(func() {
-		SpriteMgr.PauseAnim(obj)
+		gdx.SpriteMgr.PauseAnim(obj)
 	})
 }
-func SyncSpriteStopAnim(obj Object) {
+func (pself *spriteMgrImpl) StopAnim(obj gdx.Object) {
 	WaitMainThread(func() {
-		SpriteMgr.StopAnim(obj)
+		gdx.SpriteMgr.StopAnim(obj)
 	})
 }
-func SyncSpriteIsPlayingAnim(obj Object) bool {
+func (pself *spriteMgrImpl) IsPlayingAnim(obj gdx.Object) bool {
 	var _ret1 bool
 	WaitMainThread(func() {
-		_ret1 = SpriteMgr.IsPlayingAnim(obj)
+		_ret1 = gdx.SpriteMgr.IsPlayingAnim(obj)
 	})
 	return _ret1
 }
-func SyncSpriteSetAnim(obj Object, p_name string) {
+func (pself *spriteMgrImpl) SetAnim(obj gdx.Object, p_name string) {
 	WaitMainThread(func() {
-		SpriteMgr.SetAnim(obj, p_name)
+		gdx.SpriteMgr.SetAnim(obj, p_name)
 	})
 }
-func SyncSpriteGetAnim(obj Object) string {
+func (pself *spriteMgrImpl) GetAnim(obj gdx.Object) string {
 	var _ret1 string
 	WaitMainThread(func() {
-		_ret1 = SpriteMgr.GetAnim(obj)
+		_ret1 = gdx.SpriteMgr.GetAnim(obj)
 	})
 	return _ret1
 }
-func SyncSpriteSetAnimFrame(obj Object, p_frame int64) {
+func (pself *spriteMgrImpl) SetAnimFrame(obj gdx.Object, p_frame int64) {
 	WaitMainThread(func() {
-		SpriteMgr.SetAnimFrame(obj, p_frame)
+		gdx.SpriteMgr.SetAnimFrame(obj, p_frame)
 	})
 }
-func SyncSpriteGetAnimFrame(obj Object) int64 {
+func (pself *spriteMgrImpl) GetAnimFrame(obj gdx.Object) int64 {
 	var _ret1 int64
 	WaitMainThread(func() {
-		_ret1 = SpriteMgr.GetAnimFrame(obj)
+		_ret1 = gdx.SpriteMgr.GetAnimFrame(obj)
 	})
 	return _ret1
 }
-func SyncSpriteSetAnimSpeedScale(obj Object, p_speed_scale float64) {
+func (pself *spriteMgrImpl) SetAnimSpeedScale(obj gdx.Object, p_speed_scale float64) {
 	WaitMainThread(func() {
-		SpriteMgr.SetAnimSpeedScale(obj, p_speed_scale)
+		gdx.SpriteMgr.SetAnimSpeedScale(obj, p_speed_scale)
 	})
 }
-func SyncSpriteGetAnimSpeedScale(obj Object) float64 {
+func (pself *spriteMgrImpl) GetAnimSpeedScale(obj gdx.Object) float64 {
 	var _ret1 float64
 	WaitMainThread(func() {
-		_ret1 = SpriteMgr.GetAnimSpeedScale(obj)
+		_ret1 = gdx.SpriteMgr.GetAnimSpeedScale(obj)
 	})
 	return _ret1
 }
-func SyncSpriteGetAnimPlayingSpeed(obj Object) float64 {
+func (pself *spriteMgrImpl) GetAnimPlayingSpeed(obj gdx.Object) float64 {
 	var _ret1 float64
 	WaitMainThread(func() {
-		_ret1 = SpriteMgr.GetAnimPlayingSpeed(obj)
+		_ret1 = gdx.SpriteMgr.GetAnimPlayingSpeed(obj)
 	})
 	return _ret1
 }
-func SyncSpriteSetAnimCentered(obj Object, p_center bool) {
+func (pself *spriteMgrImpl) SetAnimCentered(obj gdx.Object, p_center bool) {
 	WaitMainThread(func() {
-		SpriteMgr.SetAnimCentered(obj, p_center)
+		gdx.SpriteMgr.SetAnimCentered(obj, p_center)
 	})
 }
-func SyncSpriteIsAnimCentered(obj Object) bool {
+func (pself *spriteMgrImpl) IsAnimCentered(obj gdx.Object) bool {
 	var _ret1 bool
 	WaitMainThread(func() {
-		_ret1 = SpriteMgr.IsAnimCentered(obj)
+		_ret1 = gdx.SpriteMgr.IsAnimCentered(obj)
 	})
 	return _ret1
 }
-func SyncSpriteSetAnimOffset(obj Object, p_offset Vec2) {
+func (pself *spriteMgrImpl) SetAnimOffset(obj gdx.Object, p_offset Vec2) {
 	WaitMainThread(func() {
-		SpriteMgr.SetAnimOffset(obj, p_offset)
+		gdx.SpriteMgr.SetAnimOffset(obj, p_offset)
 	})
 }
-func SyncSpriteGetAnimOffset(obj Object) Vec2 {
+func (pself *spriteMgrImpl) GetAnimOffset(obj gdx.Object) Vec2 {
 	var _ret1 Vec2
 	WaitMainThread(func() {
-		_ret1 = SpriteMgr.GetAnimOffset(obj)
+		_ret1 = gdx.SpriteMgr.GetAnimOffset(obj)
 	})
 	return _ret1
 }
-func SyncSpriteSetAnimFlipH(obj Object, p_flip bool) {
+func (pself *spriteMgrImpl) SetAnimFlipH(obj gdx.Object, p_flip bool) {
 	WaitMainThread(func() {
-		SpriteMgr.SetAnimFlipH(obj, p_flip)
+		gdx.SpriteMgr.SetAnimFlipH(obj, p_flip)
 	})
 }
-func SyncSpriteIsAnimFlippedH(obj Object) bool {
+func (pself *spriteMgrImpl) IsAnimFlippedH(obj gdx.Object) bool {
 	var _ret1 bool
 	WaitMainThread(func() {
-		_ret1 = SpriteMgr.IsAnimFlippedH(obj)
+		_ret1 = gdx.SpriteMgr.IsAnimFlippedH(obj)
 	})
 	return _ret1
 }
-func SyncSpriteSetAnimFlipV(obj Object, p_flip bool) {
+func (pself *spriteMgrImpl) SetAnimFlipV(obj gdx.Object, p_flip bool) {
 	WaitMainThread(func() {
-		SpriteMgr.SetAnimFlipV(obj, p_flip)
+		gdx.SpriteMgr.SetAnimFlipV(obj, p_flip)
 	})
 }
-func SyncSpriteIsAnimFlippedV(obj Object) bool {
+func (pself *spriteMgrImpl) IsAnimFlippedV(obj gdx.Object) bool {
 	var _ret1 bool
 	WaitMainThread(func() {
-		_ret1 = SpriteMgr.IsAnimFlippedV(obj)
+		_ret1 = gdx.SpriteMgr.IsAnimFlippedV(obj)
 	})
 	return _ret1
 }
-func SyncSpriteSetVelocity(obj Object, velocity Vec2) {
+func (pself *spriteMgrImpl) SetVelocity(obj gdx.Object, velocity Vec2) {
 	WaitMainThread(func() {
-		SpriteMgr.SetVelocity(obj, velocity)
+		gdx.SpriteMgr.SetVelocity(obj, velocity)
 	})
 }
-func SyncSpriteGetVelocity(obj Object) Vec2 {
+func (pself *spriteMgrImpl) GetVelocity(obj gdx.Object) Vec2 {
 	var _ret1 Vec2
 	WaitMainThread(func() {
-		_ret1 = SpriteMgr.GetVelocity(obj)
+		_ret1 = gdx.SpriteMgr.GetVelocity(obj)
 	})
 	return _ret1
 }
-func SyncSpriteIsOnFloor(obj Object) bool {
+func (pself *spriteMgrImpl) IsOnFloor(obj gdx.Object) bool {
 	var _ret1 bool
 	WaitMainThread(func() {
-		_ret1 = SpriteMgr.IsOnFloor(obj)
+		_ret1 = gdx.SpriteMgr.IsOnFloor(obj)
 	})
 	return _ret1
 }
-func SyncSpriteIsOnFloorOnly(obj Object) bool {
+func (pself *spriteMgrImpl) IsOnFloorOnly(obj gdx.Object) bool {
 	var _ret1 bool
 	WaitMainThread(func() {
-		_ret1 = SpriteMgr.IsOnFloorOnly(obj)
+		_ret1 = gdx.SpriteMgr.IsOnFloorOnly(obj)
 	})
 	return _ret1
 }
-func SyncSpriteIsOnWall(obj Object) bool {
+func (pself *spriteMgrImpl) IsOnWall(obj gdx.Object) bool {
 	var _ret1 bool
 	WaitMainThread(func() {
-		_ret1 = SpriteMgr.IsOnWall(obj)
+		_ret1 = gdx.SpriteMgr.IsOnWall(obj)
 	})
 	return _ret1
 }
-func SyncSpriteIsOnWallOnly(obj Object) bool {
+func (pself *spriteMgrImpl) IsOnWallOnly(obj gdx.Object) bool {
 	var _ret1 bool
 	WaitMainThread(func() {
-		_ret1 = SpriteMgr.IsOnWallOnly(obj)
+		_ret1 = gdx.SpriteMgr.IsOnWallOnly(obj)
 	})
 	return _ret1
 }
-func SyncSpriteIsOnCeiling(obj Object) bool {
+func (pself *spriteMgrImpl) IsOnCeiling(obj gdx.Object) bool {
 	var _ret1 bool
 	WaitMainThread(func() {
-		_ret1 = SpriteMgr.IsOnCeiling(obj)
+		_ret1 = gdx.SpriteMgr.IsOnCeiling(obj)
 	})
 	return _ret1
 }
-func SyncSpriteIsOnCeilingOnly(obj Object) bool {
+func (pself *spriteMgrImpl) IsOnCeilingOnly(obj gdx.Object) bool {
 	var _ret1 bool
 	WaitMainThread(func() {
-		_ret1 = SpriteMgr.IsOnCeilingOnly(obj)
+		_ret1 = gdx.SpriteMgr.IsOnCeilingOnly(obj)
 	})
 	return _ret1
 }
-func SyncSpriteGetLastMotion(obj Object) Vec2 {
+func (pself *spriteMgrImpl) GetLastMotion(obj gdx.Object) Vec2 {
 	var _ret1 Vec2
 	WaitMainThread(func() {
-		_ret1 = SpriteMgr.GetLastMotion(obj)
+		_ret1 = gdx.SpriteMgr.GetLastMotion(obj)
 	})
 	return _ret1
 }
-func SyncSpriteGetPositionDelta(obj Object) Vec2 {
+func (pself *spriteMgrImpl) GetPositionDelta(obj gdx.Object) Vec2 {
 	var _ret1 Vec2
 	WaitMainThread(func() {
-		_ret1 = SpriteMgr.GetPositionDelta(obj)
+		_ret1 = gdx.SpriteMgr.GetPositionDelta(obj)
 	})
 	return _ret1
 }
-func SyncSpriteGetFloorNormal(obj Object) Vec2 {
+func (pself *spriteMgrImpl) GetFloorNormal(obj gdx.Object) Vec2 {
 	var _ret1 Vec2
 	WaitMainThread(func() {
-		_ret1 = SpriteMgr.GetFloorNormal(obj)
+		_ret1 = gdx.SpriteMgr.GetFloorNormal(obj)
 	})
 	return _ret1
 }
-func SyncSpriteGetWallNormal(obj Object) Vec2 {
+func (pself *spriteMgrImpl) GetWallNormal(obj gdx.Object) Vec2 {
 	var _ret1 Vec2
 	WaitMainThread(func() {
-		_ret1 = SpriteMgr.GetWallNormal(obj)
+		_ret1 = gdx.SpriteMgr.GetWallNormal(obj)
 	})
 	return _ret1
 }
-func SyncSpriteGetRealVelocity(obj Object) Vec2 {
+func (pself *spriteMgrImpl) GetRealVelocity(obj gdx.Object) Vec2 {
 	var _ret1 Vec2
 	WaitMainThread(func() {
-		_ret1 = SpriteMgr.GetRealVelocity(obj)
+		_ret1 = gdx.SpriteMgr.GetRealVelocity(obj)
 	})
 	return _ret1
 }
-func SyncSpriteMoveAndSlide(obj Object) {
+func (pself *spriteMgrImpl) MoveAndSlide(obj gdx.Object) {
 	WaitMainThread(func() {
-		SpriteMgr.MoveAndSlide(obj)
+		gdx.SpriteMgr.MoveAndSlide(obj)
 	})
 }
-func SyncSpriteSetGravity(obj Object, gravity float64) {
+func (pself *spriteMgrImpl) SetGravity(obj gdx.Object, gravity float64) {
 	WaitMainThread(func() {
-		SpriteMgr.SetGravity(obj, gravity)
+		gdx.SpriteMgr.SetGravity(obj, gravity)
 	})
 }
-func SyncSpriteGetGravity(obj Object) float64 {
+func (pself *spriteMgrImpl) GetGravity(obj gdx.Object) float64 {
 	var _ret1 float64
 	WaitMainThread(func() {
-		_ret1 = SpriteMgr.GetGravity(obj)
+		_ret1 = gdx.SpriteMgr.GetGravity(obj)
 	})
 	return _ret1
 }
-func SyncSpriteSetMass(obj Object, mass float64) {
+func (pself *spriteMgrImpl) SetMass(obj gdx.Object, mass float64) {
 	WaitMainThread(func() {
-		SpriteMgr.SetMass(obj, mass)
+		gdx.SpriteMgr.SetMass(obj, mass)
 	})
 }
-func SyncSpriteGetMass(obj Object) float64 {
+func (pself *spriteMgrImpl) GetMass(obj gdx.Object) float64 {
 	var _ret1 float64
 	WaitMainThread(func() {
-		_ret1 = SpriteMgr.GetMass(obj)
+		_ret1 = gdx.SpriteMgr.GetMass(obj)
 	})
 	return _ret1
 }
-func SyncSpriteAddForce(obj Object, force Vec2) {
+func (pself *spriteMgrImpl) AddForce(obj gdx.Object, force Vec2) {
 	WaitMainThread(func() {
-		SpriteMgr.AddForce(obj, force)
+		gdx.SpriteMgr.AddForce(obj, force)
 	})
 }
-func SyncSpriteAddImpulse(obj Object, impulse Vec2) {
+func (pself *spriteMgrImpl) AddImpulse(obj gdx.Object, impulse Vec2) {
 	WaitMainThread(func() {
-		SpriteMgr.AddImpulse(obj, impulse)
+		gdx.SpriteMgr.AddImpulse(obj, impulse)
 	})
 }
-func SyncSpriteSetCollisionLayer(obj Object, layer int64) {
+func (pself *spriteMgrImpl) SetCollisionLayer(obj gdx.Object, layer int64) {
 	WaitMainThread(func() {
-		SpriteMgr.SetCollisionLayer(obj, layer)
+		gdx.SpriteMgr.SetCollisionLayer(obj, layer)
 	})
 }
-func SyncSpriteGetCollisionLayer(obj Object) int64 {
+func (pself *spriteMgrImpl) GetCollisionLayer(obj gdx.Object) int64 {
 	var _ret1 int64
 	WaitMainThread(func() {
-		_ret1 = SpriteMgr.GetCollisionLayer(obj)
+		_ret1 = gdx.SpriteMgr.GetCollisionLayer(obj)
 	})
 	return _ret1
 }
-func SyncSpriteSetCollisionMask(obj Object, mask int64) {
+func (pself *spriteMgrImpl) SetCollisionMask(obj gdx.Object, mask int64) {
 	WaitMainThread(func() {
-		SpriteMgr.SetCollisionMask(obj, mask)
+		gdx.SpriteMgr.SetCollisionMask(obj, mask)
 	})
 }
-func SyncSpriteGetCollisionMask(obj Object) int64 {
+func (pself *spriteMgrImpl) GetCollisionMask(obj gdx.Object) int64 {
 	var _ret1 int64
 	WaitMainThread(func() {
-		_ret1 = SpriteMgr.GetCollisionMask(obj)
+		_ret1 = gdx.SpriteMgr.GetCollisionMask(obj)
 	})
 	return _ret1
 }
-func SyncSpriteSetTriggerLayer(obj Object, layer int64) {
+func (pself *spriteMgrImpl) SetTriggerLayer(obj gdx.Object, layer int64) {
 	WaitMainThread(func() {
-		SpriteMgr.SetTriggerLayer(obj, layer)
+		gdx.SpriteMgr.SetTriggerLayer(obj, layer)
 	})
 }
-func SyncSpriteGetTriggerLayer(obj Object) int64 {
+func (pself *spriteMgrImpl) GetTriggerLayer(obj gdx.Object) int64 {
 	var _ret1 int64
 	WaitMainThread(func() {
-		_ret1 = SpriteMgr.GetTriggerLayer(obj)
+		_ret1 = gdx.SpriteMgr.GetTriggerLayer(obj)
 	})
 	return _ret1
 }
-func SyncSpriteSetTriggerMask(obj Object, mask int64) {
+func (pself *spriteMgrImpl) SetTriggerMask(obj gdx.Object, mask int64) {
 	WaitMainThread(func() {
-		SpriteMgr.SetTriggerMask(obj, mask)
+		gdx.SpriteMgr.SetTriggerMask(obj, mask)
 	})
 }
-func SyncSpriteGetTriggerMask(obj Object) int64 {
+func (pself *spriteMgrImpl) GetTriggerMask(obj gdx.Object) int64 {
 	var _ret1 int64
 	WaitMainThread(func() {
-		_ret1 = SpriteMgr.GetTriggerMask(obj)
+		_ret1 = gdx.SpriteMgr.GetTriggerMask(obj)
 	})
 	return _ret1
 }
-func SyncSpriteSetColliderRect(obj Object, center Vec2, size Vec2) {
+func (pself *spriteMgrImpl) SetColliderRect(obj gdx.Object, center Vec2, size Vec2) {
 	WaitMainThread(func() {
-		SpriteMgr.SetColliderRect(obj, center, size)
+		gdx.SpriteMgr.SetColliderRect(obj, center, size)
 	})
 }
-func SyncSpriteSetColliderCircle(obj Object, center Vec2, radius float64) {
+func (pself *spriteMgrImpl) SetColliderCircle(obj gdx.Object, center Vec2, radius float64) {
 	WaitMainThread(func() {
-		SpriteMgr.SetColliderCircle(obj, center, radius)
+		gdx.SpriteMgr.SetColliderCircle(obj, center, radius)
 	})
 }
-func SyncSpriteSetColliderCapsule(obj Object, center Vec2, size Vec2) {
+func (pself *spriteMgrImpl) SetColliderCapsule(obj gdx.Object, center Vec2, size Vec2) {
 	WaitMainThread(func() {
-		SpriteMgr.SetColliderCapsule(obj, center, size)
+		gdx.SpriteMgr.SetColliderCapsule(obj, center, size)
 	})
 }
-func SyncSpriteSetCollisionEnabled(obj Object, enabled bool) {
+func (pself *spriteMgrImpl) SetCollisionEnabled(obj gdx.Object, enabled bool) {
 	WaitMainThread(func() {
-		SpriteMgr.SetCollisionEnabled(obj, enabled)
+		gdx.SpriteMgr.SetCollisionEnabled(obj, enabled)
 	})
 }
-func SyncSpriteIsCollisionEnabled(obj Object) bool {
+func (pself *spriteMgrImpl) IsCollisionEnabled(obj gdx.Object) bool {
 	var _ret1 bool
 	WaitMainThread(func() {
-		_ret1 = SpriteMgr.IsCollisionEnabled(obj)
+		_ret1 = gdx.SpriteMgr.IsCollisionEnabled(obj)
 	})
 	return _ret1
 }
-func SyncSpriteSetTriggerRect(obj Object, center Vec2, size Vec2) {
+func (pself *spriteMgrImpl) SetTriggerRect(obj gdx.Object, center Vec2, size Vec2) {
 	WaitMainThread(func() {
-		SpriteMgr.SetTriggerRect(obj, center, size)
+		gdx.SpriteMgr.SetTriggerRect(obj, center, size)
 	})
 }
-func SyncSpriteSetTriggerCircle(obj Object, center Vec2, radius float64) {
+func (pself *spriteMgrImpl) SetTriggerCircle(obj gdx.Object, center Vec2, radius float64) {
 	WaitMainThread(func() {
-		SpriteMgr.SetTriggerCircle(obj, center, radius)
+		gdx.SpriteMgr.SetTriggerCircle(obj, center, radius)
 	})
 }
-func SyncSpriteSetTriggerCapsule(obj Object, center Vec2, size Vec2) {
+func (pself *spriteMgrImpl) SetTriggerCapsule(obj gdx.Object, center Vec2, size Vec2) {
 	WaitMainThread(func() {
-		SpriteMgr.SetTriggerCapsule(obj, center, size)
+		gdx.SpriteMgr.SetTriggerCapsule(obj, center, size)
 	})
 }
-func SyncSpriteSetTriggerEnabled(obj Object, trigger bool) {
+func (pself *spriteMgrImpl) SetTriggerEnabled(obj gdx.Object, trigger bool) {
 	WaitMainThread(func() {
-		SpriteMgr.SetTriggerEnabled(obj, trigger)
+		gdx.SpriteMgr.SetTriggerEnabled(obj, trigger)
 	})
 }
-func SyncSpriteIsTriggerEnabled(obj Object) bool {
+func (pself *spriteMgrImpl) IsTriggerEnabled(obj gdx.Object) bool {
 	var _ret1 bool
 	WaitMainThread(func() {
-		_ret1 = SpriteMgr.IsTriggerEnabled(obj)
+		_ret1 = gdx.SpriteMgr.IsTriggerEnabled(obj)
 	})
 	return _ret1
 }
 
 // IUiMgr
-func SyncUiBindNode(obj Object, rel_path string) Object {
-	var _ret1 Object
+func (pself *uiMgrImpl) BindNode(obj gdx.Object, rel_path string) gdx.Object {
+	var _ret1 gdx.Object
 	WaitMainThread(func() {
-		_ret1 = UiMgr.BindNode(obj, rel_path)
+		_ret1 = gdx.UiMgr.BindNode(obj, rel_path)
 	})
 	return _ret1
 }
-func SyncUiCreateNode(path string) Object {
-	var _ret1 Object
+func (pself *uiMgrImpl) CreateNode(path string) gdx.Object {
+	var _ret1 gdx.Object
 	WaitMainThread(func() {
-		_ret1 = UiMgr.CreateNode(path)
+		_ret1 = gdx.UiMgr.CreateNode(path)
 	})
 	return _ret1
 }
-func SyncUiCreateButton(path string, text string) Object {
-	var _ret1 Object
+func (pself *uiMgrImpl) CreateButton(path string, text string) gdx.Object {
+	var _ret1 gdx.Object
 	WaitMainThread(func() {
-		_ret1 = UiMgr.CreateButton(path, text)
+		_ret1 = gdx.UiMgr.CreateButton(path, text)
 	})
 	return _ret1
 }
-func SyncUiCreateLabel(path string, text string) Object {
-	var _ret1 Object
+func (pself *uiMgrImpl) CreateLabel(path string, text string) gdx.Object {
+	var _ret1 gdx.Object
 	WaitMainThread(func() {
-		_ret1 = UiMgr.CreateLabel(path, text)
+		_ret1 = gdx.UiMgr.CreateLabel(path, text)
 	})
 	return _ret1
 }
-func SyncUiCreateImage(path string) Object {
-	var _ret1 Object
+func (pself *uiMgrImpl) CreateImage(path string) gdx.Object {
+	var _ret1 gdx.Object
 	WaitMainThread(func() {
-		_ret1 = UiMgr.CreateImage(path)
+		_ret1 = gdx.UiMgr.CreateImage(path)
 	})
 	return _ret1
 }
-func SyncUiCreateToggle(path string, value bool) Object {
-	var _ret1 Object
+func (pself *uiMgrImpl) CreateToggle(path string, value bool) gdx.Object {
+	var _ret1 gdx.Object
 	WaitMainThread(func() {
-		_ret1 = UiMgr.CreateToggle(path, value)
+		_ret1 = gdx.UiMgr.CreateToggle(path, value)
 	})
 	return _ret1
 }
-func SyncUiCreateSlider(path string, value float64) Object {
-	var _ret1 Object
+func (pself *uiMgrImpl) CreateSlider(path string, value float64) gdx.Object {
+	var _ret1 gdx.Object
 	WaitMainThread(func() {
-		_ret1 = UiMgr.CreateSlider(path, value)
+		_ret1 = gdx.UiMgr.CreateSlider(path, value)
 	})
 	return _ret1
 }
-func SyncUiCreateInput(path string, text string) Object {
-	var _ret1 Object
+func (pself *uiMgrImpl) CreateInput(path string, text string) gdx.Object {
+	var _ret1 gdx.Object
 	WaitMainThread(func() {
-		_ret1 = UiMgr.CreateInput(path, text)
+		_ret1 = gdx.UiMgr.CreateInput(path, text)
 	})
 	return _ret1
 }
-func SyncUiDestroyNode(obj Object) bool {
+func (pself *uiMgrImpl) DestroyNode(obj gdx.Object) bool {
 	var _ret1 bool
 	WaitMainThread(func() {
-		_ret1 = UiMgr.DestroyNode(obj)
+		_ret1 = gdx.UiMgr.DestroyNode(obj)
 	})
 	return _ret1
 }
-func SyncUiGetType(obj Object) int64 {
+func (pself *uiMgrImpl) GetType(obj gdx.Object) int64 {
 	var _ret1 int64
 	WaitMainThread(func() {
-		_ret1 = UiMgr.GetType(obj)
+		_ret1 = gdx.UiMgr.GetType(obj)
 	})
 	return _ret1
 }
-func SyncUiSetText(obj Object, text string) {
+func (pself *uiMgrImpl) SetText(obj gdx.Object, text string) {
 	WaitMainThread(func() {
-		UiMgr.SetText(obj, text)
+		gdx.UiMgr.SetText(obj, text)
 	})
 }
-func SyncUiGetText(obj Object) string {
+func (pself *uiMgrImpl) GetText(obj gdx.Object) string {
 	var _ret1 string
 	WaitMainThread(func() {
-		_ret1 = UiMgr.GetText(obj)
+		_ret1 = gdx.UiMgr.GetText(obj)
 	})
 	return _ret1
 }
-func SyncUiSetTexture(obj Object, path string) {
+func (pself *uiMgrImpl) SetTexture(obj gdx.Object, path string) {
 	WaitMainThread(func() {
-		UiMgr.SetTexture(obj, path)
+		gdx.UiMgr.SetTexture(obj, path)
 	})
 }
-func SyncUiGetTexture(obj Object) string {
+func (pself *uiMgrImpl) GetTexture(obj gdx.Object) string {
 	var _ret1 string
 	WaitMainThread(func() {
-		_ret1 = UiMgr.GetTexture(obj)
+		_ret1 = gdx.UiMgr.GetTexture(obj)
 	})
 	return _ret1
 }
-func SyncUiSetColor(obj Object, color Color) {
+func (pself *uiMgrImpl) SetColor(obj gdx.Object, color Color) {
 	WaitMainThread(func() {
-		UiMgr.SetColor(obj, color)
+		gdx.UiMgr.SetColor(obj, color)
 	})
 }
-func SyncUiGetColor(obj Object) Color {
+func (pself *uiMgrImpl) GetColor(obj gdx.Object) Color {
 	var _ret1 Color
 	WaitMainThread(func() {
-		_ret1 = UiMgr.GetColor(obj)
+		_ret1 = gdx.UiMgr.GetColor(obj)
 	})
 	return _ret1
 }
-func SyncUiSetFontSize(obj Object, size int64) {
+func (pself *uiMgrImpl) SetFontSize(obj gdx.Object, size int64) {
 	WaitMainThread(func() {
-		UiMgr.SetFontSize(obj, size)
+		gdx.UiMgr.SetFontSize(obj, size)
 	})
 }
-func SyncUiGetFontSize(obj Object) int64 {
+func (pself *uiMgrImpl) GetFontSize(obj gdx.Object) int64 {
 	var _ret1 int64
 	WaitMainThread(func() {
-		_ret1 = UiMgr.GetFontSize(obj)
+		_ret1 = gdx.UiMgr.GetFontSize(obj)
 	})
 	return _ret1
 }
-func SyncUiSetVisible(obj Object, visible bool) {
+func (pself *uiMgrImpl) SetVisible(obj gdx.Object, visible bool) {
 	WaitMainThread(func() {
-		UiMgr.SetVisible(obj, visible)
+		gdx.UiMgr.SetVisible(obj, visible)
 	})
 }
-func SyncUiGetVisible(obj Object) bool {
+func (pself *uiMgrImpl) GetVisible(obj gdx.Object) bool {
 	var _ret1 bool
 	WaitMainThread(func() {
-		_ret1 = UiMgr.GetVisible(obj)
+		_ret1 = gdx.UiMgr.GetVisible(obj)
 	})
 	return _ret1
 }
-func SyncUiSetInteractable(obj Object, interactable bool) {
+func (pself *uiMgrImpl) SetInteractable(obj gdx.Object, interactable bool) {
 	WaitMainThread(func() {
-		UiMgr.SetInteractable(obj, interactable)
+		gdx.UiMgr.SetInteractable(obj, interactable)
 	})
 }
-func SyncUiGetInteractable(obj Object) bool {
+func (pself *uiMgrImpl) GetInteractable(obj gdx.Object) bool {
 	var _ret1 bool
 	WaitMainThread(func() {
-		_ret1 = UiMgr.GetInteractable(obj)
+		_ret1 = gdx.UiMgr.GetInteractable(obj)
 	})
 	return _ret1
 }
-func SyncUiSetRect(obj Object, rect Rect2) {
+func (pself *uiMgrImpl) SetRect(obj gdx.Object, rect Rect2) {
 	WaitMainThread(func() {
-		UiMgr.SetRect(obj, rect)
+		gdx.UiMgr.SetRect(obj, rect)
 	})
 }
-func SyncUiGetRect(obj Object) Rect2 {
+func (pself *uiMgrImpl) GetRect(obj gdx.Object) Rect2 {
 	var _ret1 Rect2
 	WaitMainThread(func() {
-		_ret1 = UiMgr.GetRect(obj)
+		_ret1 = gdx.UiMgr.GetRect(obj)
 	})
 	return _ret1
 }
-func SyncUiGetLayoutDirection(obj Object) int64 {
+func (pself *uiMgrImpl) GetLayoutDirection(obj gdx.Object) int64 {
 	var _ret1 int64
 	WaitMainThread(func() {
-		_ret1 = UiMgr.GetLayoutDirection(obj)
+		_ret1 = gdx.UiMgr.GetLayoutDirection(obj)
 	})
 	return _ret1
 }
-func SyncUiSetLayoutDirection(obj Object, value int64) {
+func (pself *uiMgrImpl) SetLayoutDirection(obj gdx.Object, value int64) {
 	WaitMainThread(func() {
-		UiMgr.SetLayoutDirection(obj, value)
+		gdx.UiMgr.SetLayoutDirection(obj, value)
 	})
 }
-func SyncUiGetLayoutMode(obj Object) int64 {
+func (pself *uiMgrImpl) GetLayoutMode(obj gdx.Object) int64 {
 	var _ret1 int64
 	WaitMainThread(func() {
-		_ret1 = UiMgr.GetLayoutMode(obj)
+		_ret1 = gdx.UiMgr.GetLayoutMode(obj)
 	})
 	return _ret1
 }
-func SyncUiSetLayoutMode(obj Object, value int64) {
+func (pself *uiMgrImpl) SetLayoutMode(obj gdx.Object, value int64) {
 	WaitMainThread(func() {
-		UiMgr.SetLayoutMode(obj, value)
+		gdx.UiMgr.SetLayoutMode(obj, value)
 	})
 }
-func SyncUiGetAnchorsPreset(obj Object) int64 {
+func (pself *uiMgrImpl) GetAnchorsPreset(obj gdx.Object) int64 {
 	var _ret1 int64
 	WaitMainThread(func() {
-		_ret1 = UiMgr.GetAnchorsPreset(obj)
+		_ret1 = gdx.UiMgr.GetAnchorsPreset(obj)
 	})
 	return _ret1
 }
-func SyncUiSetAnchorsPreset(obj Object, value int64) {
+func (pself *uiMgrImpl) SetAnchorsPreset(obj gdx.Object, value int64) {
 	WaitMainThread(func() {
-		UiMgr.SetAnchorsPreset(obj, value)
+		gdx.UiMgr.SetAnchorsPreset(obj, value)
 	})
 }
-func SyncUiGetScale(obj Object) Vec2 {
+func (pself *uiMgrImpl) GetScale(obj gdx.Object) Vec2 {
 	var _ret1 Vec2
 	WaitMainThread(func() {
-		_ret1 = UiMgr.GetScale(obj)
+		_ret1 = gdx.UiMgr.GetScale(obj)
 	})
 	return _ret1
 }
-func SyncUiSetScale(obj Object, value Vec2) {
+func (pself *uiMgrImpl) SetScale(obj gdx.Object, value Vec2) {
 	WaitMainThread(func() {
-		UiMgr.SetScale(obj, value)
+		gdx.UiMgr.SetScale(obj, value)
 	})
 }
-func SyncUiGetPosition(obj Object) Vec2 {
+func (pself *uiMgrImpl) GetPosition(obj gdx.Object) Vec2 {
 	var _ret1 Vec2
 	WaitMainThread(func() {
-		_ret1 = UiMgr.GetPosition(obj)
+		_ret1 = gdx.UiMgr.GetPosition(obj)
 	})
 	return _ret1
 }
-func SyncUiSetPosition(obj Object, value Vec2) {
+func (pself *uiMgrImpl) SetPosition(obj gdx.Object, value Vec2) {
 	WaitMainThread(func() {
-		UiMgr.SetPosition(obj, value)
+		gdx.UiMgr.SetPosition(obj, value)
 	})
 }
-func SyncUiGetSize(obj Object) Vec2 {
+func (pself *uiMgrImpl) GetSize(obj gdx.Object) Vec2 {
 	var _ret1 Vec2
 	WaitMainThread(func() {
-		_ret1 = UiMgr.GetSize(obj)
+		_ret1 = gdx.UiMgr.GetSize(obj)
 	})
 	return _ret1
 }
-func SyncUiSetSize(obj Object, value Vec2) {
+func (pself *uiMgrImpl) SetSize(obj gdx.Object, value Vec2) {
 	WaitMainThread(func() {
-		UiMgr.SetSize(obj, value)
+		gdx.UiMgr.SetSize(obj, value)
 	})
 }
-func SyncUiGetGlobalPosition(obj Object) Vec2 {
+func (pself *uiMgrImpl) GetGlobalPosition(obj gdx.Object) Vec2 {
 	var _ret1 Vec2
 	WaitMainThread(func() {
-		_ret1 = UiMgr.GetGlobalPosition(obj)
+		_ret1 = gdx.UiMgr.GetGlobalPosition(obj)
 	})
 	return _ret1
 }
-func SyncUiSetGlobalPosition(obj Object, value Vec2) {
+func (pself *uiMgrImpl) SetGlobalPosition(obj gdx.Object, value Vec2) {
 	WaitMainThread(func() {
-		UiMgr.SetGlobalPosition(obj, value)
+		gdx.UiMgr.SetGlobalPosition(obj, value)
 	})
 }
-func SyncUiGetRotation(obj Object) float64 {
+func (pself *uiMgrImpl) GetRotation(obj gdx.Object) float64 {
 	var _ret1 float64
 	WaitMainThread(func() {
-		_ret1 = UiMgr.GetRotation(obj)
+		_ret1 = gdx.UiMgr.GetRotation(obj)
 	})
 	return _ret1
 }
-func SyncUiSetRotation(obj Object, value float64) {
+func (pself *uiMgrImpl) SetRotation(obj gdx.Object, value float64) {
 	WaitMainThread(func() {
-		UiMgr.SetRotation(obj, value)
+		gdx.UiMgr.SetRotation(obj, value)
 	})
 }
-func SyncUiGetFlip(obj Object, horizontal bool) bool {
+func (pself *uiMgrImpl) GetFlip(obj gdx.Object, horizontal bool) bool {
 	var _ret1 bool
 	WaitMainThread(func() {
-		_ret1 = UiMgr.GetFlip(obj, horizontal)
+		_ret1 = gdx.UiMgr.GetFlip(obj, horizontal)
 	})
 	return _ret1
 }
-func SyncUiSetFlip(obj Object, horizontal bool, is_flip bool) {
+func (pself *uiMgrImpl) SetFlip(obj gdx.Object, horizontal bool, is_flip bool) {
 	WaitMainThread(func() {
-		UiMgr.SetFlip(obj, horizontal, is_flip)
+		gdx.UiMgr.SetFlip(obj, horizontal, is_flip)
 	})
 }

@@ -6,13 +6,13 @@ import (
 	stime "time"
 
 	"github.com/goplus/spx/internal/time"
-	. "github.com/realdream-ai/gdspx/pkg/engine"
-	"github.com/realdream-ai/gdspx/pkg/gdspx"
+	gdspx "github.com/realdream-ai/gdspx/pkg/engine"
+	gde "github.com/realdream-ai/gdspx/pkg/gdspx"
 )
 
 type TriggerEvent struct {
-	Src *ProxySprite
-	Dst *ProxySprite
+	Src *SpriteProxy
+	Dst *SpriteProxy
 }
 type KeyEvent struct {
 	Id        int64
@@ -20,7 +20,7 @@ type KeyEvent struct {
 }
 
 var (
-	game              Gamer
+	game              IGame
 	triggerEventsTemp []TriggerEvent
 	triggerEvents     []TriggerEvent
 	triggerMutex      sync.Mutex
@@ -42,16 +42,16 @@ var (
 	debugLastFrame int64   = 0
 )
 
-type Gamer interface {
+type IGame interface {
 	OnEngineStart()
 	OnEngineUpdate(delta float64)
 	OnEngineRender(delta float64)
 	OnEngineDestroy()
 }
 
-func GdspxMain(g Gamer) {
+func GdspxMain(g IGame) {
 	game = g
-	gdspx.LinkEngine(EngineCallbackInfo{
+	gde.LinkEngine(gdspx.EngineCallbackInfo{
 		OnEngineStart:   onStart,
 		OnEngineUpdate:  onUpdate,
 		OnEngineDestroy: onDestroy,
@@ -97,7 +97,7 @@ func calcfps() {
 	}
 }
 func onSetTimeScale(scale float64) {
-	SyncPlatformSetTimeScale(scale)
+	PlatformMgr.SetTimeScale(scale)
 }
 
 func updateTime(delta float64) {
@@ -131,7 +131,7 @@ func cacheTriggerEvents() {
 	triggerEventsTemp = triggerEventsTemp[:0]
 }
 func IsWebIntepreterMode() bool {
-	return gdspx.IsWebIntepreterMode()
+	return gde.IsWebIntepreterMode()
 }
 func GetTriggerEvents(lst []TriggerEvent) []TriggerEvent {
 	triggerMutex.Lock()
