@@ -1,8 +1,6 @@
 package ui
 
 import (
-	"math"
-
 	"github.com/realdream-ai/mathf"
 	. "github.com/realdream-ai/mathf"
 
@@ -30,16 +28,16 @@ func (pself *UiMeasure) OnStart() {
 	pself.labelValue = BindUI[UiNode](pself.GetId(), "LC/Label")
 }
 
-func (pself *UiMeasure) UpdateInfo(x, y float64, length, heading float64, name string, color Color) {
+func (pself *UiMeasure) UpdateInfo(wpos Vec2, length, heading float64, name string, color Color) {
 	extraLen := 4.0 //hack for engine picture size
 	length += extraLen
+
 	rad := DegToRad(heading - 90)
-	s, c := math.Sincos(float64(rad))
-	halfX, halfY := (c * length / 2), (s * length / 2)
-	pos := WorldToUI(x, y)
+	sc := Sincos(rad).Mulf(length / 2)
+	pos := WorldToUI(wpos)
 	labelPos := pos
-	pos.X -= float64(halfX)
-	pos.Y -= float64(halfY)
+	pos = pos.Sub(NewVec2(sc.Y, sc.X))
+
 	UiMgr.SetGlobalPosition(pself.container.GetId(), pos)
 	UiMgr.SetColor(pself.container.GetId(), color)
 	UiMgr.SetSize(pself.container.GetId(), mathf.NewVec2(length+extraLen, 26))

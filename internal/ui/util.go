@@ -1,7 +1,6 @@
 package ui
 
 import (
-	"github.com/realdream-ai/mathf"
 	. "github.com/realdream-ai/mathf"
 
 	. "github.com/goplus/spx/internal/engine"
@@ -13,9 +12,8 @@ type UiNode struct {
 }
 
 // convert world space position to screen space
-func WorldToUI(x, y float64) Vec2 {
+func WorldToUI(pos Vec2) Vec2 {
+	pos.Y *= -1
 	viewport := CameraMgr.GetViewportRect()
-	winX := float64(viewport.Size.X)
-	winY := float64(viewport.Size.Y)
-	return mathf.NewVec2(x+winX/2-float64(viewport.Position.X), (-y+winY/2)-float64(viewport.Position.Y))
+	return pos.Add(viewport.Size.Mulf(0.5)).Sub(viewport.Position)
 }

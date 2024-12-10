@@ -1,6 +1,8 @@
 package engine
 
 import (
+	"math"
+
 	gdx "github.com/realdream-ai/gdspx/pkg/engine"
 	"github.com/realdream-ai/mathf"
 	. "github.com/realdream-ai/mathf"
@@ -127,4 +129,7 @@ func SyncReloadScene() {
 }
 func DegToRad(p_y float64) float64 {
 	return p_y * (gdx.Math_PI / 180.0)
+}
+func Sincos(rad float64) Vec2 {
+	return NewVec2(math.Sincos(rad))
 }

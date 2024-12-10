@@ -784,31 +784,9 @@ func Sched() int {
 }
 
 // -----------------------------------------------------------------------------
-
-func (p *Game) getWidth() int {
-	if p.windowWidth_ == 0 {
-		p.doWindowSize()
-	}
-	return p.windowWidth_
-}
-
-func (p *Game) getHeight() int {
-	if p.windowHeight_ == 0 {
-		p.doWindowSize()
-	}
-	return p.windowHeight_
-}
-
-// convert pos from win space(0,0 is top left) to game space(0,0 is center)
-func (p *Game) convertWinSpace2GameSpace(x, y float64) (float64, float64) {
-	winW, winH := p.getWindowSize()
-	x += float64(winW) / 2
-	y = float64(winH)/2 - y
-	return x, y
-}
-
-func (p *Game) getWindowSize() (int, int) {
-	return p.windowSize_()
+func (p *Game) getWindowSize() mathf.Vec2 {
+	x, y := p.windowSize_()
+	return mathf.NewVec2(float64(x), float64(y))
 }
 
 func (p *Game) windowSize_() (int, int) {

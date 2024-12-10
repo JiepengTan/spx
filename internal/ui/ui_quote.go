@@ -29,11 +29,10 @@ func (pself *UiQuote) OnStart() {
 	pself.labelMsg = BindUI[UiNode](pself.GetId(), "C/LabelMsg")
 }
 
-func (pself *UiQuote) SetText(pos mathf.Vec2, width, height float64, msg, description string) {
+func (pself *UiQuote) SetText(pos mathf.Vec2, size mathf.Vec2, msg, description string) {
 	pos = CameraMgr.GetLocalPosition(pos)
-	x, y := pos.X, pos.Y
-	UiMgr.SetGlobalPosition(pself.container.GetId(), WorldToUI(x-width, y+height))
-	UiMgr.SetSize(pself.container.GetId(), mathf.NewVec2(width*2, height*2))
+	UiMgr.SetGlobalPosition(pself.container.GetId(), WorldToUI(pos.Sub(mathf.NewVec2(size.X, -size.Y))))
+	UiMgr.SetSize(pself.container.GetId(), size.Mulf(2))
 	UiMgr.SetText(pself.labelMsg.GetId(), msg)
 	UiMgr.SetText(pself.labelDes.GetId(), description)
 }

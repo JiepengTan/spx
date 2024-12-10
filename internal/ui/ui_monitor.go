@@ -45,8 +45,8 @@ func (pself *UiMonitor) SetVisible(isOn bool) {
 func (pself *UiMonitor) UpdateScale(x float64) {
 	UiMgr.SetScale(pself.GetId(), mathf.NewVec2(x, x))
 }
-func (pself *UiMonitor) UpdatePos(x, y float64) {
-	pos := WorldToUI(x, y)
+func (pself *UiMonitor) UpdatePos(wpos Vec2) {
+	pos := WorldToUI(wpos)
 	UiMgr.SetGlobalPosition(pself.GetId(), pos)
 }
 
