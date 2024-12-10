@@ -17,7 +17,7 @@ type UiMeasure struct {
 }
 
 func NewUiMeasure() *UiMeasure {
-	panel := engine.SyncCreateEngineUiNode[UiMeasure]("")
+	panel := engine.SyncNewUiNode[UiMeasure]()
 	return panel
 }
 

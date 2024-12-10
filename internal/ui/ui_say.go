@@ -25,7 +25,7 @@ type UiSay struct {
 }
 
 func NewUiSay() *UiSay {
-	panel := engine.SyncCreateEngineUiNode[UiSay]("")
+	panel := engine.SyncNewUiNode[UiSay]()
 	return panel
 }
 

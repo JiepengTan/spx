@@ -652,7 +652,7 @@ func (p *Game) runLoop(cfg *Config) (err error) {
 		log.Println("==> RunLoop")
 	}
 	if !cfg.DontRunOnUnfocused {
-		engine.SyncSetRunnableOnUnfocused(true)
+		engine.PlatformMgr.SetRunnableOnUnfocused(true)
 	}
 	if cfg.FullScreen {
 		engine.PlatformMgr.SetWindowFullscreen(true)

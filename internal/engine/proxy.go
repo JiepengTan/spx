@@ -13,12 +13,6 @@ type SpriteProxy struct {
 	Target  interface{}
 }
 
-func NewSpriteProxy(obj interface{}) *SpriteProxy {
-	proxy := CreateEmptySprite[SpriteProxy]()
-	proxy.Target = obj
-	return proxy
-}
-
 func (pself *SpriteProxy) UpdateTexture(path string, renderScale float64) {
 	if path == "" {
 		return

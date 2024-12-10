@@ -20,7 +20,7 @@ type UiMonitor struct {
 type UpdateFunc func(float64)
 
 func NewUiMonitor() *UiMonitor {
-	panel := engine.SyncCreateEngineUiNode[UiMonitor]("")
+	panel := engine.SyncNewUiNode[UiMonitor]()
 	return panel
 }
 func (pself *UiMonitor) OnStart() {

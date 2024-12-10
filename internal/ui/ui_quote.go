@@ -17,7 +17,7 @@ type UiQuote struct {
 }
 
 func NewUiQuote() *UiQuote {
-	panel := engine.SyncCreateEngineUiNode[UiQuote]("")
+	panel := engine.SyncNewUiNode[UiQuote]()
 	return panel
 }
 

@@ -14,25 +14,21 @@ import (
 func BindUI[T any](parentNode gdx.Object, path string) *T {
 	return gdx.BindUI[T](parentNode, path)
 }
-func CreateEmptySprite[T any]() *T {
-	return gdx.CreateEmptySprite[T]()
+func NewSpriteProxy(obj interface{}) *SpriteProxy {
+	proxy := gdx.CreateEmptySprite[SpriteProxy]()
+	proxy.Target = obj
+	return proxy
 }
-func SyncCreateUiNode[T any](path string) *T {
+
+func SyncNewUiNode[T any]() *T {
 	var _ret1 *T
 	WaitMainThread(func() {
-		_ret1 = gdx.CreateUI[T](path)
-	})
-	return _ret1
-}
-func SyncCreateEngineUiNode[T any](path string) *T {
-	var _ret1 *T
-	WaitMainThread(func() {
-		_ret1 = gdx.CreateEngineUI[T](path)
+		_ret1 = gdx.CreateEngineUI[T]("")
 	})
 	return _ret1
 }
 
-func SyncCreateSprite[T any]() *T {
+func SyncNewSprite[T any]() *T {
 	var _ret1 *T
 	WaitMainThread(func() {
 		_ret1 = gdx.CreateSprite[T]()
@@ -40,7 +36,7 @@ func SyncCreateSprite[T any]() *T {
 	return _ret1
 }
 
-func SyncCreateEmptySprite[T any]() *T {
+func SyncNewEmptySprite[T any]() *T {
 	var _ret1 *T
 	WaitMainThread(func() {
 		_ret1 = gdx.CreateEmptySprite[T]()
@@ -70,9 +66,10 @@ func GetMousePos() Vec2 {
 }
 
 // =============== window ===================
-func SyncSetRunnableOnUnfocused(flag bool) {
+
+func (pself *platformMgr) SetRunnableOnUnfocused(flag bool) {
 	if !flag {
-		println("TODO tanjp SyncSetRunnableOnUnfocused")
+		println("TODO tanjp SetRunnableOnUnfocused")
 	}
 }
 
