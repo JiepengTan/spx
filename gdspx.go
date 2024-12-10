@@ -25,7 +25,6 @@ import (
 
 	"github.com/goplus/spx/internal/engine"
 
-	gdspx "github.com/realdream-ai/gdspx/pkg/engine"
 	"github.com/realdream-ai/mathf"
 )
 
@@ -80,17 +79,17 @@ func (p *Game) updateLogic() error {
 }
 
 func (p *Game) updateCamera() {
-	isOn, x, y := p.Camera.getFollowPos()
+	isOn, pos := p.Camera.getFollowPos()
 	if isOn {
-		gdspx.CameraMgr.SetCameraPosition(mathf.NewVec2(x, -y))
+		engine.SetCameraPosition(pos)
 	}
 }
 
 func (p *Game) updateInput() {
-	pos := gdspx.InputMgr.GetMousePos()
-	posX, posY := engine.ScreenToWorld(float64(pos.X), float64(pos.Y))
-	atomic.StoreInt64(&p.gMouseX, int64(posX))
-	atomic.StoreInt64(&p.gMouseY, int64(posY))
+	pos := engine.GetMousePos()
+	wpos := engine.ScreenToWorld(pos)
+	atomic.StoreInt64(&p.gMouseX, int64(wpos.X))
+	atomic.StoreInt64(&p.gMouseY, int64(wpos.Y))
 }
 
 func (sprite *SpriteImpl) checkInitProxy() {
@@ -245,7 +244,7 @@ func getCostumeBoundByAlpha(p *SpriteImpl, pscale float64) (mathf.Vec2, mathf.Ve
 			rect = cache
 		} else {
 			assetPath := engine.ToAssetPath(cs.path)
-			rect = gdspx.ResMgr.GetBoundFromAlpha(assetPath)
+			rect = engine.GetBoundFromAlpha(assetPath)
 		}
 		cachedBounds[cs.path] = rect
 	}

@@ -2,6 +2,8 @@ package engine
 
 import (
 	gdx "github.com/realdream-ai/gdspx/pkg/engine"
+	"github.com/realdream-ai/mathf"
+	. "github.com/realdream-ai/mathf"
 )
 
 // =============== factory ===================
@@ -61,6 +63,10 @@ func (pself *inputMgr) MousePressed() bool {
 	return InputMgr.GetMouseState(0) || InputMgr.GetMouseState(1)
 }
 
+func GetMousePos() Vec2 {
+	return gdx.InputMgr.GetMousePos()
+}
+
 // =============== window ===================
 func SyncSetRunnableOnUnfocused(flag bool) {
 	if !flag {
@@ -78,36 +84,40 @@ func SyncSetDebugMode(isDebug bool) {
 	PlatformMgr.SetDebugMode(isDebug)
 }
 
+func SetCameraPosition(pos Vec2) {
+	gdx.CameraMgr.SetCameraPosition(mathf.NewVec2(pos.X, -pos.Y))
+}
+
+func GetBoundFromAlpha(assetPath string) Rect2 {
+	return gdx.ResMgr.GetBoundFromAlpha(assetPath)
+}
+
 // =============== setting ===================
-func ScreenToWorld(x, y float64) (float64, float64) {
+func ScreenToWorld(pos Vec2) Vec2 {
 	camPos := gdx.CameraMgr.GetCameraPosition()
-	posX, posY := float64(camPos.X), -float64(camPos.Y)
-	x += posX
-	y += posY
-	return x, y
+	camPos.Y *= -1
+	return pos.Add(camPos)
 }
 
-func WorldToScreen(x, y float64) (float64, float64) {
+func WorldToScreen(pos Vec2) Vec2 {
 	camPos := gdx.CameraMgr.GetCameraPosition()
-	posX, posY := float64(camPos.X), -float64(camPos.Y)
-	x -= posX
-	y -= posY
-	return x, y
+	camPos.Y *= -1
+	return pos.Sub(camPos)
 }
 
-func SyncScreenToWorld(x, y float64) (float64, float64) {
-	var _ret1, _ret2 float64
+func SyncScreenToWorld(pos Vec2) Vec2 {
+	var _ret1 Vec2
 	WaitMainThread(func() {
-		_ret1, _ret2 = ScreenToWorld(x, y)
+		_ret1 = ScreenToWorld(pos)
 	})
-	return _ret1, _ret2
+	return _ret1
 }
-func SyncWorldToScreen(x, y float64) (float64, float64) {
-	var _ret1, _ret2 float64
+func SyncWorldToScreen(pos Vec2) Vec2 {
+	var _ret1 Vec2
 	WaitMainThread(func() {
-		_ret1, _ret2 = WorldToScreen(x, y)
+		_ret1 = WorldToScreen(pos)
 	})
-	return _ret1, _ret2
+	return _ret1
 }
 
 func SyncReloadScene() {

@@ -47,14 +47,14 @@ func (c *Camera) ChangeXYpos(x float64, y float64) {
 	c.SetXYpos(posX+x, posY+y)
 }
 
-func (c *Camera) getFollowPos() (bool, float64, float64) {
+func (c *Camera) getFollowPos() (bool, mathf.Vec2) {
 	if c.on_ != nil {
 		switch v := c.on_.(type) {
 		case SpriteImpl:
-			return true, v.x, v.y
+			return true, mathf.NewVec2(v.x, v.y)
 		}
 	}
-	return false, 0, 0
+	return false, mathf.NewVec2(0, 0)
 }
 func (c *Camera) on(obj interface{}) {
 	switch v := obj.(type) {
