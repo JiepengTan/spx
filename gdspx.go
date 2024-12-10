@@ -74,7 +74,6 @@ func (p *Game) updateLogic() error {
 		p.fireEvent(&eventStart{})
 	})
 
-	p.tickMgr.update()
 	return nil
 }
 

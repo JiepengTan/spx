@@ -100,8 +100,7 @@ func (p *soundMgr) resumeMusic(media Sound) {
 }
 
 func (p *soundMgr) getVolume() float64 {
-	volume := AudioMgr.GetMasterVolume()
-	return float64(volume)
+	return AudioMgr.GetMasterVolume()
 }
 
 func (p *soundMgr) setVolume(volume float64) {
@@ -115,8 +114,7 @@ func (p *soundMgr) changeVolume(delta float64) {
 }
 
 func (p *soundMgr) getSfxVolume() float64 {
-	volume := AudioMgr.GetSfxVolume()
-	return float64(volume)
+	return AudioMgr.GetSfxVolume()
 }
 
 func (p *soundMgr) setSfxVolume(volume float64) {
@@ -130,8 +128,7 @@ func (p *soundMgr) changeSfxVolume(delta float64) {
 }
 
 func (p *soundMgr) getMusicVolume() float64 {
-	volume := AudioMgr.GetMusicVolume()
-	return float64(volume)
+	return AudioMgr.GetMusicVolume()
 }
 
 func (p *soundMgr) setMusicVolume(volume float64) {

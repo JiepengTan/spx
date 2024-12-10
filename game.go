@@ -76,6 +76,9 @@ func SetDebug(flags dbgFlags) {
 
 // -------------------------------------------------------------------------------------
 
+type Shape interface {
+}
+
 type Game struct {
 	baseObj
 	eventSinks
@@ -92,7 +95,6 @@ type Game struct {
 	destroyItems []Shape                 // shapes on stage (in Zorder), not only sprites
 	tempItems    []Shape                 // temp items
 
-	tickMgr   tickMgr
 	events    chan event
 	aurec     *audiorecord.Recorder
 	startFlag sync.Once
@@ -168,7 +170,6 @@ func (p *Game) getGame() *Game {
 }
 
 func (p *Game) initGame(sprites []Sprite) *Game {
-	p.tickMgr.init()
 	p.eventSinks.init(&p.sinkMgr, p)
 	p.sprs = make(map[string]Sprite)
 	p.typs = make(map[string]reflect.Type)
@@ -664,18 +665,6 @@ func (p *Game) runLoop(cfg *Config) (err error) {
 
 func (p *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
 	return p.windowSize_()
-}
-
-// startTick creates tickHandler to handle `onTick` event.
-// You can call tickHandler.Stop to stop listening `onTick` event.
-func (p *Game) startTick(duration int64, onTick func(tick int64)) *tickHandler {
-	return p.tickMgr.start(duration, onTick)
-}
-
-// currentTPS returns the current TPS (ticks per second),
-// that represents how many update function is called in a second.
-func (p *Game) currentTPS() float64 {
-	return p.tickMgr.getCurrentTPS()
 }
 
 type clicker interface {

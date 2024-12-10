@@ -1447,6 +1447,20 @@ func touchingSprite(dst, src *SpriteImpl) bool {
 	return ret
 }
 
+func (p *SpriteImpl) touchPoint(x, y float64) bool {
+	if p.proxy == nil {
+		return false
+	}
+	return engine.SpriteMgr.CheckCollisionWithPoint(p.proxy.GetId(), mathf.NewVec2(x, y), true)
+}
+
+func (p *SpriteImpl) touchingSprite(dst *SpriteImpl) bool {
+	if p.proxy == nil || dst.proxy == nil {
+		return false
+	}
+	return engine.SpriteMgr.CheckCollision(p.proxy.GetId(), dst.proxy.GetId(), true, true)
+}
+
 const (
 	touchingScreenLeft   = 1
 	touchingScreenTop    = 2
