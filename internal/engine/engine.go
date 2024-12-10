@@ -6,7 +6,7 @@ import (
 	stime "time"
 
 	"github.com/goplus/spx/internal/time"
-	gdspx "github.com/realdream-ai/gdspx/pkg/engine"
+	gdx "github.com/realdream-ai/gdspx/pkg/engine"
 	gde "github.com/realdream-ai/gdspx/pkg/gdspx"
 )
 
@@ -51,7 +51,7 @@ type IGame interface {
 
 func GdspxMain(g IGame) {
 	game = g
-	gde.LinkEngine(gdspx.EngineCallbackInfo{
+	gde.LinkEngine(gdx.EngineCallbackInfo{
 		OnEngineStart:   onStart,
 		OnEngineUpdate:  onUpdate,
 		OnEngineDestroy: onDestroy,
@@ -108,7 +108,7 @@ func updateTime(delta float64) {
 	unscaledTimeSinceLevelLoad := curTime.Sub(startTimestamp).Seconds()
 	unscaledDeltaTime := curTime.Sub(lastTimestamp).Seconds()
 	lastTimestamp = curTime
-	timeScale := PlatformMgr.GetTimeScale()
+	timeScale := gdx.PlatformMgr.GetTimeScale()
 	calcfps()
 	time.Update(float64(timeScale), unscaledTimeSinceLevelLoad, timeSinceLevelLoad, deltaTime, unscaledDeltaTime, fps)
 }

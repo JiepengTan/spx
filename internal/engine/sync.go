@@ -47,7 +47,7 @@ func SyncCreateEmptySprite[T any]() *T {
 func SyncNewBackdropProxy(obj interface{}, path string, renderScale float64) *SpriteProxy {
 	var _ret1 *SpriteProxy
 	WaitMainThread(func() {
-		_ret1 := gdx.CreateEmptySprite[SpriteProxy]()
+		_ret1 = gdx.CreateEmptySprite[SpriteProxy]()
 		_ret1.Target = obj
 		_ret1.SetZIndex(-1)
 		_ret1.DisablePhysic()
@@ -80,7 +80,7 @@ func SyncSetDebugMode(isDebug bool) {
 
 // =============== setting ===================
 func ScreenToWorld(x, y float64) (float64, float64) {
-	camPos := CameraMgr.GetCameraPosition()
+	camPos := gdx.CameraMgr.GetCameraPosition()
 	posX, posY := float64(camPos.X), -float64(camPos.Y)
 	x += posX
 	y += posY
@@ -88,7 +88,7 @@ func ScreenToWorld(x, y float64) (float64, float64) {
 }
 
 func WorldToScreen(x, y float64) (float64, float64) {
-	camPos := CameraMgr.GetCameraPosition()
+	camPos := gdx.CameraMgr.GetCameraPosition()
 	posX, posY := float64(camPos.X), -float64(camPos.Y)
 	x -= posX
 	y -= posY
