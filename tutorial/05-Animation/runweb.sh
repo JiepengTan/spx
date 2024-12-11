@@ -1,10 +1,11 @@
 
 rm -rf wasm_exec.js
-rm -rf wasm_exec.html
+rm -rf index.html
 rm -rf server.go
 rm -rf *.wasm
 if [ "$1" == "-i" ]; then
     cd ../../cmd/ispx
+	cp -f "$(go env GOROOT)/misc/wasm/wasm_exec.js" ./
 	./runweb.sh
 	cd ../../tutorial/05-Animation
 	exit 0
