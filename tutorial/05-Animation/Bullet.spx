@@ -3,10 +3,6 @@ onTouchStart => {
 }
 
 onStart => {
-	for {
-		wait 0.3
-		clone
-	}
 }
 
 onCloned => {

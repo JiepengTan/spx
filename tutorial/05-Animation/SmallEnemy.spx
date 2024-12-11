@@ -1,26 +1,34 @@
 var life int
 onStart => {
-	for {
-		wait 0.3
-		clone
-	}
+        for i := 1; i <= 1; i++ {
+                wait 0.3
+                clone
+        }
+        
 }
 
 onCloned => {
-	life = 3
-	setXYpos rand(-131, 131), 237
-	show
-	for {
-		wait 0.05
-		changeYpos -2.4
-		if touching(EdgeBottom) {
-			destroy
-		}
-	}
+        life = 3
+        setXYpos rand(-0, 0), 200
+        show
+        for {
+                //debugLog("====waitNextFrame ", this.GameFrame())
+                waitNextFrame
+                startTimer := realTimeSinceStart
+                changeYpos -100 * deltaTime
+                if touching(EdgeBottom) {
+                        setXYpos xpos, 200
+                }
+                dt := (realTimeSinceStart - startTimer) *1000
+				if(false){
+					println(dt)
+				}
+                //debugLog("====frame ", gameFrame," dt = ", dt)
+        }
 }
 
 onTouchStart "Bullet", => {
-	if life > 0 {
+        if life > 0 {
         life --
         if life <= 0 {
             die

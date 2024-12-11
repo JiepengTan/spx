@@ -37,16 +37,6 @@
     }
   ],
   "costumeIndex": 0,
-  "fAnimations": {
-    "die": {
-      "onStart":{
-        "play": "explode"
-      },
-      "frameFps": 20,
-      "frameFrom": "die-0",
-      "frameTo": "die-3"
-    }
-  },
   "heading": 90,
   "isDraggable": false,
   "rotationStyle": "normal",
