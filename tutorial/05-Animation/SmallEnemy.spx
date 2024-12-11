@@ -1,6 +1,6 @@
 var life int
 onStart => {
-        for i := 1; i <= 1; i++ {
+        for i := 1; i <= 20; i++ {
                 wait 0.3
                 clone
         }
