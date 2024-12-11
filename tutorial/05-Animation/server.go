@@ -1,23 +1,4 @@
-
-rm -rf wasm_exec.js
-rm -rf wasm_exec.html
-rm -rf server.go
-rm -rf *.wasm
-if [ "$1" == "-i" ]; then
-    cd ../../cmd/ispx
-	./runweb.sh
-	cd ../../tutorial/05-Animation
-	exit 0
-fi
-
-gop go 
-GOEXPERIMENT=noregabi GOOS=js GOARCH=wasm go build --tags canvas -o test.wasm
-cp -f "$(go env GOROOT)/misc/wasm/wasm_exec.js" ./
-cp -f "$(go env GOROOT)/misc/wasm/wasm_exec.html" ./index.html
-
-
-
-echo '// test.go
+// test.go
 package main
 
 import (
@@ -42,5 +23,4 @@ func main() {
 
 		http.FileServer(http.Dir(*dir)).ServeHTTP(resp, req)
 	})))
-}'> server.go
-go run server.go
+}

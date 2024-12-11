@@ -219,7 +219,7 @@ func (p *soundMgr) play(media Sound, wait, loop bool) (err error) {
 	p.addPlayer(sp, done)
 	sp.Play()
 	if wait {
-		WaitForChan(done, &doneVal)
+		waitForChan(done, &doneVal)
 	}
 	return
 }
