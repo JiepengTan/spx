@@ -28,8 +28,8 @@ type threadImpl struct {
 	Obj      ThreadObj
 	stopped_ bool
 	frame    int
-	mutex    sync.Mutex  // Mutex for this thread's condition variable
-	cond     *sync.Cond  // Per-thread condition variable for targeted wake-up
+	mutex    sync.Mutex // Mutex for this thread's condition variable
+	cond     *sync.Cond // Per-thread condition variable for targeted wake-up
 }
 
 func (p *threadImpl) Stopped() bool {
@@ -263,47 +263,49 @@ func (p *Coroutines) setWaitStatus(me *threadImpl, typeId int) {
 }
 
 func (p *Coroutines) Wait(t float64) {
-	id := atomic.AddInt64(&p.curId, 1)
 	me := p.Current()
 	dstTime := time.TimeSinceLevelLoad() + t
-	go func() {
-		done := make(chan int)
-		job := &WaitJob{
-			Id:   id,
-			Type: waitTypeTime,
-			Call: func() {
-				p.setWaitStatus(me, waitStatusIdle)
-				done <- 1
-			},
-			Time: dstTime,
-		}
-		p.addWaitJob(job, false)
-		<-done
-		p.Resume(me)
-	}()
+
+	// Set up the job directly without a goroutine
+	job := &WaitJob{
+		Id:   atomic.AddInt64(&p.curId, 1),
+		Type: waitTypeTime,
+		Call: func() {
+			// Mark thread as idle and resume it directly
+			p.setWaitStatus(me, waitStatusIdle)
+			p.Resume(me)
+		},
+		Time: dstTime,
+	}
+
+	// Add the job to the queue
+	p.addWaitJob(job, false)
+
+	// Mark the thread as blocked and yield control
 	p.setWaitStatus(me, waitStatusBlock)
 	p.Yield(me)
 }
 
 func (p *Coroutines) WaitNextFrame() {
-	id := atomic.AddInt64(&p.curId, 1)
 	me := p.Current()
 	frame := time.Frame()
-	go func() {
-		done := make(chan int)
-		job := &WaitJob{
-			Id:   id,
-			Type: waitTypeFrame,
-			Call: func() {
-				p.setWaitStatus(me, waitStatusIdle)
-				done <- 1
-			},
-			Frame: frame,
-		}
-		p.addWaitJob(job, false)
-		<-done
-		p.Resume(me)
-	}()
+
+	// Set up the job directly instead of creating a goroutine
+	job := &WaitJob{
+		Id:   atomic.AddInt64(&p.curId, 1),
+		Type: waitTypeFrame,
+		Call: func() {
+			// Mark thread as idle and resume it directly
+			p.setWaitStatus(me, waitStatusIdle)
+			p.Resume(me)
+		},
+		Frame: frame,
+	}
+
+	// Add the job to the queue
+	p.addWaitJob(job, false)
+
+	// Mark the thread as blocked and yield control
 	p.setWaitStatus(me, waitStatusBlock)
 	p.Yield(me)
 }
@@ -329,11 +331,18 @@ func (p *Coroutines) WaitMainThread(call func()) {
 }
 func (p *Coroutines) WaitToDo(fn func()) {
 	me := p.Current()
+
+	// Create a goroutine that executes the function
+	// This is necessary since fn() could be a long-running task
 	go func() {
+		// Execute the function
 		fn()
+		// When done, mark thread as idle and resume it
 		p.setWaitStatus(me, waitStatusIdle)
 		p.Resume(me)
 	}()
+
+	// Mark the thread as blocked and yield control
 	p.setWaitStatus(me, waitStatusBlock)
 	p.Yield(me)
 }
