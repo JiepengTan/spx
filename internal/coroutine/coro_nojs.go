@@ -1,16 +1,15 @@
-//go:build !js
-// +build !js
-
 package coroutine
 
 import (
 	"errors"
-	"fmt"
 	"runtime"
+	"runtime/debug"
 	"sync"
 	"sync/atomic"
+	stime "time"
 	"unsafe"
 
+	"github.com/goplus/spx/internal/engine/platform"
 	"github.com/goplus/spx/internal/time"
 )
 
@@ -292,6 +291,10 @@ func (p *Coroutines) WaitNextFrame() {
 }
 
 func (p *Coroutines) WaitMainThread(call func()) {
+	if platform.IsWeb() {
+		call()
+		return
+	}
 	id := atomic.AddInt64(&p.curId, 1)
 	done := make(chan int)
 	job := &WaitJob{
@@ -306,7 +309,6 @@ func (p *Coroutines) WaitMainThread(call func()) {
 	p.addWaitJob(job, true)
 	<-done
 }
-
 func (p *Coroutines) WaitToDo(fn func()) {
 	me := p.Current()
 	go func() {
@@ -318,24 +320,58 @@ func (p *Coroutines) WaitToDo(fn func()) {
 	p.Yield(me)
 }
 
+// 全局变量，存储最近一次更新的统计信息
+var lastUpdateStats UpdateJobsStats
+
+// GetLastUpdateStats 返回最近一次更新的统计信息
+func (p *Coroutines) GetLastUpdateStats() UpdateJobsStats {
+	return lastUpdateStats
+}
+
 func (p *Coroutines) UpdateJobs() {
-	timestamp := time.RealTimeSinceStart()
+	// 总计时开始
+	start := stime.Now()
+
+	// 记录GC信息
+	var gcStatsBefore debug.GCStats
+	debug.ReadGCStats(&gcStatsBefore)
+
+	// 初始化统计信息
+	stats := UpdateJobsStats{}
+
+	// 初始化阶段开始
+	initStart := stime.Now()
 	curQueue := p.curQueue
 	nextQueue := p.nextQueue
 	curFrame := time.Frame()
-	curTime := time.TimeSinceLevelLoad()
+	curTime := time.RealTimeSinceStart()
 	debugStartTime := time.RealTimeSinceStart()
 	waitFrameCount := 0
 	waitMainCount := 0
+	// 初始化阶段结束
+	stats.InitTime = stime.Since(initStart).Seconds() * 1000
+
+	// 主循环开始
+	loopStart := stime.Now()
+	// 循环迭代计数器
+	loopIterCount := 0
 	for {
+		// 记录每次循环迭代的开始时间
+		_ = stime.Now() // 不再使用loopIterStart变量
+		loopIterCount++
+
 		if !p.hasInited {
 			if curQueue.Count() == 0 {
+				waitStart := stime.Now()
 				time.Sleep(0.05) // 0.05ms
+				stats.WaitTime += stime.Since(waitStart).Seconds() * 1000
 				continue
 			}
 		} else {
 			done := false
 			isContinue := false
+
+			waitStart := stime.Now()
 			p.waitMutex.Lock()
 			if curQueue.Count() == 0 {
 				activeCount := 0
@@ -352,6 +388,8 @@ func (p *Coroutines) UpdateJobs() {
 				}
 			}
 			p.waitMutex.Unlock()
+			stats.WaitTime += stime.Since(waitStart).Seconds() * 1000
+
 			if done {
 				break
 			}
@@ -360,7 +398,11 @@ func (p *Coroutines) UpdateJobs() {
 			}
 		}
 
+		// 任务处理开始
+		taskStart := stime.Now()
 		task := curQueue.PopFront()
+		stats.TaskCounts++
+
 		switch task.Type {
 		case waitTypeFrame:
 			if task.Frame >= curFrame {
@@ -379,24 +421,56 @@ func (p *Coroutines) UpdateJobs() {
 			task.Call()
 			waitMainCount++
 		}
+		stats.TaskProcessing += stime.Since(taskStart).Seconds() * 1000
+
 		if time.RealTimeSinceStart()-debugStartTime > 1 {
 			println("Warning: engine update > 1 seconds, please check your code ! waitMainCount=", waitMainCount)
 			break
 		}
 	}
-	nextCount := nextQueue.Count()
+	// 主循环结束
+	_ = stime.Now() // 不再使用loopEndTime变量
+	stats.LoopTime = stime.Since(loopStart).Seconds() * 1000
+
+	// 队列移动开始
+	moveStart := stime.Now()
+	stats.NextCount = nextQueue.Count()
 	curQueue.Move(nextQueue)
-	delta := (time.RealTimeSinceStart() - timestamp) * 1000
-	fmt.Printf("curFrame %d,useTime %fms,fps %d, taskCount %d,curTime %f , moveCount %d \n", curFrame, delta, int(time.FPS()), waitFrameCount, curTime, nextCount)
+	stats.MoveTime = stime.Since(moveStart).Seconds() * 1000
 
-}
+	// 更新统计信息
+	stats.WaitFrameCount = waitFrameCount
+	stats.WaitMainCount = waitMainCount
 
-// 全局变量，存储最近一次更新的统计信息
-var lastUpdateStats UpdateJobsStats
+	// 获取GC统计
+	var gcStatsAfter debug.GCStats
+	debug.ReadGCStats(&gcStatsAfter)
+	stats.GCCount = int(gcStatsAfter.NumGC - gcStatsBefore.NumGC)
+	stats.GCPauses = float64(gcStatsAfter.PauseTotal-gcStatsBefore.PauseTotal) / float64(stime.Millisecond)
 
-// GetLastUpdateStats 返回最近一次更新的统计信息
-func (p *Coroutines) GetLastUpdateStats() UpdateJobsStats {
-	return lastUpdateStats
+	// 计算总时间
+	_ = stime.Now() // 不再使用totalEndTime变量
+	delta := stime.Since(start).Seconds() * 1000
+
+	// 计算实际测量的时间与各部分时间之和的差异
+	measuredTotal := delta
+	sumParts := stats.InitTime + stats.LoopTime + stats.MoveTime
+	timeDiff := measuredTotal - sumParts
+
+	// 计算主循环外部的时间（可能包含Go运行时调度开销）
+	externalTime := delta - sumParts
+
+	// 更新统计信息
+	stats.ExternalTime = externalTime
+	stats.LoopIterations = loopIterCount
+	stats.TotalTime = delta
+	stats.TimeDifference = timeDiff
+
+	// 保存统计信息供外部访问
+	lastUpdateStats = stats
+
+	// 输出基本信息
+	//fmt.Printf("curFrame %d,useTime %.3fms,fps %d, taskCount %d,curTime %.3f, moveCount %d\n",curFrame, delta, int(time.FPS()), waitFrameCount, curTime, stats.NextCount)
 }
 
 // -------------------------------------------------------------------------------------
