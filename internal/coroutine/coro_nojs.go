@@ -28,6 +28,8 @@ type threadImpl struct {
 	Obj      ThreadObj
 	stopped_ bool
 	frame    int
+	mutex    sync.Mutex  // Mutex for this thread's condition variable
+	cond     *sync.Cond  // Per-thread condition variable for targeted wake-up
 }
 
 func (p *threadImpl) Stopped() bool {
@@ -146,6 +148,7 @@ func (p *Coroutines) StopIf(filter func(th Thread) bool) {
 // CreateAndStart creates and executes the new coroutine.
 func (p *Coroutines) CreateAndStart(start bool, tobj ThreadObj, fn func(me Thread) int) Thread {
 	id := &threadImpl{Obj: tobj, frame: p.frame}
+	id.cond = sync.NewCond(&id.mutex) // Initialize the thread's condition variable
 	go func() {
 		p.sema.Lock()
 		p.setCurrent(id)
@@ -178,10 +181,14 @@ func (p *Coroutines) Yield(me Thread) {
 	p.sema.Unlock()
 	p.mutex.Lock()
 	p.suspended[me] = true
-	for p.suspended[me] {
-		p.cond.Wait()
-	}
 	p.mutex.Unlock()
+
+	// Wait on the thread's own condition variable instead of the shared one
+	me.mutex.Lock()
+	for p.isSuspended(me) {
+		me.cond.Wait()
+	}
+	me.mutex.Unlock()
 
 	p.waitNotify()
 
@@ -193,6 +200,13 @@ func (p *Coroutines) Yield(me Thread) {
 	}
 }
 
+// isSuspended checks if a thread is suspended (thread-safe)
+func (p *Coroutines) isSuspended(me Thread) bool {
+	p.mutex.Lock()
+	defer p.mutex.Unlock()
+	return p.suspended[me]
+}
+
 // Resume resumes a suspended coroutine.
 func (p *Coroutines) Resume(me Thread) {
 	for {
@@ -200,11 +214,15 @@ func (p *Coroutines) Resume(me Thread) {
 		p.mutex.Lock()
 		if p.suspended[me] {
 			p.suspended[me] = false
-			p.cond.Broadcast()
 			done = true
 		}
 		p.mutex.Unlock()
+
 		if done {
+			// Signal only the specific thread's condition variable
+			me.mutex.Lock()
+			me.cond.Signal()
+			me.mutex.Unlock()
 			return
 		}
 		runtime.Gosched()
