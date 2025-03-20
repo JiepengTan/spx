@@ -37,7 +37,3 @@ func WaitMainThread(call func()) {
 func WaitToDo(fn func()) {
 	gco.WaitToDo(fn)
 }
-
-func WaitForChan[T any](done chan T, data *T) {
-	coroutine.WaitForChan(gco, done, data)
-}
