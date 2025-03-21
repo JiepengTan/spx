@@ -8,13 +8,13 @@ onStart => {
 
 onCloned => {
 	life = 3
-	setXYpos 0, 180
+	setXYpos rand(-131, 131), 180
 	show
 	for {
 		waitNextFrame
 		changeYpos -48 * deltaTime
 		if ypos < -180 {
-			setXYpos 0, 180
+	setXYpos rand(-131, 131), 180
 		}
 	}
 }

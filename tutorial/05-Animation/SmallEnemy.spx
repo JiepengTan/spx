@@ -1,6 +1,6 @@
 var life int
 onStart => {
-	for {
+	for i := 0; i < 30; i++ {
 		wait 0.3
 		clone
 	}
@@ -8,22 +8,13 @@ onStart => {
 
 onCloned => {
 	life = 3
-	setXYpos rand(-131, 131), 237
+	setXYpos rand(-131, 131), 180
 	show
 	for {
 		waitNextFrame
 		changeYpos -48 * deltaTime
-		if touching(EdgeBottom) {
-			destroy
+		if ypos < -180 {
+			setXYpos rand(-131, 131), 180
 		}
-	}
-}
-
-onTouchStart "Bullet", => {
-	if life > 0 {
-        life --
-        if life <= 0 {
-            die
-        }
-    }
+	}		
 }

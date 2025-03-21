@@ -1,0 +1,32 @@
+@coro_nojs.go  这个协程库 非常的慢，是否有办法优化，
+
+// Yield suspends a running coroutine.
+func (p *Coroutines) Yield(me Thread) {
+	if p.Current() != me {
+		panic(ErrCannotYieldANonrunningThread)
+	}
+	p.sema.Unlock()
+	p.mutex.Lock()
+	p.suspended[me] = true
+	for p.suspended[me] {
+		p.cond.Wait()
+	}
+	p.mutex.Unlock()
+
+	p.waitNotify()
+
+	p.sema.Lock()
+
+	p.setCurrent(me)
+	if me.stopped_ { // check stopped
+		panic(ErrAbortThread)
+	}
+}
+
+比如这里会每次都唤醒，如果不行就又会锁起来睡去，非常消耗资源， 有没有办法可以直接判定那个协程 没有被挂起，然后直接唤醒就行了？
+	for p.suspended[me] {
+		p.cond.Wait()
+	}
+
+其实目的是为了模拟 Unity 的c# 协程，即单线程运行，且可以通过WaitNextFrame 或 Wait来让出控制权
+同一时间只有一个 Thread 在运行
