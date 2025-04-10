@@ -163,9 +163,12 @@ type baseObj struct {
 }
 
 func (p *baseObj) setLayer(layer int) { // dying: visible but can't be touched
-	p.layer = layer
-	p.isLayerDirty = true
+	if p.layer != layer {
+		p.layer = layer
+		p.isLayerDirty = true
+	}
 }
+
 func (p *baseObj) setCustumeIndex(value int) {
 	p.costumeIndex_ = value
 	p.isCostumeDirty = true
