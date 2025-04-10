@@ -156,8 +156,16 @@ type baseObj struct {
 	HasDestroyed   bool
 	isCostumeSet   bool
 	isCostumeDirty bool
+
+	initLayer    int
+	layer        int
+	isLayerDirty bool
 }
 
+func (p *baseObj) setLayer(layer int) { // dying: visible but can't be touched
+	p.layer = layer
+	p.isLayerDirty = true
+}
 func (p *baseObj) setCustumeIndex(value int) {
 	p.costumeIndex_ = value
 	p.isCostumeDirty = true
@@ -255,6 +263,7 @@ func (p *baseObj) init(base string, costumes []*costumeConfig, costumeIndex int)
 	if costumeIndex >= len(costumes) || costumeIndex < 0 {
 		costumeIndex = 0
 	}
+	p.isLayerDirty = true
 	p.setCustumeIndex(costumeIndex)
 }
 

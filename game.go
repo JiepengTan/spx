@@ -122,7 +122,12 @@ type Game struct {
 
 	windowScale float64
 	audioId     engine.Object
+
+	curMinLayer int
+	curMaxLayer int
 }
+
+const startBackfrontLayer = 10000
 
 type Gamer interface {
 	engine.IGame
@@ -183,6 +188,8 @@ func (p *Game) getGame() *Game {
 }
 
 func (p *Game) initGame(sprites []Sprite) *Game {
+	p.curMinLayer = -startBackfrontLayer
+	p.curMaxLayer = startBackfrontLayer
 	p.eventSinks.init(&p.sinkMgr, p)
 	p.sprs = make(map[string]Sprite)
 	p.typs = make(map[string]reflect.Type)
@@ -471,10 +478,13 @@ func (p *Game) loadIndex(g reflect.Value, proj *projConfig) (err error) {
 	p.syncSprite = engine.NewBackdropProxy(p, p.getCostumePath(), p.getCostumeRenderScale())
 	p.setupBackdrop()
 	inits := make([]Sprite, 0, len(proj.Zorder))
-	for _, v := range proj.Zorder {
+	for layer, v := range proj.Zorder {
 		if name, ok := v.(string); ok {
 			sp := p.getSpriteProtoByName(name, g)
-			p.addShape(spriteOf(sp))
+			spr := spriteOf(sp)
+			spr.initLayer = layer
+			spr.setLayer(layer)
+			p.addShape(spr)
 			inits = append(inits, sp)
 		} else {
 			// not a prototype sprite
@@ -999,61 +1009,21 @@ func (p *Game) activateShape(child Shape) {
 	}
 }
 
-func (p *Game) goBackByLayers(spr *SpriteImpl, n int) {
-	idx := p.doFindSprite(spr)
-	if idx < 0 {
-		return
+func (p *Game) goBackLayers(spr *SpriteImpl, n int) {
+	spr.setLayer(spr.layer - n)
+	if spr.layer < p.curMinLayer {
+		p.curMinLayer = spr.layer
 	}
-	items := p.items
-	if n > 0 {
-		newIdx := idx
-		for newIdx > 0 {
-			newIdx--
-			item := items[newIdx]
-			if _, ok := item.(*SpriteImpl); ok {
-				n--
-				if n == 0 {
-					break
-				}
-			}
-		}
-		if newIdx != idx {
-			// p.getItems() requires immutable items, so we need copy before modify
-			newItems := make([]Shape, len(items))
-			copy(newItems, items[:newIdx])
-			copy(newItems[newIdx+1:], items[newIdx:idx])
-			copy(newItems[idx+1:], items[idx+1:])
-			newItems[newIdx] = spr
-			p.items = newItems
-		}
-	} else if n < 0 {
-		newIdx := idx
-		lastIdx := len(items) - 1
-		if newIdx < lastIdx {
-			for {
-				newIdx++
-				if newIdx >= lastIdx {
-					break
-				}
-				item := items[newIdx]
-				if _, ok := item.(*SpriteImpl); ok {
-					n++
-					if n == 0 {
-						break
-					}
-				}
-			}
-		}
-		if newIdx != idx {
-			// p.getItems() requires immutable items, so we need copy before modify
-			newItems := make([]Shape, len(items))
-			copy(newItems, items[:idx])
-			copy(newItems[idx:newIdx], items[idx+1:])
-			copy(newItems[newIdx+1:], items[newIdx+1:])
-			newItems[newIdx] = spr
-			p.items = newItems
-		}
-	}
+}
+
+func (p *Game) gotoFront(spr *SpriteImpl) {
+	p.curMaxLayer++
+	spr.setLayer(p.curMaxLayer)
+}
+
+func (p *Game) gotoBack(spr *SpriteImpl) {
+	p.curMinLayer--
+	spr.setLayer(p.curMinLayer)
 }
 
 func (p *Game) doFindSprite(src Shape) int {

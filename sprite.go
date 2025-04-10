@@ -331,6 +331,7 @@ func (p *SpriteImpl) InitFrom(src *SpriteImpl) {
 	p.baseObj.initFrom(&src.baseObj)
 	p.eventSinks.initFrom(&src.eventSinks, p)
 
+	p.setLayer(src.initLayer)
 	p.g, p.name = src.g, src.name
 	p.x, p.y = src.x, src.y
 	p.scale = src.scale
@@ -462,6 +463,7 @@ func Gopt_SpriteImpl_Clone__1(sprite Sprite, data interface{}) {
 	out, outPtr := v.Elem(), v.Interface().(Sprite)
 	dest := cloneSprite(out, outPtr, in, nil)
 	src.g.addClonedShape(src, dest)
+
 	if dest.hasOnCloned {
 		dest.doWhenCloned(dest, data)
 	}
@@ -1570,15 +1572,15 @@ func (p *SpriteImpl) checkTouchingScreen(where int) (touching int) {
 // -----------------------------------------------------------------------------
 
 func (p *SpriteImpl) GoBackLayers(n int) {
-	p.g.goBackByLayers(p, n)
+	p.g.goBackLayers(p, n)
 }
 
 func (p *SpriteImpl) GotoFront() {
-	p.g.goBackByLayers(p, -1e8)
+	p.g.gotoFront(p)
 }
 
 func (p *SpriteImpl) GotoBack() {
-	p.g.goBackByLayers(p, 1e8)
+	p.g.gotoBack(p)
 }
 
 // -----------------------------------------------------------------------------
