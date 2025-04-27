@@ -109,12 +109,10 @@ func newCostumeWith(name string, img *costumeSetImage, faceRight float64, i, bit
 
 	// calc atlas uv
 	uStart := float64(value.posX) / imageSize.X
-	vStart := 1 - float64(value.posY+value.height)/imageSize.Y
-
+	vStart := float64(value.posY) / imageSize.Y
 	uSize := float64(value.width) / imageSize.X
 	vSize := float64(value.height) / imageSize.Y
 	value.altasUVRect = mathf.NewVec4(uStart, vStart, uSize, vSize)
-
 	value.center.X = float64(value.width) / 2
 	value.center.Y = float64(value.height) / 2
 	return value
