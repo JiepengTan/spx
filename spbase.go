@@ -497,7 +497,7 @@ func (p *baseObj) _setMaterialParams(effect string, amount float64) {
 	p.syncSprite.SetMaterialParams(effect, amount)
 }
 
-func (p *baseObj) _setMaterialParamsVec4(effect string, amount mathf.Vec4) {
+func (p *baseObj) _setMaterialParamsVec4(effect string, val mathf.Vec4) {
 	if p.syncSprite == nil {
 		return
 	}
@@ -505,5 +505,5 @@ func (p *baseObj) _setMaterialParamsVec4(effect string, amount mathf.Vec4) {
 		p.syncSprite.SetMaterialShader(shaderPath)
 		p.hasShader = true
 	}
-	p.syncSprite.SetMaterialParamsVec4(effect, amount)
+	p.syncSprite.SetMaterialParamsVec4(effect, val)
 }
