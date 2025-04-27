@@ -1365,7 +1365,7 @@ func (p *Game) ChangeEffect(kind EffectKind, delta float64) {
 	p.baseObj.changeEffect(kind, delta)
 }
 
-func (p *Game) ClearSoundEffects() {
+func (p *Game) ClearGraphEffects() {
 	p.baseObj.clearGraphEffects()
 }
 
