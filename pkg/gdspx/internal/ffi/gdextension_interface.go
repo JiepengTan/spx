@@ -110,7 +110,7 @@ func ToString(val GdString) string {
 	cstrPtr := (*C.char)(unsafe.Pointer(val))
 	str := C.GoString(cstrPtr)
 	// free the memory allocated in c++
-	C.free(unsafe.Pointer(cstrPtr))
+	//C.free(unsafe.Pointer(cstrPtr))
 	return str
 }
 

@@ -332,7 +332,7 @@ func getManagerFuncBody(function *clang.TypedefFunction) string {
 			sb.WriteString(")")
 			sb.WriteString("\n" + prefixTab)
 			sb.WriteString(argName + " := " + "(GdString)(" + argName + "Str) \n")
-			sb.WriteString("\tdefer " + "C.free(unsafe.Pointer(" + argName + "Str))")
+			//sb.WriteString("\tdefer " + "C.free(unsafe.Pointer(" + argName + "Str))")
 
 		default:
 			sb.WriteString(argName + " := ")
