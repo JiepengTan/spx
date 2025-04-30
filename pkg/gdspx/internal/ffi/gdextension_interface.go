@@ -105,9 +105,13 @@ func ToFloat32(val GdFloat) float64 {
 func ToFloat(val GdFloat) float64 {
 	return float64(val)
 }
+
 func ToString(val GdString) string {
-	cstrPtr := (*CString)(unsafe.Pointer(val))
-	return cstrPtr.ToUtf8()
+	cstrPtr := (*C.char)(unsafe.Pointer(val))
+	str := C.GoString(cstrPtr)
+	// free the memory allocated in c++
+	C.free(unsafe.Pointer(cstrPtr))
+	return str
 }
 
 type GDExtensionSpxCallbackInfoPtr C.GDExtensionSpxCallbackInfoPtr
