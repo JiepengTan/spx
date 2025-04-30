@@ -86,21 +86,6 @@ func stringInitConstructorBindings() {
 	globalStringMethodBindings.destructor = CallVariantGetPtrDestructor(GDEXTENSION_VARIANT_TYPE_STRING)
 }
 
-type CString C.CString
-
-func (c CString) ToGdString() GdString {
-	return (GdString)(c)
-}
-
-// constructors
-func NewCString(content string) CString {
-	return C.CString(content)
-}
-
-func (cx CString) Destroy() {
-	C.free(unsafe.Pointer(cx))
-}
-
 func CallBuiltinConstructor(constructor GDExtensionPtrConstructor, base GDExtensionUninitializedTypePtr, args ...GDExtensionConstTypePtr) {
 	a := (GDExtensionPtrConstructor)(constructor)
 	b := (GDExtensionUninitializedTypePtr)(base)
