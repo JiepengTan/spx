@@ -481,6 +481,12 @@ func (pself *resMgr) ReloadTexture(path string) {
 	defer C.free(unsafe.Pointer(arg0Str))
 	CallResReloadTexture(arg0)
 }
+func (pself *resMgr) FreeStr(str string) {
+	arg0Str := C.CString(str)
+	arg0 := (GdString)(arg0Str)
+	defer C.free(unsafe.Pointer(arg0Str))
+	CallResFreeStr(arg0)
+}
 func (pself *sceneMgr) ChangeSceneToFile(path string) {
 	arg0Str := C.CString(path)
 	arg0 := (GdString)(arg0Str)
