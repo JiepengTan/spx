@@ -110,7 +110,8 @@ func ToString(val GdString) string {
 	cstrPtr := (*C.char)(unsafe.Pointer(val))
 	str := C.GoString(cstrPtr)
 	// free the memory allocated in c++
-	//C.free(unsafe.Pointer(cstrPtr))
+	// Warning!: Using Go's C.free(unsafe.Pointer(cstrPtr)) to free memory allocated in C++ can cause a crash
+	CallResFreeStr(val)
 	return str
 }
 
