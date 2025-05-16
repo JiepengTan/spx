@@ -73,7 +73,11 @@ setuppack:
 	 spx export && \
 	 TEMP_VERSION=$$(cat "$(CURRENT_PATH)/cmd/gox/template/version") && \
 	 OUTPUT_PCK="$(GOPATH)/bin/gdspxrt$$TEMP_VERSION.pck" && \
-	 cp ./project/.builds/pc/gdexport.pck "$$OUTPUT_PCK" && \
+	 cp ./project/.builds/pc/gdexport.pck "$$OUTPUT_PCK" || true && \
+	 cp ./project/.builds/pc/gdexport.app/Contents/Resources/*.pck "$$OUTPUT_PCK" || true && \
+	 spx exportwebruntime && \
+	 cd ./project/.builds/webi && \
+	 zip -r $(GOPATH)/bin/gdspxrt_web$$TEMP_VERSION.zip * && \
 	 sleep 1 && \
 	 echo "$$OUTPUT_PCK has been created")
 	rm -rf $(CURRENT_PATH)/.tmp

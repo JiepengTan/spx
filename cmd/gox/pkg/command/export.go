@@ -109,6 +109,15 @@ func (pself *CmdTool) ExportWeb() error {
 	return nil
 }
 
+func (pself *CmdTool) ExportWebRuntime() error {
+	targetDir := path.Join(pself.ProjectDir, ".builds/webi")
+	targetPath := path.Join(targetDir, "godot.editor.html")
+	platformName := "Web"
+	os.Mkdir(targetDir, 0755)
+	println("ExportWebRuntime")
+	return util.RunCommandInDir(pself.ProjectDir, pself.CmdPath, "--headless", "--quit", "--path", pself.ProjectDir, "--export-debug", platformName, targetPath)
+}
+
 func (pself *CmdTool) Export() error {
 	targetDir := path.Join(pself.ProjectDir, ".builds/pc")
 	targetPath := path.Join(targetDir, PcExportName)
@@ -118,6 +127,7 @@ func (pself *CmdTool) Export() error {
 		platformName = "Win"
 	} else if runtime.GOOS == "darwin" {
 		platformName = "Mac"
+		targetPath += ".app"
 	} else if runtime.GOOS == "linux" {
 		platformName = "Linux"
 	}
