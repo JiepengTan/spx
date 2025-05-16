@@ -91,7 +91,7 @@ func (pself *CmdTool) ExportWeb() error {
 	util.SetupFile(false, path.Join(dir, ".gitignore"), pself.GitignoreTxt)
 	os.Rename(path.Join(dir, ".gitignore.txt"), path.Join(dir, ".gitignore"))
 
-	editorZipPath := path.Join(pself.GoBinPath, ENV_NAME+pself.Version+"_web.zip")
+	editorZipPath := path.Join(pself.GoBinPath, "gdspxrt_web"+pself.Version+".zip")
 	dstPath := path.Join(pself.ProjectDir, ".builds/web")
 	os.MkdirAll(dstPath, os.ModePerm)
 	if util.IsFileExist(editorZipPath) {
@@ -103,7 +103,8 @@ func (pself *CmdTool) ExportWeb() error {
 
 	util.CopyDir(pself.ProjectFS, "template/project/.builds/web", pself.WebDir, true)
 	pack.PackProject(pself.TargetDir, path.Join(pself.WebDir, "game.zip"))
-	pack.PackEngineRes(pself.ProjectFS, pself.WebDir)
+
+	//pack.PackEngineRes(pself.ProjectFS, pself.WebDir)
 	util.CopyFile(pself.getWasmPath(), path.Join(pself.WebDir, "gdspx.wasm"))
 	pack.SaveEngineHash(pself.WebDir)
 	return nil
