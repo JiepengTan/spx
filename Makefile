@@ -23,7 +23,6 @@ pcpack:
 	./pkg/gdspx/tools/build_engine.sh
 # Build web engine
 web: 
-	cd cmd/igox &&  go generate && cd $(CURRENT_PATH) && \
 	make cmdweb && ./pkg/gdspx/tools/build_engine.sh -p web -e
 # Build web engine template
 webpack: 
