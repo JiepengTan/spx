@@ -47,6 +47,8 @@ type CmdTool struct {
 	RuntimeTempDir string
 	RuntimePckPath string
 	RuntimeCmdPath string
+
+	IsWeb bool
 }
 
 // RunCmd executes the specified command with the given parameters

@@ -5,6 +5,7 @@ package main
 import (
 	"archive/zip"
 	"bytes"
+	_ "embed"
 	"errors"
 	"fmt"
 	"log"
@@ -21,6 +22,11 @@ import (
 	_ "github.com/goplus/spx/cmd/igox/pkg/github.com/goplus/spx"
 	"github.com/goplus/spx/cmd/igox/zipfs"
 	goxfs "github.com/goplus/spx/fs"
+)
+
+var (
+	//go:embed main.go.txt
+	sourceCodes string
 )
 
 var aiInteractionAPIEndpoint string
@@ -233,6 +239,8 @@ func Gopt_Player_Gopx_OnCmd[T any](p *Player, handler func(cmd T) error) {
 	})
 
 	source, err := gopbuild.BuildFSDir(ctx, fs, "")
+	println("build result ==", sourceCodes)
+	source = []byte(sourceCodes)
 	if err != nil {
 		log.Fatalln("Failed to build Go+ source:", err)
 	}

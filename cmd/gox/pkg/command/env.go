@@ -225,7 +225,7 @@ func (pself *CmdTool) ShouldReimport() bool {
 
 func (pself *CmdTool) Reimport() {
 	// Call BuildDll on self instead of using the global curCmd
-	pself.BuildDll()
+	//pself.BuildDll()
 	fmt.Println(" ================= Importing ... ================= ")
 	cmd := exec.Command(pself.CmdPath, "--import", "--headless")
 	cmd.Dir = pself.ProjectDir

@@ -52,7 +52,9 @@ func (p *Game) OnEngineStart() {
 		initInput()
 		gamer := p.gamer_
 		if me, ok := gamer.(interface{ MainEntry() }); ok {
-			runMain(me.MainEntry)
+			println("try call MainEntry", me, p)
+			me.MainEntry()
+			println("try call MainEntryend", me, p)
 		}
 		if !p.isRunned {
 			Gopt_Game_Run(gamer, "assets")

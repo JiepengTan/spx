@@ -279,6 +279,7 @@ func (p *eventSinks) doDeleteClone() {
 // -------------------------------------------------------------------------------------
 
 func (p *eventSinks) OnStart(onStart func()) {
+	println("onstart call ", p)
 	p.allWhenStart = &eventSink{
 		prev:  p.allWhenStart,
 		pthis: p.pthis,

@@ -90,11 +90,15 @@ setuppack:
 	 echo "$$OUTPUT_PCK has been created")
 	rm -rf $(CURRENT_PATH)/.tmp
 
-test:
-	cd test/All && spx run . && cd $(CURRENT_PATH) 
+path ?= demos/00_Test
 
-path ?= tutorial/01-Weather
-runweb:
+test:
+	cd test/All && spx runi . && cd $(CURRENT_PATH) 
+
+testpc:
+	cd demos/00_Test2 && spx runi . && cd $(CURRENT_PATH) 
+
+testweb:
 	@echo "Killing gdspx_web_server.py if running..."
 	@PIDS=$$(pgrep -f gdspx_web_server.py); \
 	if [ -n "$$PIDS" ]; then \
@@ -104,7 +108,6 @@ runweb:
 		echo "No gdspx_web_server.py process found."; \
 	fi	
 	make cmdweb && cd $(path) && spx clear && spx runweb -serveraddr=":8106" && cd $(CURRENT_PATH) 
-
 
 init:
 	make cmd && make download

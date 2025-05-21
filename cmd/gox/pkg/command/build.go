@@ -12,7 +12,7 @@ import (
 )
 
 func (pself *CmdTool) BuildWasm() (err error) {
-	pself.genGo()
+	pself.genGo(true)
 	rawdir, _ := os.Getwd()
 	dir := path.Join(pself.ProjectDir, ".builds/web/")
 	os.MkdirAll(dir, 0755)
@@ -60,7 +60,7 @@ func (pself *CmdTool) BuildDll() error {
 	}
 
 	rawdir, _ := os.Getwd()
-	tagStr := pself.genGo()
+	tagStr := pself.genGo(false)
 
 	// fix https://github.com/goplus/spx/issues/619
 	// fatal error: non-Go code set up signal handler without SA_ONSTACK flag
@@ -87,7 +87,7 @@ func (pself *CmdTool) BuildDll() error {
 	os.Chdir(rawdir)
 	return nil
 }
-func (pself *CmdTool) genGo() string {
+func (pself *CmdTool) genGo(isWeb bool) string {
 	rawdir, _ := os.Getwd()
 	projectDir, _ := filepath.Abs(pself.ProjectDir)
 	spxProjPath, _ := filepath.Abs(pself.ProjectDir + "/..")
@@ -105,7 +105,9 @@ func (pself *CmdTool) genGo() string {
 		util.RunGoplus(envVars, "go", tagStr)
 	}
 	os.MkdirAll(pself.GoDir, 0755)
-	os.Rename(path.Join(spxProjPath, "gop_autogen.go"), path.Join(pself.GoDir, "main.go"))
+	if isWeb {
+		os.Rename(path.Join(spxProjPath, "gop_autogen.go"), path.Join(pself.GoDir, "main.go"))
+	}
 	os.Chdir(projectDir)
 	util.RunGolang(nil, "mod", "tidy")
 	os.Chdir(rawdir)
