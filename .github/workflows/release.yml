@@ -98,6 +98,7 @@ jobs:
       - name: Build release pack
         run: |
           make exportweb
+          ls -l
 
       - name: Upload Web Build Results
         uses: actions/upload-artifact@v4
