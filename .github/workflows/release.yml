@@ -97,7 +97,7 @@ jobs:
 
       - name: Build release pack
         run: |
-          make cmdweb
+          make wasm
           ls -l cmd/igox
           if [ ! -f "cmd/igox/gdspx.wasm" ]; then
             echo "gdspx.wasm not found"
