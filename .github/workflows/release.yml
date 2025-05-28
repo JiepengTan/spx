@@ -97,8 +97,18 @@ jobs:
 
       - name: Build release pack
         run: |
+          make cmdweb
+          ls -l cmd/igox
+          if [ ! -f "cmd/igox/gdspx.wasm" ]; then
+            echo "gdspx.wasm not found"
+            exit 1
+          fi
           make exportweb
           ls -l
+          if [ ! -f "spx_web.zip" ]; then
+            echo "spx_web.zip not found"
+            exit 1
+          fi
 
       - name: Upload Web Build Results
         uses: actions/upload-artifact@v4
