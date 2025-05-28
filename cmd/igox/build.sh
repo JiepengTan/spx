@@ -1,7 +1,7 @@
 #!/bin/bash
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd $SCRIPT_DIR
-go install github.com/goplus/igop/cmd/qexp@0.46.0
+go install github.com/goplus/igop/cmd/qexp@v0.45.0
 GOOS=js GOARCH=wasm go generate -v
 go mod tidy
 if [ "$1" = "--opt" ]; then
