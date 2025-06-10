@@ -43,6 +43,7 @@
 	<script src="godot.editor.js"></script>
 	<script src="jszip-3.10.1.min.js"></script>
 	<script src="game.js"></script>
+	<script src="wrap.gen.js"></script>
 	<script>
 		"use strict";
 		let gameApp = null
@@ -92,7 +93,7 @@
 				"gameCanvas": document.getElementById('game-canvas'),
 				"editorCanvas": document.getElementById('editor-canvas'),
 				"projectData": new Uint8Array(buffer),
-				"logLevel": LOG_LEVEL_NONE,
+				"logLevel": LOG_LEVEL_VERBOSE,
 				"useAssetCache": false,
 				"isRuntimeMode": true,
 				"assetURLs": {
@@ -100,7 +101,7 @@
 					"engineres.zip": "/engineres.zip",
 					"gdspx.wasm": "/gdspx.wasm",
 					"godot.editor.wasm": "/godot.editor.wasm",
-				},
+				}
 			};
 			if (assetURLs != null) {
 				config.assetURLs = assetURLs
@@ -110,11 +111,17 @@
 				await gameApp.StopProject();
 			}
 			
-			// load wasm
-			let url = config.assetURLs["gdspx.wasm"]
-			const go = new Go();
-			const { instance } = await WebAssembly.instantiateStreaming(fetch(url), go.importObject);
-			go.run(instance);
+			// // load wasm
+			// let url = config.assetURLs["gdspx.wasm"]
+			// const go = new Go();
+			// const { instance } = await WebAssembly.instantiateStreaming(fetch(url), go.importObject);
+			// go.run(instance);
+			// // register ffi
+			// var ffi = BindFFI()
+			// console.log("startGame   ====>", config)
+			// ffi.gdspx_on_ui_clicked(null, null)
+			// config.ffi = ffi;
+
 			if (onSpxReady != null) {
 				onSpxReady()
 			}

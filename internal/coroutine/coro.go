@@ -3,6 +3,7 @@ package coroutine
 import (
 	"errors"
 	"fmt"
+	"math"
 	"reflect"
 	"runtime"
 	sdebug "runtime/debug"
@@ -12,7 +13,6 @@ import (
 	"unsafe"
 
 	"github.com/goplus/spx/v2/internal/debug"
-	"github.com/goplus/spx/v2/internal/engine/platform"
 	"github.com/goplus/spx/v2/internal/time"
 )
 
@@ -366,10 +366,7 @@ func (p *Coroutines) WaitNextFrame() {
 }
 
 func (p *Coroutines) WaitMainThread(call func()) {
-	if platform.IsWeb() {
-		call()
-		return
-	}
+
 	id := atomic.AddInt64(&p.curId, 1)
 	done := make(chan int)
 	job := &WaitJob{
@@ -433,6 +430,10 @@ func (p *Coroutines) Update() {
 	waitMainCount := 0
 	// Initialization phase ends
 	stats.InitTime = stime.Since(initStart).Seconds() * 1000
+
+	if math.Mod(float64(curFrame), 200) == 0 {
+		println("===> Update", curFrame)
+	}
 
 	// Main loop starts
 	loopStart := stime.Now()

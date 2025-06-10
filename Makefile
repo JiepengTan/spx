@@ -35,10 +35,10 @@ help:
 	@echo "  runtest     - Run tests"
 	@echo ""
 	@echo "Usage Examples:"
-	@echo "  make pc                      - Build for current platform"
-	@echo "  make run path=demos/demo1    - Run specific demo on PC (default: tutorial/01-Weather)"
-	@echo "  make runweb path=demos/demo1 - Run specific demo on web (default: tutorial/01-Weather)"
-	@echo "  make runtest                 - Run tests"
+	@echo "  make pc                      			- Build for current platform"
+	@echo "  make run path=demos/demo1    			- Run specific demo on PC (default: tutorial/01-Weather)"
+	@echo "  make runweb path=demos/demo1 port=8080 	- Run specific demo on web (default: tutorial/01-Weather, port: 8106)"
+	@echo "  make runtest                 			- Run tests"
 
 init:
 	chmod +x ./pkg/gdspx/tools/*.sh && \
@@ -116,6 +116,7 @@ exportweb:
 
 # Run demos
 path ?= tutorial/01-Weather
+port ?= 8106
 
 # Run demo on PC editor mode
 rune:
@@ -127,11 +128,25 @@ run:
 
 # Run demo on web
 runweb:
-	./pkg/gdspx/tools/make_util.sh runweb $(path) && cd $(CURRENT_PATH) 
+	./pkg/gdspx/tools/make_util.sh runweb $(path) $(port) && cd $(CURRENT_PATH) 
 
 # Run tests
 runtest:
 	cd test/All && spx run . && cd $(CURRENT_PATH) 
+
+webe:
+	cd ./pkg/gdspx/godot && scons platform=web target=editor proxy_to_pthread=true && cd $(CURRENT_PATH) && \
+	rm -rf .tmp && mkdir -p .tmp && \
+	cp ./pkg/gdspx/godot/bin/godot.web.editor.wasm32.zip .tmp/godot.zip && \
+	cp pkg/gdspx/tools/run.sh .tmp && \
+	cp pkg/gdspx/tools/run.py .tmp && \
+	cd .tmp && unzip godot.zip && \
+	chmod +x run.sh   && cd $(CURRENT_PATH)
+
+runwebe:
+	cd .tmp && ./run.sh $(port)
+
+
 
 # Default rule for unknown targets
 %:

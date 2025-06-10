@@ -25,6 +25,7 @@ func NewBackdropProxy(obj any, path string, renderScale float64) *Sprite {
 		_ret1.SetZIndex(-1)
 		_ret1.DisablePhysic()
 		_ret1.UpdateTexture(path, renderScale)
+		println("==> NewBackdropProxy", path, renderScale)
 	})
 	return _ret1
 }
