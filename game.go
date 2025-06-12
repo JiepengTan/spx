@@ -17,7 +17,6 @@
 package spx
 
 import (
-	"encoding/json"
 	"flag"
 	"fmt"
 	"log"
@@ -209,8 +208,6 @@ func (p *Game) initGame(sprites []Sprite) *Game {
 
 // Gopt_Game_Main is required by Go+ compiler as the entry of a .gmx project.
 func Gopt_Game_Main(game Gamer, sprites ...Sprite) {
-	debugLoad = true
-	println("Gopt_Game_Main call")
 	g := game.initGame(sprites)
 	g.gamer_ = game
 	engine.Main(game)
@@ -245,11 +242,6 @@ func Gopt_Game_Run(game Gamer, resource any, gameConf ...*Config) {
 	}
 	if err != nil {
 		panic(err)
-	}
-	if data, err := json.MarshalIndent(proj, "", "  "); err == nil {
-		fmt.Println("proj =", string(data))
-	} else {
-		fmt.Println("marshal proj error:", err)
 	}
 	if !conf.DontParseFlags {
 		f := flag.CommandLine
@@ -466,26 +458,16 @@ func (p *Game) loadIndex(g reflect.Value, proj *projConfig) (err error) {
 		windowScale = proj.WindowScale
 	}
 	p.windowScale = windowScale
-
-	if data, err := json.MarshalIndent(proj, "", "  "); err == nil {
-		fmt.Println("proj =", string(data))
-	} else {
-		fmt.Println("marshal proj error:", err)
-	}
-
 	p.debug = proj.Debug
 	if backdrops := proj.getBackdrops(); len(backdrops) > 0 {
 		p.baseObj.initBackdrops("", backdrops, proj.getBackdropIndex())
 		p.worldWidth_ = proj.Map.Width
 		p.worldHeight_ = proj.Map.Height
 		p.doWorldSize() // set world size
-		println("==>Init SetWorldSize", p.worldWidth_, p.worldHeight_)
 	} else {
 		p.worldWidth_ = proj.Map.Width
 		p.worldHeight_ = proj.Map.Height
-		println("==>Init SetWorldSize2", p.worldWidth_, p.worldHeight_)
 		p.baseObj.initWithSize(p.worldWidth_, p.worldHeight_)
-		println("==>Init SetWorldSize3", p.worldWidth_, p.worldHeight_)
 	}
 	if debugLoad {
 		log.Println("==> SetWorldSize", p.worldWidth_, p.worldHeight_)
@@ -513,7 +495,6 @@ func (p *Game) loadIndex(g reflect.Value, proj *projConfig) (err error) {
 		scale := math.Min(winSize.X/float64(p.windowWidth_), winSize.Y/float64(p.windowHeight_))
 		p.windowScale = scale
 	}
-	println("==> SetWindowSize", p.windowWidth_, p.windowHeight_, p.windowScale)
 
 	platformMgr.SetWindowSize(int64(float64(p.windowWidth_)*p.windowScale), int64(float64(p.windowHeight_)*p.windowScale))
 	p.Camera.init(p)
