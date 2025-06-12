@@ -15,7 +15,7 @@ var Module = {};
 // Thread-local guard variable for one-time init of the JS state
 var initializedJS = false;
 
-// Go WASM 模块全局状态控制 - 简化版本
+// Go WASM module global state control - simplified version
 var goWasmState = {
   isLoading: false,
   isLoaded: false,
@@ -63,52 +63,52 @@ self.onunhandledrejection = (e) => {
 };
 
 /**
- * 按需初始化 Go WASM（可在任何线程调用）
- * 这个函数会在 godot_js_spx_on_engine_start 回调时被调用
+ * Initializes Go WASM on demand (callable from any thread)
+ * This function will be called on godot_js_spx_on_engine_start callback
  */
 async function initializeGoWasmOnDemand() {
   const workerId = (typeof Module !== 'undefined' && Module['workerID']) || 'unknown';
   const threadInfo = typeof importScripts !== 'undefined' ? 'Worker' : 'MainThread';
 
-  console.log(`[线程 ${threadInfo}-${workerId}] 开始按需初始化 Go WASM`);
+  console.log(`[Thread ${threadInfo}-${workerId}] Initializing Go WASM on demand`);
 
-  // 如果已经初始化过了，直接返回
+  // If already initialized, return immediately
   if (self.goBridge && self.goBridge.isReady && typeof Module !== 'undefined' && Module['FFI']) {
-    console.log(`[线程 ${threadInfo}-${workerId}] Go WASM 已就绪，无需重复初始化`);
+    console.log(`[Thread ${threadInfo}-${workerId}] Go WASM is ready, no need to reinitialize`);
     return true;
   }
 
   try {
-    // 加载 Go WASM 模块
+    // Load Go WASM module
     await loadGoWasmModule();
-    console.log(`[线程 ${threadInfo}-${workerId}] Go WASM 按需初始化成功`);
+    console.log(`[Thread ${threadInfo}-${workerId}] Go WASM initialization successful`);
     return true;
   } catch (error) {
-    console.error(`[线程 ${threadInfo}-${workerId}] Go WASM 按需初始化失败:`, error);
+    console.error(`[Thread ${threadInfo}-${workerId}] Go WASM initialization failed:`, error);
     return false;
   }
 }
 
-// 将函数暴露到全局作用域，以便在 godot.editor.js 中调用
+// Expose functions to global scope for godot.editor.js to call
 if (typeof self !== 'undefined') {
   self.initializeGoWasmOnDemand = initializeGoWasmOnDemand;
 }
 
 
 /**
- * 简化的 Go WASM 模块加载逻辑
+ * Simplified Go WASM module loading logic
  */
 async function loadGoWasmModule() {
-  // 如果已经加载过了，直接返回
+  // If already loaded, return immediately
   if (self.goBridge && self.goBridge.isReady) {
-    console.log(`[Godot Worker ${Module['workerID']}] Go WASM 已加载，直接使用`);
+    console.log(`[Godot Worker ${Module['workerID']}] Go WASM is already loaded, using directly`);
     return;
   }
 
   try {
-    console.log(`[Godot Worker ${Module['workerID']}] 开始加载 Go WASM 模块...`);
+    console.log(`[Godot Worker ${Module['workerID']}] Loading Go WASM module...`);
 
-    // 导入 Go WASM Bridge (只导入一次)
+    // Import Go WASM Bridge (only import once)
     if (typeof GoWasmBridge === 'undefined') {
       importScripts('./go-wasm-bridge.js');
     }
@@ -116,34 +116,34 @@ async function loadGoWasmModule() {
       importScripts('./wrap.gen.js');
     }
 
-    // 创建 Go WASM Bridge 实例
+    // Create Go WASM Bridge instance
     const goBridge = new GoWasmBridge();
 
-    // 初始化 Go WASM 模块
+    // Initialize Go WASM module
     await goBridge.initialize({
       wasmPath: './gdspx.wasm',
       timeout: 15000,
       enableDebug: true
     });
 
-    console.log(`[Godot Worker ${Module['workerID']}] Go WASM 模块加载成1111功`);
+    console.log(`[Godot Worker ${Module['workerID']}] Go WASM module loaded successfully`);
 
-    // 尝试调用 Go 的初始化函数（可选）
+    // Try to call Go initialization function (optional)
     try {
       const initResult = await goBridge.callGoFunctionSafe('goWasmInit');
-      console.log(`[Godot Worker ${Module['workerID']}] Go 初始化函数执行成功:`, initResult);
+      console.log(`[Godot Worker ${Module['workerID']}] Go initialization function executed successfully:`, initResult);
       Module['FFI'] = BindFFI(goBridge);
     } catch (goInitError) {
-      console.warn(`[Godot Worker ${Module['workerID']}] Go 初始化函数调用失败，但继续执行:`, goInitError);
+      console.warn(`[Godot Worker ${Module['workerID']}] Go initialization function call failed, but continuing execution:`, goInitError);
     }
 
-    // 将 Go Bridge 实例暴露给当前 worker 的全局作用域
+    // Expose Go Bridge instance to global scope of current worker
     self.goBridge = goBridge;
 
-    console.log(`[Godot Worker ${Module['workerID']}] Go WASM 模块初始化完成`);
+    console.log(`[Godot Worker ${Module['workerID']}] Go WASM module initialization complete`);
 
   } catch (error) {
-    console.error(`[Godot Worker ${Module['workerID']}] Go WASM 模块加载失败:`, error);
+    console.error(`[Godot Worker ${Module['workerID']}] Go WASM module loading failed:`, error);
     throw error;
   }
 }
@@ -236,7 +236,7 @@ function handleMessage(e) {
         Module['checkMailbox']();
       }
     } else if (e.data._gameAppMessageId) {
-      // 这是来自 GameApp 的消息，带有特殊标识
+      // This is a message from GameApp with special identifier
       handleGameAppMessage(e.data);
     } else if (e.data.cmd) {
       // The received message looks like something that should be handled by this message
@@ -255,12 +255,12 @@ function handleMessage(e) {
   }
 };
 
-// === 新增：处理来自 GameApp 的消息 ===
+// === Added: handle messages from GameApp ===
 function handleGameAppMessage(data) {
   const workerId = (typeof Module !== 'undefined' && Module['workerID']) || 'unknown';
   const threadInfo = typeof importScripts !== 'undefined' ? 'Worker' : 'MainThread';
   
-  console.log(`[线程 ${threadInfo}-${workerId}] 收到 GameApp 消息:`, data.cmd || 'unknown', data);
+  console.log(`[Thread ${threadInfo}-${workerId}] Received GameApp message:`, data.cmd || 'unknown', data);
   
   try {
     switch (data.cmd) {
@@ -273,7 +273,7 @@ function handleGameAppMessage(data) {
         break;
         
       case 'ping':
-        // 响应 ping 消息
+        // Respond to ping message
         postMessage({
           cmd: 'pong',
           workerID: workerId,
@@ -283,7 +283,7 @@ function handleGameAppMessage(data) {
         break;
         
       case 'getWorkerStatus':
-        // 返回 worker 状态信息
+        // Return worker status information
         postMessage({
           cmd: 'workerStatus',
           workerID: workerId,
@@ -295,7 +295,7 @@ function handleGameAppMessage(data) {
         break;
         
       case 'initGoWasm':
-        // 按需初始化 Go WASM
+        // Initialize Go WASM on demand
         initializeGoWasmOnDemand().then(success => {
           postMessage({
             cmd: 'goWasmInitResult',
@@ -317,8 +317,8 @@ function handleGameAppMessage(data) {
         break;
         
       default:
-        console.warn(`[线程 ${threadInfo}-${workerId}] 未知的 GameApp 命令:`, data.cmd);
-        // 发送未知命令响应
+        console.warn(`[Thread ${threadInfo}-${workerId}] Unknown GameApp command:`, data.cmd);
+        // Send unknown command response
         postMessage({
           cmd: 'unknownCommand',
           originalCmd: data.cmd,
@@ -329,8 +329,8 @@ function handleGameAppMessage(data) {
         break;
     }
   } catch (error) {
-    console.error(`[线程 ${threadInfo}-${workerId}] 处理 GameApp 消息时出错:`, error);
-    // 发送错误响应
+    console.error(`[Thread ${threadInfo}-${workerId}] Error handling GameApp message:`, error);
+    // Send error response
     postMessage({
       cmd: 'error',
       error: error.message,
@@ -344,11 +344,11 @@ function handleGameAppMessage(data) {
 
 async function handleProjectDataUpdate(data) {
   const workerId = (typeof Module !== 'undefined' && Module['workerID']) || 'unknown';
-  console.log(`[Worker ${workerId}] 处理项目数据更新，数据大小:`, data.data ? data.data.byteLength : 0);
+  console.log(`[Worker ${workerId}] Handling project data update, data size:`, data.data ? data.data.byteLength : 0);
   
   //await unpackGameData("", data.data, data.packName, data.packUrl)
-  // 这里可以处理项目数据更新逻辑
-  // 例如：更新本地缓存、通知 Go WASM 等
+  // Project data update logic can be processed here
+  // For example: Update local cache, notify Go WASM, etc
   
   if (! Module["FFI"]){
     console.log("==> Module[\"FFI\"] is not ready, wait for goWasmInitResult")
@@ -358,10 +358,10 @@ async function handleProjectDataUpdate(data) {
 
   if (self.goBridge && self.goBridge.isReady) {
     try {
-      // 如果 Go WASM 已就绪，可以调用相关函数处理数据
+      // If Go WASM is ready, can call related functions to process data
       self.goBridge.callGoFunctionSafe('goLoadData', data.data);
     } catch (error) {
-      console.error(`[Worker ${workerId}] 调用 Go 函数处理项目数据失败:`, error);
+      console.error(`[Worker ${workerId}] Error calling Go function to process project data:`, error);
     }
   }
 
@@ -390,21 +390,19 @@ async function unpackGameData(dir, projectData, packName, packUrl) {
 
 function handleCustomCommand(data) {
   const workerId = (typeof Module !== 'undefined' && Module['workerID']) || 'unknown';
-  console.log(`[Worker ${workerId}] 处理自定义命令:`, data);
+  console.log(`[Worker ${workerId}] Handling custom command:`, data);
   
-  // 这里可以添加自定义命令的处理逻辑
-  // 根据需要调用相应的函数或模块
+  // Custom command handling logic can be added here
+  // Call corresponding functions or modules as needed
   
-  // 发送处理完成响应
+  // Send processing complete response
   postMessage({
     cmd: 'customCommandComplete',
     workerID: workerId,
     originalMessageId: data._gameAppMessageId,
-    result: `自定义命令 ${data.customCmd || 'unknown'} 处理完成`,
+    result: `Custom command ${data.customCmd || 'unknown'} processed successfully`,
     timestamp: Date.now()
   });
 }
 
 self.onmessage = handleMessage;
-
-
