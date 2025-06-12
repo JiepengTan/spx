@@ -62,91 +62,7 @@ self.onunhandledrejection = (e) => {
   throw e.reason ?? e;
 };
 
-/**
- * Initializes Go WASM on demand (callable from any thread)
- * This function will be called on godot_js_spx_on_engine_start callback
- */
-async function initializeGoWasmOnDemand() {
-  const workerId = (typeof Module !== 'undefined' && Module['workerID']) || 'unknown';
-  const threadInfo = typeof importScripts !== 'undefined' ? 'Worker' : 'MainThread';
 
-  console.log(`[Thread ${threadInfo}-${workerId}] Initializing Go WASM on demand`);
-
-  // If already initialized, return immediately
-  if (self.goBridge && self.goBridge.isReady && typeof Module !== 'undefined' && Module['FFI']) {
-    console.log(`[Thread ${threadInfo}-${workerId}] Go WASM is ready, no need to reinitialize`);
-    return true;
-  }
-
-  try {
-    // Load Go WASM module
-    await loadGoWasmModule();
-    console.log(`[Thread ${threadInfo}-${workerId}] Go WASM initialization successful`);
-    return true;
-  } catch (error) {
-    console.error(`[Thread ${threadInfo}-${workerId}] Go WASM initialization failed:`, error);
-    return false;
-  }
-}
-
-// Expose functions to global scope for godot.editor.js to call
-if (typeof self !== 'undefined') {
-  self.initializeGoWasmOnDemand = initializeGoWasmOnDemand;
-}
-
-
-/**
- * Simplified Go WASM module loading logic
- */
-async function loadGoWasmModule() {
-  // If already loaded, return immediately
-  if (self.goBridge && self.goBridge.isReady) {
-    console.log(`[Godot Worker ${Module['workerID']}] Go WASM is already loaded, using directly`);
-    return;
-  }
-
-  try {
-    console.log(`[Godot Worker ${Module['workerID']}] Loading Go WASM module...`);
-
-    // Import Go WASM Bridge (only import once)
-    if (typeof GoWasmBridge === 'undefined') {
-      importScripts('./go-wasm-bridge.js');
-    }
-    if (typeof BindFFI === 'undefined') {
-      importScripts('./wrap.gen.js');
-    }
-
-    // Create Go WASM Bridge instance
-    const goBridge = new GoWasmBridge();
-
-    // Initialize Go WASM module
-    await goBridge.initialize({
-      wasmPath: './gdspx.wasm',
-      timeout: 15000,
-      enableDebug: true
-    });
-
-    console.log(`[Godot Worker ${Module['workerID']}] Go WASM module loaded successfully`);
-
-    // Try to call Go initialization function (optional)
-    try {
-      const initResult = await goBridge.callGoFunctionSafe('goWasmInit');
-      console.log(`[Godot Worker ${Module['workerID']}] Go initialization function executed successfully:`, initResult);
-      Module['FFI'] = BindFFI(goBridge);
-    } catch (goInitError) {
-      console.warn(`[Godot Worker ${Module['workerID']}] Go initialization function call failed, but continuing execution:`, goInitError);
-    }
-
-    // Expose Go Bridge instance to global scope of current worker
-    self.goBridge = goBridge;
-
-    console.log(`[Godot Worker ${Module['workerID']}] Go WASM module initialization complete`);
-
-  } catch (error) {
-    console.error(`[Godot Worker ${Module['workerID']}] Go WASM module loading failed:`, error);
-    throw error;
-  }
-}
 
 function handleMessage(e) {
   try {
@@ -235,9 +151,8 @@ function handleMessage(e) {
       if (initializedJS) {
         Module['checkMailbox']();
       }
-    } else if (e.data._gameAppMessageId) {
-      // This is a message from GameApp with special identifier
-      handleGameAppMessage(e.data);
+    } else if (e.data._gameAppMessageId) { 
+      handleGameAppMessage(e.data); // This is a message from GameApp with special identifier
     } else if (e.data.cmd) {
       // The received message looks like something that should be handled by this message
       // handler, (since there is a e.data.cmd field present), but is not one of the
@@ -254,17 +169,94 @@ function handleMessage(e) {
     throw ex;
   }
 };
+self.onmessage = handleMessage;
 
-// === Added: handle messages from GameApp ===
+
+
+//----------------------- user codes  -----------------------
+
+/**
+ * Initializes Go WASM on demand (callable from any thread)
+ * This function will be called on godot_js_spx_on_engine_start callback
+ */
+async function initializeGoWasmOnDemand() {
+  const workerId = (typeof Module !== 'undefined' && Module['workerID']) || 'unknown';
+  const threadInfo = typeof importScripts !== 'undefined' ? 'Worker' : 'MainThread';
+
+  // If already initialized, return immediately
+  if (self.goBridge && self.goBridge.isReady && typeof Module !== 'undefined' && Module['FFI']) {
+    console.log(`[Thread ${threadInfo}-${workerId}] Go WASM is ready, no need to reinitialize`);
+    return true;
+  }
+  try {
+    // Load Go WASM module
+    await loadGoWasmModule();
+    return true;
+  } catch (error) {
+    console.error(`[Thread ${threadInfo}-${workerId}] Go WASM initialization failed:`, error);
+    return false;
+  }
+}
+
+// Expose functions to global scope for godot.editor.js to call
+if (typeof self !== 'undefined') {
+  self.initializeGoWasmOnDemand = initializeGoWasmOnDemand;
+}
+
+
+/**
+ * Simplified Go WASM module loading logic
+ */
+async function loadGoWasmModule() {
+  // If already loaded, return immediately
+  if (self.goBridge && self.goBridge.isReady) {
+    console.log(`[Godot Worker ${Module['workerID']}] Go WASM is already loaded, using directly`);
+    return;
+  }
+
+  try {
+    // Import Go WASM Bridge (only import once)
+    if (typeof GoWasmBridge === 'undefined') {
+      importScripts('./go-wasm-bridge.js');
+    }
+    if (typeof BindFFI === 'undefined') {
+      importScripts('./wrap.gen.js');
+    }
+
+    // Create Go WASM Bridge instance
+    const goBridge = new GoWasmBridge();
+
+    // Initialize Go WASM module
+    await goBridge.initialize({
+      wasmPath: './gdspx.wasm',
+      timeout: 15000,
+      enableDebug: false
+    });
+
+    // Try to call Go initialization function (optional)
+    try {
+      const initResult = await goBridge.callGoFunctionSafe('goWasmInit');
+      Module['FFI'] = BindFFI(goBridge);
+    } catch (goInitError) {
+      console.warn(`[Godot Worker ${Module['workerID']}] Go initialization function call failed, but continuing execution:`, goInitError);
+    }
+
+    // Expose Go Bridge instance to global scope of current worker
+    self.goBridge = goBridge;
+  } catch (error) {
+    console.error(`[Godot Worker ${Module['workerID']}] Go WASM module loading failed:`, error);
+    throw error;
+  }
+}
+
 function handleGameAppMessage(data) {
   const workerId = (typeof Module !== 'undefined' && Module['workerID']) || 'unknown';
   const threadInfo = typeof importScripts !== 'undefined' ? 'Worker' : 'MainThread';
-  console.log(`[Thread ${threadInfo}-${workerId}] Received GameApp message:`, data.cmd || 'unknown', data);
   try {
     switch (data.cmd) {
       case 'projectDataUpdate':
         handleProjectDataUpdate(data);
-        break;        
+        break;
       default:
         console.warn(`[Thread ${threadInfo}-${workerId}] Unknown GameApp command:`, data.cmd);
         break;
@@ -276,18 +268,10 @@ function handleGameAppMessage(data) {
 
 async function handleProjectDataUpdate(data) {
   const workerId = (typeof Module !== 'undefined' && Module['workerID']) || 'unknown';
-  console.log(`[Worker ${workerId}] Handling project data update, data size:`, data.data ? data.data.byteLength : 0);
-  
-  //await unpackGameData("", data.data, data.packName, data.packUrl)
-  // Project data update logic can be processed here
-  // For example: Update local cache, notify Go WASM, etc
-  
-  if (! Module["FFI"]){
+  if (!Module["FFI"]) {
     console.log("==> Module[\"FFI\"] is not ready, wait for goWasmInitResult")
     return;
   }
-  console.log("==> Module[\"FFI\"] is ready, call onProjectDataUpdate")
-
   if (self.goBridge && self.goBridge.isReady) {
     try {
       // If Go WASM is ready, can call related functions to process data
@@ -299,25 +283,3 @@ async function handleProjectDataUpdate(data) {
 
 }
 
-async function unpackGameData(dir, projectData, packName, packUrl) {
-  const zip1 = new JSZip();
-  const zip1Content = await zip1.loadAsync(projectData);
-  let datas = []
-  for (const [filePath, file] of Object.entries(zip1Content.files)) {
-      const content = await file.async('arraybuffer');
-      if (!file.dir) {
-          console.log("unpackGameData ", filePath, content);
-          datas.push({ "path": filePath, "data": content })
-      }
-  }
-  // write project data to file
-  datas.push({ "path": "spx_project_data.zip", "data": projectData.buffer })
-  console.log("unpackGameData ", "spx_project_data",projectData, projectData.buffer);
-  if (packUrl != ""){
-      let pckBuffer = await (await fetch(packUrl)).arrayBuffer();
-      datas.push({ "path": packName, "data": pckBuffer })
-  }
-  Module.unpackGameData(dir, datas)
-}
-
-self.onmessage = handleMessage;

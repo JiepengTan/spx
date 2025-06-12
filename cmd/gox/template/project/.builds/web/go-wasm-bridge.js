@@ -18,7 +18,7 @@ class GoWasmBridge {
         this.config = {
             wasmPath: './main.wasm',
             timeout: 10000, // 10 second timeout
-            enableDebug: true
+            enableDebug: false
         };
         
         // Bind methods
