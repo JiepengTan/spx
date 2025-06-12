@@ -115,7 +115,7 @@ exportweb:
 
 
 # Run demos
-path ?= tutorial/01-Weather
+path ?= tutorial/05-Animation
 port ?= 8106
 
 # Run demo on PC editor mode
@@ -133,20 +133,6 @@ runweb:
 # Run tests
 runtest:
 	cd test/All && spx run . && cd $(CURRENT_PATH) 
-
-webe:
-	cd ./pkg/gdspx/godot && scons platform=web target=editor proxy_to_pthread=true && cd $(CURRENT_PATH) && \
-	rm -rf .tmp && mkdir -p .tmp && \
-	cp ./pkg/gdspx/godot/bin/godot.web.editor.wasm32.zip .tmp/godot.zip && \
-	cp pkg/gdspx/tools/run.sh .tmp && \
-	cp pkg/gdspx/tools/run.py .tmp && \
-	cd .tmp && unzip godot.zip && \
-	chmod +x run.sh   && cd $(CURRENT_PATH)
-
-runwebe:
-	cd .tmp && ./run.sh $(port)
-
-
 
 # Default rule for unknown targets
 %:
