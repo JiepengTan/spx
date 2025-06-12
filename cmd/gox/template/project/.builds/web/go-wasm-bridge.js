@@ -1,8 +1,8 @@
 /**
  * Go WASM Bridge for Godot Workers
  * 
- * 这个文件提供了在Godot Worker中集成Go WASM模块的完整解决方案
- * 包括模块加载、函数调用、错误处理和性能优化
+ * This file provides a complete solution for integrating Go WASM modules in Godot Workers,
+ * including module loading, function calling, error handling, and performance optimization.
  */
 
 class GoWasmBridge {
@@ -14,93 +14,93 @@ class GoWasmBridge {
         this.callCounter = 0;
         this.activeCalls = new Map();
         
-        // 配置选项
+        // Configuration options
         this.config = {
             wasmPath: './main.wasm',
-            timeout: 10000, // 10秒超时
+            timeout: 10000, // 10 second timeout
             enableDebug: true
         };
         
-        // 绑定方法
+        // Bind methods
         this.loadGoModule = this.loadGoModule.bind(this);
         this.callGoFunction = this.callGoFunction.bind(this);
         this.handleGoMessage = this.handleGoMessage.bind(this);
     }
     
     /**
-     * 初始化Go WASM模块
-     * @param {Object} options 配置选项
-     * @returns {Promise} 初始化Promise
+     * Initialize Go WASM module
+     * @param {Object} options Configuration options
+     * @returns {Promise} Initialization Promise
      */
     async initialize(options = {}) {
-        // 合并配置
+        // Merge options
         Object.assign(this.config, options);
         
         try {
-            this.log('开始初始化Go WASM模块...');
+            this.log('Initializing Go WASM module...');
             
-            // 加载Go运行时
+            // Load Go runtime
             await this.loadGoRuntime();
             
-            // 加载Go WASM模块
+            // Load Go WASM module
             await this.loadGoModule();
             
-            this.log('Go WASM模块初始化完成');
+            this.log('Go WASM module initialization complete');
             return true;
             
         } catch (error) {
-            this.error('Go WASM模块初始化失败:', error);
+            this.error('Go WASM module initialization failed:', error);
             throw error;
         }
     }
     
     /**
-     * 加载Go运行时
+     * Load Go runtime
      * @returns {Promise}
      */
     loadGoRuntime() {
         return new Promise((resolve, reject) => {
             try {
-                // 导入Go运行时脚本
+                // Import Go runtime script
                 if (this.config.runtimePath !== undefined && this.config.runtimePath !== null && this.config.runtimePath !== '') {
                     importScripts(this.config.runtimePath);
                 }
                 
-                // 创建Go实例
+                // Create Go instance
                 this.goRuntime = new Go();
-                this.log('Go运行时加载成功');
+                this.log('Go runtime loaded successfully');
                 resolve();
                 
             } catch (error) {
-                reject(new Error(`加载Go运行时失败: ${error.message}`));
+                reject(new Error(`Failed to load Go runtime: ${error.message}`));
             }
         });
     }
     
     /**
-     * 加载Go WASM模块
+     * Load Go WASM module
      * @returns {Promise}
      */
     async loadGoModule() {
         try {
-            // 获取WASM字节码
+            // Fetch WASM bytes
             const wasmBytes = await this.fetchWasm(this.config.wasmPath);
             
-            // 实例化WASM模块
+            // Instantiate WASM module
             const wasmModule = await WebAssembly.instantiate(wasmBytes, this.goRuntime.importObject);
             this.goInstance = wasmModule.instance;
             
-            // 设置消息监听
+            // Set up message listener
             this.setupMessageHandling();
             
-            // 创建一个Promise来等待Go模块就绪
+            // Create a Promise to wait for Go module readiness
             const readyPromise = new Promise((resolve, reject) => {
-                // 设置超时检查
+                // Setup timeout check
                 const timeout = setTimeout(() => {
-                    reject(new Error('Go模块初始化超时'));
+                    reject(new Error('Go module initialization timed out'));
                 }, this.config.timeout || 15000);
                 
-                // 保存resolve函数，当模块就绪时调用
+                // Save resolve function for module-ready callback
                 this._moduleReadyResolve = () => {
                     clearTimeout(timeout);
                     clearInterval(checkInterval);
@@ -113,40 +113,40 @@ class GoWasmBridge {
                     reject(error);
                 };
                 
-                // 备用检查机制：定期检查Go函数是否可用
+                // Fallback mechanism: poll for Go functions availability
                 const checkInterval = setInterval(() => {
                     const availableFunctions = this.getAvailableGoFunctions();
                     if (availableFunctions.length > 0) {
-                        this.log('通过轮询检测到Go函数可用:', availableFunctions);
+                        this.log('Detected Go functions available through polling:', availableFunctions);
                         this.isReady = true;
                         this._moduleReadyResolve();
                     }
-                }, 100); // 每100ms检查一次
+                }, 100); // Check every 100ms
             });
             
-            // 运行Go程序（异步）
+            // Run Go program (asynchronously)
             this.goRuntime.run(this.goInstance).catch(error => {
-                this.error('Go程序运行失败:', error);
+                this.error('Go program execution failed:', error);
                 if (this._moduleReadyReject) {
                     this._moduleReadyReject(error);
                 }
             });
             
-            this.log('Go WASM模块开始启动，等待就绪...');
+            this.log('Go WASM module initialization started, waiting for readiness...');
             
-            // 等待Go模块就绪
+            // Await Go module readiness
             await readyPromise;
             
-            this.log('Go WASM模块加载并启动成功');
+            this.log('Go WASM module loaded and initialized successfully');
             
         } catch (error) {
-            throw new Error(`加载Go WASM模块失败: ${error.message}`);
+            throw new Error(`Failed to load Go WASM module: ${error.message}`);
         }
     }
     
     /**
-     * 获取WASM字节码
-     * @param {string} wasmPath WASM文件路径
+     * Fetch WASM bytes
+     * @param {string} wasmPath WASM file path
      * @returns {Promise<ArrayBuffer>}
      */
     async fetchWasm(wasmPath) {
@@ -157,15 +157,15 @@ class GoWasmBridge {
             }
             return await response.arrayBuffer();
         } catch (error) {
-            throw new Error(`获取WASM文件失败: ${error.message}`);
+            throw new Error(`Failed to fetch WASM file: ${error.message}`);
         }
     }
     
     /**
-     * 设置消息处理机制
+     * Set up message handling mechanism
      */
     setupMessageHandling() {
-        // 监听来自Go的消息
+        // Listen for messages from Go
         const originalPostMessage = self.postMessage;
         self.postMessage = (data) => {
             if (this.isGoMessage(data)) {
@@ -177,8 +177,8 @@ class GoWasmBridge {
     }
     
     /**
-     * 判断是否为Go消息
-     * @param {*} data 消息数据
+     * Check if message is from Go
+     * @param {*} data Message data
      * @returns {boolean}
      */
     isGoMessage(data) {
@@ -187,8 +187,8 @@ class GoWasmBridge {
     }
     
     /**
-     * 处理来自Go的消息
-     * @param {Object} data 消息数据
+     * Handle message from Go
+     * @param {Object} data Message data
      */
     handleGoMessage(data) {
         switch (data.cmd) {
@@ -199,29 +199,29 @@ class GoWasmBridge {
                 this.handleGoFunctionCall(data);
                 break;
             default:
-                this.log('收到未知Go消息:', data);
+                this.log('Received unknown Go message:', data);
         }
     }
     
     /**
-     * 处理Go模块就绪消息
-     * @param {Object} data 消息数据
+     * Handle Go module readiness message
+     * @param {Object} data Message data
      */
     handleGoReady(data) {
         this.isReady = true;
-        this.log('Go模块就绪，可用函数:', data.functions);
+        this.log('Go module is ready, available functions:', data.functions);
         
-        // 处理等待的函数调用
+        // Process pending function calls
         this.processPendingCalls();
         
-        // 如果有等待的初始化Promise，则resolve它
+        // If there's a pending init Promise, resolve it
         if (this._moduleReadyResolve) {
             this._moduleReadyResolve();
             this._moduleReadyResolve = null;
             this._moduleReadyReject = null;
         }
         
-        // 通知主线程
+        // Notify main thread
         self.postMessage({
             cmd: 'goModuleReady',
             availableFunctions: data.functions || [],
@@ -230,7 +230,7 @@ class GoWasmBridge {
     }
     
     /**
-     * 处理等待的函数调用
+     * Process pending function calls
      */
     processPendingCalls() {
         while (this.pendingCalls.length > 0) {
@@ -240,15 +240,15 @@ class GoWasmBridge {
     }
     
     /**
-     * 调用Go函数
-     * @param {string} funcName 函数名
-     * @param {...*} args 参数
-     * @returns {Promise} 调用结果
+     * Call Go function
+     * @param {string} funcName Function name
+     * @param {...*} args Arguments
+     * @returns {Promise} Call result
      */
     callGoFunction(funcName, ...args) {
         return new Promise((resolve, reject) => {
             if (!this.isReady) {
-                // 模块未就绪，加入待处理队列
+                // Module isn't ready, queue the call
                 this.pendingCalls.push({ funcName, args, resolve, reject });
                 return;
             }
@@ -260,38 +260,38 @@ class GoWasmBridge {
     getGoFunction(funcName){
         const goFunc = self[funcName];
         if (typeof goFunc !== 'function') {
-            console.error(`Go函数 ${funcName} 不存在`);
+            console.error(`Go function ${funcName} does not exist`);
             return null
         }
         return goFunc
     }
     /**
-     * 执行Go函数
-     * @param {string} funcName 函数名
-     * @param {Array} args 参数数组
-     * @param {Function} resolve 成功回调
-     * @param {Function} reject 失败回调
+     * Execute Go function
+     * @param {string} funcName Function name
+     * @param {Array} args Argument array
+     * @param {Function} resolve Resolve callback
+     * @param {Function} reject Reject callback
      */
     executeGoFunction(funcName, args, resolve, reject) {
         try {
-            // 验证函数存在
+            // Verify function exists
             const goFunc = self[funcName];
             if (typeof goFunc !== 'function') {
-                reject(new Error(`Go函数 ${funcName} 不存在`));
+                reject(new Error(`Go function ${funcName} does not exist`));
                 return;
             }
             
-            // 设置超时
+            // Set timeout
             const timeoutId = setTimeout(() => {
-                reject(new Error(`Go函数 ${funcName} 调用超时`));
+                reject(new Error(`Go function ${funcName} call timed out`));
             }, this.config.timeout);
             
-            // 调用函数
+            // Call function
             const result = goFunc(...args);
             
-            // 处理返回值
+            // Handle return value
             if (result && typeof result.then === 'function') {
-                // Promise返回值
+                // Promise return value
                 result
                     .then(value => {
                         clearTimeout(timeoutId);
@@ -302,20 +302,20 @@ class GoWasmBridge {
                         reject(error);
                     });
             } else {
-                // 同步返回值
+                // Synchronous return value
                 clearTimeout(timeoutId);
                 resolve(result);
             }
             
         } catch (error) {
-            reject(new Error(`执行Go函数 ${funcName} 失败: ${error.message}`));
+            reject(new Error(`Failed to execute Go function ${funcName}: ${error.message}`));
         }
     }
     
     /**
-     * 批量调用Go函数
-     * @param {Array} calls 调用配置数组 [{funcName, args}, ...]
-     * @returns {Promise<Array>} 结果数组
+     * Call multiple Go functions
+     * @param {Array} calls Call configuration array [{funcName, args}, ...]
+     * @returns {Promise<Array>} Result array
      */
     async callGoFunctions(calls) {
         const promises = calls.map(call => 
@@ -325,8 +325,8 @@ class GoWasmBridge {
     }
     
     /**
-     * 获取可用的Go函数列表
-     * @returns {Array} 函数名数组
+     * Get available Go functions
+     * @returns {Array} Function name array
      */
     getAvailableGoFunctions() {
         const functions = [];
@@ -339,38 +339,38 @@ class GoWasmBridge {
     }
     
     /**
-     * 安全调用Go函数（带完整错误处理）
-     * @param {string} funcName 函数名
-     * @param {...*} args 参数
-     * @returns {Promise} 调用结果
+     * Safely call Go function (with complete error handling)
+     * @param {string} funcName Function name
+     * @param {...*} args Arguments
+     * @returns {Promise} Call result
      */
     async callGoFunctionSafe(funcName, ...args) {
         try {
-            // 参数验证
+            // Validate parameters
             if (!funcName || typeof funcName !== 'string') {
-                throw new Error('函数名必须是有效字符串');
+                throw new Error('Function name must be a valid string');
             }
             
             if (!this.isReady) {
-                throw new Error('Go模块尚未就绪');
+                throw new Error('Go module is not ready');
             }
             
-            // 调用函数
+            // Call function
             const result = await this.callGoFunction(funcName, ...args);
             
-            // 结果验证
+            // Validate result
             if (result && typeof result === 'object' && result.error) {
-                throw new Error(`Go函数执行错误: ${result.error}`);
+                throw new Error(`Go function execution error: ${result.error}`);
             }
             
             return result;
             
         } catch (error) {
-            this.error(`安全调用Go函数 ${funcName} 失败:`, error);
+            this.error(`Failed to safely call Go function ${funcName}:`, error);
             
-            // 记录调试信息
+            // Record debug information
             if (this.config.enableDebug) {
-                this.log('调试信息:', {
+                this.log('Debug information:', {
                     funcName,
                     args,
                     isReady: this.isReady,
@@ -383,45 +383,45 @@ class GoWasmBridge {
     }
     
     /**
-     * 处理大数据传输的优化调用
-     * @param {string} funcName 函数名
-     * @param {ArrayBuffer} transferableData 可传输数据
-     * @param {...*} args 其他参数
-     * @returns {Promise} 调用结果
+     * Call Go function with transferable data
+     * @param {string} funcName Function name
+     * @param {ArrayBuffer} transferableData Transferable data
+     * @param {...*} args Other arguments
+     * @returns {Promise} Call result
      */
     async callGoFunctionWithTransfer(funcName, transferableData, ...args) {
-        // 注意：在Worker内部，Transferable Objects的优化有限
-        // 但这个接口为将来的优化预留空间
+        // Note: Optimizing transferable objects inside worker is limited
+        // But this interface reserves space for future optimizations
         return this.callGoFunction(funcName, transferableData, ...args);
     }
     
     /**
-     * 销毁Go模块实例
+     * Destroy Go module instance
      */
     destroy() {
-        this.log('销毁Go WASM模块实例');
+        this.log('Destroying Go WASM module instance');
         
-        // 清理待处理的调用
+        // Clean up pending calls
         this.pendingCalls.forEach(call => {
-            call.reject(new Error('Go模块已销毁'));
+            call.reject(new Error('Go module has been destroyed'));
         });
         this.pendingCalls = [];
         
-        // 清理活跃调用
+        // Clean up active calls
         this.activeCalls.forEach(call => {
-            call.reject(new Error('Go模块已销毁'));
+            call.reject(new Error('Go module has been destroyed'));
         });
         this.activeCalls.clear();
         
-        // 重置状态
+        // Reset state
         this.isReady = false;
         this.goInstance = null;
         this.goRuntime = null;
     }
     
     /**
-     * 日志输出
-     * @param {...*} args 日志参数
+     * Log output
+     * @param {...*} args Log arguments
      */
     log(...args) {
         if (this.config.enableDebug) {
@@ -430,33 +430,33 @@ class GoWasmBridge {
     }
     
     /**
-     * 错误日志输出
-     * @param {...*} args 错误参数
+     * Error log output
+     * @param {...*} args Error arguments
      */
     error(...args) {
         console.error('[GoWasmBridge]', ...args);
     }
 }
 
-// 导出供Worker使用
+// Export for Worker usage
 if (typeof self !== 'undefined' && typeof module === 'undefined') {
-    // 在Worker环境中直接使用
+    // Directly use in Worker environment
     self.GoWasmBridge = GoWasmBridge;
 } else if (typeof module !== 'undefined' && module.exports) {
-    // Node.js环境
+    // Node.js environment
     module.exports = GoWasmBridge;
 } else if (typeof window !== 'undefined') {
-    // 浏览器环境
+    // Browser environment
     window.GoWasmBridge = GoWasmBridge;
 }
 
 /**
- * 使用示例：
+ * Usage example:
  * 
- * // 在Worker中使用
+ * // Usage in Worker
  * const bridge = new GoWasmBridge();
  * 
- * // 初始化
+ * // Initialize
  * await bridge.initialize({
  *     wasmPath: './main.wasm',
  *     runtimePath: './wasm_exec.js',
@@ -464,21 +464,21 @@ if (typeof self !== 'undefined' && typeof module === 'undefined') {
  *     enableDebug: true
  * });
  * 
- * // 调用Go函数
+ * // Call Go function
  * const result = await bridge.callGoFunction('goCalculateSum', 10, 20);
- * console.log('计算结果:', result);
+ * console.log('Calculation result:', result);
  * 
- * // 安全调用
+ * // Safe call
  * try {
  *     const safeResult = await bridge.callGoFunctionSafe('goProcessData', data);
- *     console.log('处理结果:', safeResult);
+ *     console.log('Processing result:', safeResult);
  * } catch (error) {
- *     console.error('调用失败:', error);
+ *     console.error('Call failed:', error);
  * }
  * 
- * // 批量调用
+ * // Batch call
  * const batchResults = await bridge.callGoFunctions([
  *     { funcName: 'goFunc1', args: [1, 2] },
  *     { funcName: 'goFunc2', args: ['hello'] }
  * ]);
- */ 
+ */
