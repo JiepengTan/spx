@@ -24,9 +24,9 @@ class GameApp {
         this.useAssetCache = config.useAssetCache;
         this.pthreads = null;
         
-        // === Worker 管理相关属性 ===
-        this.workerMessageHandlers = new Map(); // 存储消息处理器
-        this.workerMessageId = 0; // 消息ID计数器
+        // === Worker management related properties ===
+        this.workerMessageHandlers = new Map(); // Stores message handlers
+        this.workerMessageId = 0; // Message ID counter
         
         this.editorConfig = {
             "executable": "godot.editor",
@@ -242,7 +242,7 @@ class GameApp {
             curGame.start({ 'args': args, 'canvas': this.gameCanvas }).then(async () => {
                 this.pthreads = curGame.getPThread()
                 console.log("==> pthreads =", this.pthreads)
-                // 等待2秒钟
+                // Wait for 2 seconds
                 this.logVerbose("==> waited seconds after fs sync 1");
                 await new Promise(resolve => setTimeout(resolve, 1000));
                 this.broadcastProjectDataUpdate(this.projectData,this.packName, this.isRuntimeMode? this.assetURLs["godot.editor.pck"]:"")
@@ -559,15 +559,15 @@ class GameApp {
 
 
 
-    // === PThread Worker 消息发送相关方法 ===
+    // === PThread Worker message sending related methods ===
     
     /**
-     * 获取所有可用的 workers (包括运行中的和未使用的)
+     * Retrieves all available workers (including running and idle ones)
      */
     getAllWorkers() {
         const workers = [];
         console.log("==> getAllWorkers pthreads =", this.pthreads)
-        // 获取 PThread 的 workers
+        // Retrieves PThread workers
         if (this.pthreads) {
             workers.push(...this.pthreads.runningWorkers);
             workers.push(...this.pthreads.unusedWorkers);
@@ -577,7 +577,7 @@ class GameApp {
     }
     
     /**
-     * 获取正在运行的 workers
+     * Retrieves currently running workers
      */
     getRunningWorkers() {
         const workers = [];
@@ -588,16 +588,16 @@ class GameApp {
     }
     
     /**
-     * 向所有 worker 发送消息
-     * @param {Object} message - 要发送的消息对象
-     * @param {Array} transferList - 可转移对象列表 (可选)
-     * @param {boolean} onlyRunning - 是否只发送给正在运行的 worker (默认 true)
-     * @param {boolean} cloneForEach - 是否为每个 worker 克隆消息数据 (默认 false)
+     * Sends a message to all workers
+     * @param {Object} message - The message object to send
+     * @param {Array} transferList - List of transferable objects (optional)
+     * @param {boolean} onlyRunning - Whether to send only to running workers (default true)
+     * @param {boolean} cloneForEach - Whether to clone message data for each worker (default false)
      */
     postMessageToAllWorkers(message, transferList = null, onlyRunning = true, cloneForEach = false) {
         const workers = onlyRunning ? this.getRunningWorkers() : this.getAllWorkers();
         
-        this.logVerbose(`向 ${workers.length} 个 worker 发送消息:`, message);
+        this.logVerbose(`Sending message to ${workers.length} workers:`, message);
         
         let successCount = 0;
         let errorCount = 0;
@@ -605,7 +605,7 @@ class GameApp {
         workers.forEach((worker, index) => {
             try {
                 if (worker && typeof worker.postMessage === 'function') {
-                    // 为每个消息添加唯一标识和目标信息
+                    // Adds unique identifier and target info to each message
                     let enhancedMessage = {
                         ...message,
                         _gameAppMessageId: ++this.workerMessageId,
@@ -613,9 +613,9 @@ class GameApp {
                         _timestamp: Date.now()
                     };
                     
-                    // 如果需要克隆数据或者使用 transferList，需要特殊处理
+                    // Special handling required when cloning data or using transferList
                     if (transferList && cloneForEach) {
-                        // 为每个 worker 创建数据副本
+                        // Creates a data copy for each worker
                         if (message.data && message.data.buffer) {
                             const clonedData = new Uint8Array(message.data);
                             enhancedMessage.data = clonedData;
@@ -624,44 +624,44 @@ class GameApp {
                             worker.postMessage(enhancedMessage);
                         }
                     } else {
-                        // 不使用 transferList 进行广播，让每个 worker 都能收到数据
+                        // Does not use transferList for broadcast to ensure each worker receives the data
                         worker.postMessage(enhancedMessage);
                     }
                     
                     successCount++;
-                    this.logVerbose(`消息已发送到 worker ${index} (ID: ${worker.workerID || 'unknown'})`);
+                    this.logVerbose(`Message sent to worker ${index} (ID: ${worker.workerID || 'unknown'})`);
                 } else {
-                    console.warn(`Worker ${index} 无效或没有 postMessage 方法`);
+                    console.warn(`Worker ${index} is invalid or does not have postMessage method`);
                     errorCount++;
                 }
             } catch (error) {
-                console.error(`发送消息到 worker ${index} 失败:`, error);
+                console.error(`Failed to send message to worker ${index}:`, error);
                 errorCount++;
             }
         });
         
-        this.logVerbose(`消息发送完成: 成功 ${successCount}, 失败 ${errorCount}`);
+        this.logVerbose(`Message sending completed: Success ${successCount}, Failure ${errorCount}`);
         return { successCount, errorCount, totalWorkers: workers.length };
     }
     
     /**
-     * 向特定 worker 发送消息
-     * @param {number} workerIndex - worker 索引
-     * @param {Object} message - 要发送的消息对象
-     * @param {Array} transferList - 可转移对象列表 (可选)
-     * @param {boolean} onlyRunning - 是否只在正在运行的 worker 中查找
+     * Sends a message to a specific worker
+     * @param {number} workerIndex - Worker index
+     * @param {Object} message - The message object to send
+     * @param {Array} transferList - List of transferable objects (optional)
+     * @param {boolean} onlyRunning - Whether to send only to running workers
      */
     postMessageToWorker(workerIndex, message, transferList = null, onlyRunning = true) {
         const workers = onlyRunning ? this.getRunningWorkers() : this.getAllWorkers();
         
         if (workerIndex < 0 || workerIndex >= workers.length) {
-            console.error(`Worker 索引 ${workerIndex} 超出范围 (0-${workers.length - 1})`);
+            console.error(`Worker index ${workerIndex} is out of range (0-${workers.length - 1})`);
             return false;
         }
         
         const worker = workers[workerIndex];
         if (!worker || typeof worker.postMessage !== 'function') {
-            console.error(`Worker ${workerIndex} 无效或没有 postMessage 方法`);
+            console.error(`Worker ${workerIndex} is invalid or does not have postMessage method`);
             return false;
         }
         
@@ -679,16 +679,16 @@ class GameApp {
                 worker.postMessage(enhancedMessage);
             }
             
-            this.logVerbose(`消息已发送到 worker ${workerIndex} (ID: ${worker.workerID || 'unknown'}):`, message);
+            this.logVerbose(`Message sent to worker ${workerIndex} (ID: ${worker.workerID || 'unknown'}):`, message);
             return true;
         } catch (error) {
-            console.error(`发送消息到 worker ${workerIndex} 失败:`, error);
+            console.error(`Failed to send message to worker ${workerIndex}:`, error);
             return false;
         }
     }
     
     /**
-     * 获取 worker 信息列表
+     * Retrieves worker information list
      */
     getWorkerInfo() {
         const runningWorkers = this.getRunningWorkers();
@@ -714,8 +714,8 @@ class GameApp {
     }
     
     /**
-     * 广播项目数据更新消息到所有 worker
-     * @param {ArrayBuffer|Uint8Array} projectData - 项目数据
+     * Broadcasts project data update message to all workers
+     * @param {ArrayBuffer|Uint8Array} projectData - Project data
      */
     broadcastProjectDataUpdate(projectData, packName, packUrl) {
         const message = {
@@ -724,16 +724,16 @@ class GameApp {
             timestamp: Date.now()
         };
         
-        // 广播到多个 worker 时不使用 transferList，避免 ArrayBuffer 被 detached
-        // 数据会被克隆到每个 worker，虽然内存占用更多但确保所有 worker 都能收到
+        // Broadcast to multiple workers without using transferList to avoid ArrayBuffer being detached
+        // Data will be cloned to each worker, although memory usage is higher, it ensures all workers receive the data
         return this.postMessageToAllWorkers(message, null, true, false);
     }
     
     /**
-     * 向所有 worker 发送自定义命令
-     * @param {string} cmd - 命令名称
-     * @param {Object} data - 命令数据
-     * @param {Array} transferList - 可转移对象列表
+     * Sends a custom command to all workers
+     * @param {string} cmd - Command name
+     * @param {Object} data - Command data
+     * @param {Array} transferList - List of transferable objects
      */
     broadcastCustomCommand(cmd, data = {}, transferList = null) {
         const message = {
@@ -745,60 +745,60 @@ class GameApp {
         return this.postMessageToAllWorkers(message, transferList);
     }
     
-    // === 便利方法 ===
+    // === Utility methods ===
     
     /**
-     * Ping 所有 worker 以检查响应性
+     * Pings all workers to check responsiveness
      */
     async pingAllWorkers(timeout = 5000) {
         const message = { cmd: 'ping' };
         const result = this.postMessageToAllWorkers(message);
         
-        this.logVerbose(`Ping 发送到 ${result.totalWorkers} 个 worker`);
+        this.logVerbose(`Ping sent to ${result.totalWorkers} workers`);
         return result;
     }
     
     /**
-     * 获取所有 worker 的状态信息
+     * Retrieves status information for all workers
      */
     async requestAllWorkerStatus(timeout = 5000) {
         const message = { cmd: 'getWorkerStatus' };
         const result = this.postMessageToAllWorkers(message);
         
-        this.logVerbose(`状态请求发送到 ${result.totalWorkers} 个 worker`);
+        this.logVerbose(`Status request sent to ${result.totalWorkers} workers`);
         return result;
     }
     
     /**
-     * 初始化所有 worker 的 Go WASM 模块
+     * Initializes Go WASM module in all workers
      */
     async initGoWasmInAllWorkers(timeout = 15000) {
         const message = { cmd: 'initGoWasm' };
         const result = this.postMessageToAllWorkers(message);
         
-        this.logVerbose(`Go WASM 初始化请求发送到 ${result.totalWorkers} 个 worker`);
+        this.logVerbose(`Go WASM initialization request sent to ${result.totalWorkers} workers`);
         return result;
     }
     
-    // === 示例用法方法 ===
+    // === Example usage methods ===
     
     /**
-     * 示例：发送项目数据到所有 worker
+     * Example: Sends project data to all workers
      */
     async syncProjectDataToWorkers() {
         if (!this.projectData) {
-            console.warn('没有项目数据可同步');
+            console.warn('No project data available for synchronization');
             return;
         }
         
-        this.logVerbose('开始同步项目数据到所有 worker...');
+        this.logVerbose('Starting project data synchronization to all workers...');
         const result = this.broadcastProjectDataUpdate(this.projectData);
-        this.logVerbose('项目数据同步请求已发送:', result);
+        this.logVerbose('Project data synchronization request sent:', result);
         return result;
     }
     
     /**
-     * 示例：向所有 worker 发送自定义游戏命令
+     * Example: Sends a custom game command to all workers
      */
     async sendGameCommand(command, params = {}) {
         const result = this.broadcastCustomCommand('gameCommand', {
@@ -806,19 +806,19 @@ class GameApp {
             params: params
         });
         
-        this.logVerbose(`游戏命令 "${command}" 已发送到所有 worker:`, result);
+        this.logVerbose(`Game command "${command}" sent to all workers:`, result);
         return result;
     }
     
     /**
-     * 示例：设置 worker 配置
+     * Example: Sets worker configuration
      */
     async configureWorkers(config) {
         const result = this.broadcastCustomCommand('configure', {
             configuration: config
         });
         
-        this.logVerbose('Worker 配置已发送:', result);
+        this.logVerbose('Worker configuration sent:', result);
         return result;
     }
 
