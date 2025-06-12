@@ -259,86 +259,18 @@ function handleMessage(e) {
 function handleGameAppMessage(data) {
   const workerId = (typeof Module !== 'undefined' && Module['workerID']) || 'unknown';
   const threadInfo = typeof importScripts !== 'undefined' ? 'Worker' : 'MainThread';
-  
   console.log(`[Thread ${threadInfo}-${workerId}] Received GameApp message:`, data.cmd || 'unknown', data);
-  
   try {
     switch (data.cmd) {
       case 'projectDataUpdate':
         handleProjectDataUpdate(data);
-        break;
-        
-      case 'customCommand':
-        handleCustomCommand(data);
-        break;
-        
-      case 'ping':
-        // Respond to ping message
-        postMessage({
-          cmd: 'pong',
-          workerID: workerId,
-          originalMessageId: data._gameAppMessageId,
-          timestamp: Date.now()
-        });
-        break;
-        
-      case 'getWorkerStatus':
-        // Return worker status information
-        postMessage({
-          cmd: 'workerStatus',
-          workerID: workerId,
-          pthread_ptr: (typeof Module !== 'undefined' && Module['_pthread_self']) ? Module['_pthread_self']() : 0,
-          initializedJS: initializedJS,
-          originalMessageId: data._gameAppMessageId,
-          timestamp: Date.now()
-        });
-        break;
-        
-      case 'initGoWasm':
-        // Initialize Go WASM on demand
-        initializeGoWasmOnDemand().then(success => {
-          postMessage({
-            cmd: 'goWasmInitResult',
-            success: success,
-            workerID: workerId,
-            originalMessageId: data._gameAppMessageId,
-            timestamp: Date.now()
-          });
-        }).catch(error => {
-          postMessage({
-            cmd: 'goWasmInitResult',
-            success: false,
-            error: error.message,
-            workerID: workerId,
-            originalMessageId: data._gameAppMessageId,
-            timestamp: Date.now()
-          });
-        });
-        break;
-        
+        break;        
       default:
         console.warn(`[Thread ${threadInfo}-${workerId}] Unknown GameApp command:`, data.cmd);
-        // Send unknown command response
-        postMessage({
-          cmd: 'unknownCommand',
-          originalCmd: data.cmd,
-          workerID: workerId,
-          originalMessageId: data._gameAppMessageId,
-          timestamp: Date.now()
-        });
         break;
     }
   } catch (error) {
     console.error(`[Thread ${threadInfo}-${workerId}] Error handling GameApp message:`, error);
-    // Send error response
-    postMessage({
-      cmd: 'error',
-      error: error.message,
-      originalCmd: data.cmd,
-      workerID: workerId,
-      originalMessageId: data._gameAppMessageId,
-      timestamp: Date.now()
-    });
   }
 }
 
@@ -386,23 +318,6 @@ async function unpackGameData(dir, projectData, packName, packUrl) {
       datas.push({ "path": packName, "data": pckBuffer })
   }
   Module.unpackGameData(dir, datas)
-}
-
-function handleCustomCommand(data) {
-  const workerId = (typeof Module !== 'undefined' && Module['workerID']) || 'unknown';
-  console.log(`[Worker ${workerId}] Handling custom command:`, data);
-  
-  // Custom command handling logic can be added here
-  // Call corresponding functions or modules as needed
-  
-  // Send processing complete response
-  postMessage({
-    cmd: 'customCommandComplete',
-    workerID: workerId,
-    originalMessageId: data._gameAppMessageId,
-    result: `Custom command ${data.customCmd || 'unknown'} processed successfully`,
-    timestamp: Date.now()
-  });
 }
 
 self.onmessage = handleMessage;

@@ -245,7 +245,7 @@ class GameApp {
                 // Wait for 2 seconds
                 this.logVerbose("==> waited seconds after fs sync 1");
                 await new Promise(resolve => setTimeout(resolve, 1000));
-                this.broadcastProjectDataUpdate(this.projectData,this.packName, this.isRuntimeMode? this.assetURLs["godot.editor.pck"]:"")
+                this.broadcastProjectDataUpdate(this.projectData)
                 //await this.waitFsSyncDone(this.gameCanvas)
                 //  this.onProgress(0.9);
                 this.onProgress(1.0);
@@ -561,44 +561,26 @@ class GameApp {
 
     // === PThread Worker message sending related methods ===
     
-    /**
-     * Retrieves all available workers (including running and idle ones)
-     */
-    getAllWorkers() {
-        const workers = [];
-        console.log("==> getAllWorkers pthreads =", this.pthreads)
-        // Retrieves PThread workers
-        if (this.pthreads) {
-            workers.push(...this.pthreads.runningWorkers);
-            workers.push(...this.pthreads.unusedWorkers);
-        }
-        
-        return workers;
-    }
-    
-    /**
-     * Retrieves currently running workers
-     */
     getRunningWorkers() {
+       
+        return workers;
+    }
+    
+    broadcastProjectDataUpdate(projectData) {
+        const message = {
+            cmd: 'projectDataUpdate',
+            data: projectData,
+            timestamp: Date.now()
+        };
+        return this.postMessageToWorkers(message);
+    }
+
+    postMessageToWorkers(message, transferList = null, cloneForEach = false) {
         const workers = [];
         if (this.pthreads) {
             workers.push(...this.pthreads.runningWorkers);
         }
-        return workers;
-    }
-    
-    /**
-     * Sends a message to all workers
-     * @param {Object} message - The message object to send
-     * @param {Array} transferList - List of transferable objects (optional)
-     * @param {boolean} onlyRunning - Whether to send only to running workers (default true)
-     * @param {boolean} cloneForEach - Whether to clone message data for each worker (default false)
-     */
-    postMessageToAllWorkers(message, transferList = null, onlyRunning = true, cloneForEach = false) {
-        const workers = onlyRunning ? this.getRunningWorkers() : this.getAllWorkers();
-        
-        this.logVerbose(`Sending message to ${workers.length} workers:`, message);
-        
+
         let successCount = 0;
         let errorCount = 0;
         
@@ -615,7 +597,6 @@ class GameApp {
                     
                     // Special handling required when cloning data or using transferList
                     if (transferList && cloneForEach) {
-                        // Creates a data copy for each worker
                         if (message.data && message.data.buffer) {
                             const clonedData = new Uint8Array(message.data);
                             enhancedMessage.data = clonedData;
@@ -624,12 +605,10 @@ class GameApp {
                             worker.postMessage(enhancedMessage);
                         }
                     } else {
-                        // Does not use transferList for broadcast to ensure each worker receives the data
                         worker.postMessage(enhancedMessage);
                     }
                     
                     successCount++;
-                    this.logVerbose(`Message sent to worker ${index} (ID: ${worker.workerID || 'unknown'})`);
                 } else {
                     console.warn(`Worker ${index} is invalid or does not have postMessage method`);
                     errorCount++;
@@ -640,188 +619,10 @@ class GameApp {
             }
         });
         
-        this.logVerbose(`Message sending completed: Success ${successCount}, Failure ${errorCount}`);
         return { successCount, errorCount, totalWorkers: workers.length };
     }
     
-    /**
-     * Sends a message to a specific worker
-     * @param {number} workerIndex - Worker index
-     * @param {Object} message - The message object to send
-     * @param {Array} transferList - List of transferable objects (optional)
-     * @param {boolean} onlyRunning - Whether to send only to running workers
-     */
-    postMessageToWorker(workerIndex, message, transferList = null, onlyRunning = true) {
-        const workers = onlyRunning ? this.getRunningWorkers() : this.getAllWorkers();
-        
-        if (workerIndex < 0 || workerIndex >= workers.length) {
-            console.error(`Worker index ${workerIndex} is out of range (0-${workers.length - 1})`);
-            return false;
-        }
-        
-        const worker = workers[workerIndex];
-        if (!worker || typeof worker.postMessage !== 'function') {
-            console.error(`Worker ${workerIndex} is invalid or does not have postMessage method`);
-            return false;
-        }
-        
-        try {
-            const enhancedMessage = {
-                ...message,
-                _gameAppMessageId: ++this.workerMessageId,
-                _targetWorkerIndex: workerIndex,
-                _timestamp: Date.now()
-            };
-            
-            if (transferList) {
-                worker.postMessage(enhancedMessage, transferList);
-            } else {
-                worker.postMessage(enhancedMessage);
-            }
-            
-            this.logVerbose(`Message sent to worker ${workerIndex} (ID: ${worker.workerID || 'unknown'}):`, message);
-            return true;
-        } catch (error) {
-            console.error(`Failed to send message to worker ${workerIndex}:`, error);
-            return false;
-        }
-    }
-    
-    /**
-     * Retrieves worker information list
-     */
-    getWorkerInfo() {
-        const runningWorkers = this.getRunningWorkers();
-        const allWorkers = this.getAllWorkers();
-        
-        return {
-            runningCount: runningWorkers.length,
-            totalCount: allWorkers.length,
-            runningWorkers: runningWorkers.map((worker, index) => ({
-                index,
-                workerID: worker.workerID || 'unknown',
-                pthread_ptr: worker.pthread_ptr || 0,
-                loaded: worker.loaded || false
-            })),
-            allWorkers: allWorkers.map((worker, index) => ({
-                index,
-                workerID: worker.workerID || 'unknown',
-                pthread_ptr: worker.pthread_ptr || 0,
-                loaded: worker.loaded || false,
-                isRunning: runningWorkers.includes(worker)
-            }))
-        };
-    }
-    
-    /**
-     * Broadcasts project data update message to all workers
-     * @param {ArrayBuffer|Uint8Array} projectData - Project data
-     */
-    broadcastProjectDataUpdate(projectData, packName, packUrl) {
-        const message = {
-            cmd: 'projectDataUpdate',
-            data: projectData,
-            timestamp: Date.now()
-        };
-        
-        // Broadcast to multiple workers without using transferList to avoid ArrayBuffer being detached
-        // Data will be cloned to each worker, although memory usage is higher, it ensures all workers receive the data
-        return this.postMessageToAllWorkers(message, null, true, false);
-    }
-    
-    /**
-     * Sends a custom command to all workers
-     * @param {string} cmd - Command name
-     * @param {Object} data - Command data
-     * @param {Array} transferList - List of transferable objects
-     */
-    broadcastCustomCommand(cmd, data = {}, transferList = null) {
-        const message = {
-            cmd: cmd,
-            ...data,
-            timestamp: Date.now()
-        };
-        
-        return this.postMessageToAllWorkers(message, transferList);
-    }
-    
-    // === Utility methods ===
-    
-    /**
-     * Pings all workers to check responsiveness
-     */
-    async pingAllWorkers(timeout = 5000) {
-        const message = { cmd: 'ping' };
-        const result = this.postMessageToAllWorkers(message);
-        
-        this.logVerbose(`Ping sent to ${result.totalWorkers} workers`);
-        return result;
-    }
-    
-    /**
-     * Retrieves status information for all workers
-     */
-    async requestAllWorkerStatus(timeout = 5000) {
-        const message = { cmd: 'getWorkerStatus' };
-        const result = this.postMessageToAllWorkers(message);
-        
-        this.logVerbose(`Status request sent to ${result.totalWorkers} workers`);
-        return result;
-    }
-    
-    /**
-     * Initializes Go WASM module in all workers
-     */
-    async initGoWasmInAllWorkers(timeout = 15000) {
-        const message = { cmd: 'initGoWasm' };
-        const result = this.postMessageToAllWorkers(message);
-        
-        this.logVerbose(`Go WASM initialization request sent to ${result.totalWorkers} workers`);
-        return result;
-    }
-    
-    // === Example usage methods ===
-    
-    /**
-     * Example: Sends project data to all workers
-     */
-    async syncProjectDataToWorkers() {
-        if (!this.projectData) {
-            console.warn('No project data available for synchronization');
-            return;
-        }
-        
-        this.logVerbose('Starting project data synchronization to all workers...');
-        const result = this.broadcastProjectDataUpdate(this.projectData);
-        this.logVerbose('Project data synchronization request sent:', result);
-        return result;
-    }
-    
-    /**
-     * Example: Sends a custom game command to all workers
-     */
-    async sendGameCommand(command, params = {}) {
-        const result = this.broadcastCustomCommand('gameCommand', {
-            gameCommand: command,
-            params: params
-        });
-        
-        this.logVerbose(`Game command "${command}" sent to all workers:`, result);
-        return result;
-    }
-    
-    /**
-     * Example: Sets worker configuration
-     */
-    async configureWorkers(config) {
-        const result = this.broadcastCustomCommand('configure', {
-            configuration: config
-        });
-        
-        this.logVerbose('Worker configuration sent:', result);
-        return result;
-    }
-
+   
 }
 
 function GetEngineHashes() { 
