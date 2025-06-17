@@ -54,6 +54,7 @@ class GameApp {
         };
         this.logicPromise = Promise.resolve();
         this.curProjectHash = ''
+        this.bindMainCallHandler()
     }
     
     logVerbose(...args) {
@@ -237,7 +238,7 @@ class GameApp {
             await this.unpackGameData(curGame, this.tempGamePath, this.projectData,this.packName, this.isRuntimeMode? this.assetURLs["godot.editor.pck"]:"" )
             curGame.start({ 'args': args, 'canvas': this.gameCanvas }).then(async () => {
                 this.pthreads = curGame.getPThread()
-                this.broadcastProjectDataUpdate(this.projectData)
+                this.callWorkerProjectDataUpdate(this.projectData)
                 this.onProgress(1.0);
                 this.gameCanvas.focus();
                 this.logVerbose("==> game start done")
@@ -247,19 +248,7 @@ class GameApp {
     }
 
     bindMainThreadCallbacks(curGame){
-        curGame.rtenv["_spxCbOnWasmLoaded"] = function (){
-            window.onWasmLoaded(infos)
-        }
-        curGame.rtenv["_spxCbOnGameStarted"] =function (){
-            window.onGameStarted(infos)
-        }
-        // callback for ai
-        curGame.rtenv["_spxCbSetAIInteractionAPITokenProvider"] = function (infos){
-            window.onSetAIInteractionAPITokenProvider(infos)
-        }
-        curGame.rtenv["_spxCbSetAIInteractionAPIEndpoint"] = function (infos){
-            window.onSetAIInteractionAPIEndpoint(infos)
-        }
+        curGame.rtenv["_spxOnMainCall"] = window._spxOnMainCall
     }
 
     async unpackGameData(curGame,dir, projectData, pckName, packUrl) {
@@ -561,10 +550,28 @@ class GameApp {
         }
     }
 
-
-
     // === PThread Worker message sending related methods ===
-    broadcastProjectDataUpdate(projectData) {
+    bindMainCallHandler() {
+        window._spxMainCalls = {}
+        window._spxOnMainCall = function (...params){
+            let funcName = params[0]
+            let args = params.slice(1)
+            if (window._spxMainCalls.hasOwnProperty(funcName)) {
+                let callback = window._spxMainCalls[funcName]
+                if (callback != null) {
+                    callback(...args)
+                }
+            }else{
+                let func = window[funcName]
+                if (func != null) {
+                    func(...args)
+                }else{
+                    console.error("no such function: ", funcName)
+                }
+            }
+        }
+    }
+    callWorkerProjectDataUpdate(projectData) {
         const message = {
             cmd: 'projectDataUpdate',
             data: projectData,
@@ -573,16 +580,81 @@ class GameApp {
         return this.postMessageToWorkers(message);
     }
 
-    broadcastCustomCall(funcName, args) {
+    callWorkerFunction(funcName, args) {
+        // if args is not an array, convert it to an array
+        const argsArray = Array.isArray(args) ? args : [args];
+        
+        // auto process arguments, convert function to main thread callback
+        const processedArgs = this.processArguments(argsArray);
+        
         const message = {
             cmd: 'customCall',
             data: {
                 funcName: funcName,
-                args: args
+                args: processedArgs
             },
             timestamp: Date.now()
         };
         return this.postMessageToWorkers(message);
+    }
+
+    // process arguments, auto convert function to main thread callback
+    processArguments(args) {
+        if (!args || !Array.isArray(args)) {
+            return args;
+        }
+
+        const processedArgs = [];
+        let callbackCounter = 0;
+
+        for (let arg of args) {
+            if (typeof arg === 'function') {
+                // generate unique callback name
+                const callbackName = `_onSpxCall_${Date.now()}_${callbackCounter++}`;
+                
+                // register callback function
+                this.registerWorkerCallback(callbackName, arg);
+                
+                // replace with main thread callback identifier
+                processedArgs.push("_SPX_CALLBACK_FUNC_", callbackName);
+            } else {
+                processedArgs.push(arg);
+            }
+        }
+
+        return processedArgs;
+    }
+
+    // register worker callback function
+    registerWorkerCallback(callbackName, userFunction) {
+        // create callback handler function
+        window._spxMainCalls[callbackName] = async function(requestId, ...args) {
+            let errorMsg = null;
+            let result = null;
+            
+            try {
+                if (userFunction) {
+                    result = userFunction(...args);
+                    // if return Promise, wait for it to complete
+                    if (result && typeof result.then === 'function') {
+                        result = await result;
+                    }
+                } else {
+                    errorMsg = `No function registered for ${callbackName}`;
+                }
+            } catch (error) {
+                console.error(`Error in ${callbackName}:`, error);
+                errorMsg = error.message;
+            }
+            
+            // send response to worker
+            this.postMessageToWorkers({
+                cmd: 'callResponse',
+                responseId: requestId,
+                result: result,
+                error: errorMsg
+            });
+        }.bind(this);
     }
 
     postMessageToWorkers(message, transferList = null, cloneForEach = false) {
@@ -615,7 +687,6 @@ class GameApp {
                             worker.postMessage(enhancedMessage);
                         }
                     } else {
-                        console.log("post message to worker", enhancedMessage)
                         worker.postMessage(enhancedMessage);
                     }
                     

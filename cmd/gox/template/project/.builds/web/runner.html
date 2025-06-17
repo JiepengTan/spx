@@ -48,6 +48,8 @@
 		let gameApp = null
 		let isShowEditor = false
 		let onGameError = null
+		let _onSpxReady = null
+
 		window.spxIsForceDebugLog = false
 		function onProgress(value) {
 			const progressEvent = new CustomEvent('onProgress', {
@@ -85,29 +87,27 @@
 			onGameError = callback
 		}
 
-		window.onSetAIInteractionAPIEndpoint= function (info) {
-			if (info == null) {
-				console.log("onSetAIInteractionAPIEndpoint:null ")
-			}
-			console.log("windows.onSetAIInteractionAPIEndpoint: ", info)
+
+		// ai interaction
+		window.setAIInteractionAPIEndpoint = function (endpoint) {
+			gameApp.callWorkerFunction("setAIInteractionAPIEndpoint", [endpoint])
 		}
 
-		window.onSetAIInteractionAPITokenProvider= function (info) {
-			if (info == null) {
-				console.log("onSetAIInteractionAPITokenProvider:null ")
-			}
-			console.log("windows.onSetAIInteractionAPITokenProvider: ", info)
+		window.setAIInteractionAPITokenProvider = function (tokenProviderFunction) {
+			gameApp.callWorkerFunction("setAIInteractionAPITokenProvider", tokenProviderFunction)
 		}
+
 		window.onWasmLoaded = function () {
-			console.log("windows.onWasmLoaded")
+			if (_onSpxReady != null) {
+				_onSpxReady()
+			}
 		}
-
 		window.onGameStarted = function () {
-			console.log("windows.onGameStarted")
 		}
 
 		window.startGame = async (buffer, assetURLs = null, onSpxReady = null) => {
 			isShowEditor = false
+			_onSpxReady = onSpxReady
 			const config = {
 				'projectName': "spx_game",
 				'onProgress': onProgress,
@@ -130,11 +130,6 @@
 
 			if (gameApp != null) {
 				await gameApp.StopProject();
-			}
-			
-			// TODO call it in right time
-			if (onSpxReady != null) {
-				onSpxReady()
 			}
 
 			// try install project and run game

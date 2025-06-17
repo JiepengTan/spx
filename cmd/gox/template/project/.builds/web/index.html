@@ -137,7 +137,9 @@
 			})
 			runnerWindow.spxIsForceDebugLog = true
 			let buffer = await (await (fetch(zipUrl))).arrayBuffer();
-			await runnerWindow.startGame(buffer);
+			await runnerWindow.startGame(buffer, null, function () {
+				runnerWindow.setAIInteractionAPIEndpoint("http://127.0.0.1:8000")
+			});
 		}
 	</script>
 </body>
