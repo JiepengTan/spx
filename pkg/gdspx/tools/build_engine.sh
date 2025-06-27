@@ -137,7 +137,8 @@ build_template() {
         fi 
         thread_flags=".nothreads"
         # build web templates
-        scons platform=web target=template_release threads=no $COMMON_ARGS $EXTRA_OPT_ARGS debug_symbols=false  extra_cflags=["-sMINIFY=2","--profiling-funcs"] 
+        scons platform=web target=template_release threads=no $COMMON_ARGS $EXTRA_OPT_ARGS
+        # debug_symbols=false  extra_cflags=["-sMINIFY=0","--profiling-funcs"] 
         echo "Wait zip file to finished ..."
         sleep 2
         cp bin/godot.web.template_release.wasm32$thread_flags.zip bin/web_dlink_debug.zip
