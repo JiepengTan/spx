@@ -44,8 +44,8 @@ OLD_COMMON_ARGS='
             module_webrtc_enabled=false
             module_godot_physics_2d_enabled=true '
 
-COMMON_ARGS='debug_symbols=true 
-            optimize=debug 
+COMMON_ARGS='
+            optimize=size 
             use_volk=no 
             deprecated=no 
             minizip=yes  
@@ -137,10 +137,10 @@ build_template() {
         fi 
         thread_flags=".nothreads"
         # build web templates
-        scons platform=web target=template_debug threads=no $COMMON_ARGS $EXTRA_OPT_ARGS debug_symbols=true 
+        scons platform=web target=template_release threads=no $COMMON_ARGS $EXTRA_OPT_ARGS debug_symbols=false  extra_cflags=["-sMINIFY=2","--profiling-funcs"] 
         echo "Wait zip file to finished ..."
         sleep 2
-        cp bin/godot.web.template_debug.wasm32$thread_flags.zip bin/web_dlink_debug.zip
+        cp bin/godot.web.template_release.wasm32$thread_flags.zip bin/web_dlink_debug.zip
         rm "$template_dir"/web_*.zip
         cp bin/web_dlink_debug.zip "$template_dir/web_dlink_debug.zip"
         cp bin/web_dlink_debug.zip "$template_dir/web_dlink_release.zip"
