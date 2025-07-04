@@ -201,7 +201,7 @@ main() {
         echo "Commands:"
         echo "  exportweb - Create a web release package"
         echo "  exportpack  - Set up and package the application"
-        echo "  runweb [path] - Run a web server (default path: tutorial/01-Weather)"
+        echo "  runweb [path] [port] - Run a web server (default path: tutorial/01-Weather, default port: 8106)"
         return 1
     fi
 

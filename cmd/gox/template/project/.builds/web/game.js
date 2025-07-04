@@ -2,7 +2,7 @@
 class GameApp {
     constructor(config) {
         config = config || {};
-        this.config = config;
+        this.config = config; 
         this.editor = null;
         this.game = null;
         this.packName = 'engine.zip';
@@ -26,6 +26,13 @@ class GameApp {
         };
         this.logicPromise = Promise.resolve();
         this.curProjectHash = ''
+        // web worker mode
+        this.proxyThreadMode = config.proxyThreadMode || false
+        this.pthreads = null; 
+        this.workerMessageId = 0; 
+        if(this.proxyThreadMode){
+            this.bindMainCallHandler()
+        }
     }
     logVerbose(...args) {
         if (this.logLevel == LOG_LEVEL_VERBOSE) {
@@ -113,6 +120,9 @@ class GameApp {
 
         curGame.init().then(async () => {
             this.onProgress(0.6);
+            if(this.proxyThreadMode) {
+                this.bindMainThreadCallbacks(curGame)
+            }
             await this.unpackGameData(curGame)
             this.onProgress(0.7);
             if (miniEngine) {
@@ -125,7 +135,12 @@ class GameApp {
                 }
                 this.onProgress(0.9);
                 this.gameCanvas.focus();
-                window.goLoadData(new Uint8Array(this.projectData));
+                if(this.proxyThreadMode) {
+                    this.pthreads = curGame.getPThread()
+                    this.callWorkerProjectDataUpdate(this.projectData)
+                }else{
+                    window.goLoadData(new Uint8Array(this.projectData));
+                }
                 this.onProgress(1.0);
                 this.gameCanvas.focus();
                 this.logVerbose("==> game start done")
@@ -185,6 +200,7 @@ class GameApp {
             this.logVerbose("no game is running")
             return
         }
+        this.pthreads = null
         this.stopGameResolve = () => {
             this.game = null
             resolve();
@@ -206,6 +222,164 @@ class GameApp {
         if (this.config.onProgress != null) {
             this.config.onProgress(value);
         }
+    }
+
+    // === PThread Worker message sending related methods ===
+    bindMainThreadCallbacks(game){
+        game.rtenv["_spxOnMainCall"] = window._spxOnMainCall
+    }
+
+    bindMainCallHandler() {
+        window._spxMainCalls = {}
+        window._spxOnMainCall = function (...params){
+            let funcName = params[0]
+            let args = params.slice(1)
+            if (window._spxMainCalls.hasOwnProperty(funcName)) {
+                let callback = window._spxMainCalls[funcName]
+                if (callback != null) {
+                    callback(...args)
+                }
+            }else{
+                let func = window[funcName]
+                if (func != null) {
+                    func(...args)
+                }else{
+                    console.error("no such function: ", funcName)
+                }
+            }
+        }
+    }
+    callWorkerProjectDataUpdate(projectData) {
+        const message = {
+            cmd: 'projectDataUpdate',
+            data: projectData,
+            timestamp: Date.now()
+        };
+        return this.postMessageToWorkers(message);
+    }
+
+    callWorkerFunction(funcName, args) {
+        // if args is not an array, convert it to an array
+        const argsArray = Array.isArray(args) ? args : [args];
+
+        // auto process arguments, convert function to main thread callback
+        const processedArgs = this.processArguments(argsArray);
+
+        const message = {
+            cmd: 'customCall',
+            data: {
+                funcName: funcName,
+                args: processedArgs
+            },
+            timestamp: Date.now()
+        };
+        return this.postMessageToWorkers(message);
+    }
+
+    // process arguments, auto convert function to main thread callback
+    processArguments(args) {
+        if (!args || !Array.isArray(args)) {
+            return args;
+        }
+
+        const processedArgs = [];
+        let callbackCounter = 0;
+
+        for (let arg of args) {
+            if (typeof arg === 'function') {
+                // generate unique callback name
+                const callbackName = `_onSpxCall_${Date.now()}_${callbackCounter++}`;
+
+                // register callback function
+                this.registerWorkerCallback(callbackName, arg);
+
+                // replace with main thread callback identifier
+                processedArgs.push("_SPX_CALLBACK_FUNC_", callbackName);
+            } else {
+                processedArgs.push(arg);
+            }
+        }
+
+        return processedArgs;
+    }
+
+    // register worker callback function
+    registerWorkerCallback(callbackName, userFunction) {
+        // create callback handler function
+        window._spxMainCalls[callbackName] = async function(requestId, ...args) {
+            let errorMsg = null;
+            let result = null;
+
+            try {
+                if (userFunction) {
+                    result = userFunction(...args);
+                    // if return Promise, wait for it to complete
+                    if (result && typeof result.then === 'function') {
+                        result = await result;
+                    }
+                } else {
+                    errorMsg = `No function registered for ${callbackName}`;
+                }
+            } catch (error) {
+                console.error(`Error in ${callbackName}:`, error);
+                errorMsg = error.message;
+            }
+
+            // send response to worker
+            this.postMessageToWorkers({
+                cmd: 'callResponse',
+                responseId: requestId,
+                result: result,
+                error: errorMsg
+            });
+        }.bind(this);
+    }
+
+    postMessageToWorkers(message, transferList = null, cloneForEach = false) {
+        const workers = [];
+        if (this.pthreads) {
+            workers.push(...this.pthreads.runningWorkers);
+        }
+
+        let successCount = 0;
+        let errorCount = 0;
+
+        workers.forEach((worker, index) => {
+            try {
+                if (worker && typeof worker.postMessage === 'function') {
+                    // Adds unique identifier and target info to each message
+                    let enhancedMessage = {
+                        ...message,
+                        _gameAppMessageId: ++this.workerMessageId,
+                        _targetWorkerIndex: index,
+                        _timestamp: Date.now()
+                    };
+
+                    // Special handling required when cloning data or using transferList
+                    if (transferList && cloneForEach) {
+                        if (message.data && message.data.buffer) {
+                            const clonedData = new Uint8Array(message.data);
+                            enhancedMessage.data = clonedData;
+                            worker.postMessage(enhancedMessage, [clonedData.buffer]);
+                        } else {
+                            worker.postMessage(enhancedMessage);
+                        }
+                    } else {
+                        worker.postMessage(enhancedMessage);
+                    }
+
+                    successCount++;
+                } else {
+                    console.warn(`Worker ${index} is invalid or does not have postMessage method`);
+                    errorCount++;
+                }
+            } catch (error) {
+                console.error(`Failed to send message to worker ${index}:`, error);
+                errorCount++;
+            }
+        });
+
+        return { successCount, errorCount, totalWorkers: workers.length };
     }
 }
 

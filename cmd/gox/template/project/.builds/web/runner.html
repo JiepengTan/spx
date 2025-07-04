@@ -49,6 +49,10 @@
 		let gameApp = null
 		let isShowEditor = false
 		let onGameError = null
+		let _onSpxReady = null
+
+		window.spxIsProxyThreadMode = false
+		window.spxIsForceDebugLog = false
 		function onProgress(value) {
 			const progressEvent = new CustomEvent('onProgress', {
 				detail: {
@@ -87,12 +91,31 @@
 
 		window.startGame = async (buffer, assetURLs = null, onSpxReady = null) => {
 			isShowEditor = false
+			_onSpxReady = onSpxReady
+			if(window.spxIsProxyThreadMode){
+				// ai interaction
+				window.setAIInteractionAPIEndpoint = function (endpoint) {
+					gameApp.callWorkerFunction("setAIInteractionAPIEndpoint", [endpoint])
+				}
+
+				window.setAIInteractionAPITokenProvider = function (tokenProviderFunction) {
+					gameApp.callWorkerFunction("setAIInteractionAPITokenProvider", tokenProviderFunction)
+				}
+
+				window.onWasmLoaded = function () {
+					if (_onSpxReady != null) {
+						_onSpxReady()
+					}
+				}
+				window.onGameStarted = function () {
+				}
+			}
 			const config = {
 				'projectName': "spx_game",
 				'onProgress': onProgress,
 				"gameCanvas": document.getElementById('game-canvas'),
 				"projectData": new Uint8Array(buffer),
-				"logLevel": LOG_LEVEL_NONE,
+				"logLevel": window.spxIsForceDebugLog ? LOG_LEVEL_VERBOSE : LOG_LEVEL_NONE,
 				"assetURLs": {
 					"engine.zip": "/engine.zip",
 					"game.zip": "/game.zip",
