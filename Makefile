@@ -175,7 +175,7 @@ runminigame:
 runminiprogram:
 	make cmd &&\
 	cd  $(path) && spx exportminiprogram && cd $(CURRENT_PATH) &&\
-	make runserver
+	make runserver 
 
 # Default rule for unknown targets
 %:
