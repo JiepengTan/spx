@@ -99,10 +99,10 @@ func (pself *CmdTool) _exportWeb(dstPath string) error {
 
 	// overwrite web files
 	util.CopyDir(pself.ProjectFS, "template/project/.builds/web", pself.WebDir, true)
-	// Append ext/*.js to godot.editor.worker.js then remove them
-	workerFile := path.Join(pself.WebDir, "godot.editor.worker.js")
+	// Append ext/*.js to engine.worker.js then remove them
+	workerFile := path.Join(pself.WebDir, "engine.worker.js")
 
-	// merge ext/*.js to godot.editor.worker.js
+	// merge ext/*.js to engine.worker.js
 	extDir := path.Join(pself.WebDir, "worker")
 	var filesToMerge []string
 	if entries, err := os.ReadDir(extDir); err == nil {
