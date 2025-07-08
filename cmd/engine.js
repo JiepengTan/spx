@@ -781,7 +781,6 @@ var Godot = (() => {
                             checkMailbox();
                         }
                     } else if (e.data._gameAppMessageId) {
-                        console.log('====> handleGameAppMessage', e.data);
                         handleGameAppMessage(e.data);
                     } else if (cmd) {
                         err(`worker: received unknown command ${cmd}`);
@@ -795,7 +794,7 @@ var Godot = (() => {
                 }
             }
             self.onmessage = handleMessage;
-			class GoWasmBridge {
+            class GoWasmBridge {
                 constructor() {
                     this.goInstance = null;
                     this.goRuntime = null;
@@ -1046,7 +1045,6 @@ var Godot = (() => {
             function handleGameAppMessage(data) {
                 const workerId = (typeof Module !== 'undefined' && Module['workerID']) || 'unknown';
                 const threadInfo = typeof importScripts !== 'undefined' ? 'Worker' : 'MainThread';
-                console.log('====> handleGameAppMessage', workerId, threadInfo, data);
                 try {
                     switch (data.cmd) {
                         case 'projectDataUpdate':
@@ -1071,7 +1069,6 @@ var Godot = (() => {
                 tryRunGoWasm();
             }
             async function handleCustomCall(data) {
-                console.log('=====handleCustomCall =========>1', data);
                 var infos = data.data;
                 var funcName = infos.funcName;
                 try {
@@ -1125,7 +1122,6 @@ var Godot = (() => {
                 if (!Module['gameProjectData']) {
                     return;
                 }
-                console.log('tryRunGoWasm=========1');
                 const spxfuncs = new GdspxFuncs();
                 const methodNames = Object.getOwnPropertyNames(Object.getPrototypeOf(spxfuncs));
                 methodNames.forEach(key => {
@@ -1134,7 +1130,6 @@ var Godot = (() => {
                     }
                 });
                 self.Module = Module;
-                console.log('tryRunGoWasm=========2');
                 if (self.goBridge && self.goBridge.isReady) {
                     try {
                         self.goBridge.callGoFunctionSafe('goLoadData', Module['gameProjectData']);
@@ -1147,7 +1142,6 @@ var Godot = (() => {
             async function initExtensionWasm() {
                 const workerId = Module['workerID'] || 'main';
                 const threadInfo = typeof importScripts !== 'undefined' ? 'Worker' : 'MainThread';
-                console.log('initExtensionWasm=========2', Module);
                 FFI = null;
                 try {
                     await loadGoWasmModule();
