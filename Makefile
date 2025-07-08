@@ -77,7 +77,9 @@ cmd:
 	cd ./cmd/gox/ && ./install.sh && cd $(CURRENT_PATH) 
 # build wasm
 wasm:
-	cd ./cmd/gox/ && ./install.sh --web && cd $(CURRENT_PATH) 
+	cd ./cmd/gox/ && ./install.sh --web &&\
+	cp /Users/tjp/projects/robot/spx/cmd/igox/gdspx.wasm /Users/tjp/projects/robot/spx/tutorial/06-worker/project/.builds/web/gdspx.wasm &&\
+	cd $(CURRENT_PATH) 
 
 # build wasm with optimization
 wasmopt:
@@ -118,7 +120,7 @@ exportweb:
 
 
 # Run demos
-path ?= tutorial/01-Weather
+path ?= tutorial/06-worker
 port ?= 8106
 # Run demo on PC editor mode
 rune:
@@ -161,6 +163,8 @@ stopserver:
 	@echo "Process stopping completed."
 
 runserver:
+	cp -f /Users/tjp/projects/robot/spx/tutorial/06-worker/project/.builds/web/engine.js /Users/tjp/projects/robot/spx/cmd/engine.js &&\
+	cp -f /Users/tjp/projects/robot/spx/tutorial/06-worker/project/.builds/web/game.js /Users/tjp/projects/robot/spx/cmd/game.js &&\
 	make stopserver && cd $(CURRENT_PATH) &&\
 	cd $(path) && python3 ./project/.godot/gdspx_web_server.py -r "../.builds/web" -p $(port)
 
@@ -175,7 +179,7 @@ runminigame:
 runminiprogram:
 	make cmd &&\
 	cd  $(path) && spx exportminiprogram && cd $(CURRENT_PATH) &&\
-	make runserver 
+	make runserver
 
 # Default rule for unknown targets
 %:
