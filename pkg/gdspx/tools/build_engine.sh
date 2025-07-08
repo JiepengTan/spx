@@ -135,23 +135,39 @@ build_template() {
         if [ "$EDITOR_ONLY" = true ]; then
             exit 0
         fi 
+
+
+        # build web templates without threads (minigame)
         thread_flags=".nothreads"
-        # build web templates
-        scons platform=web target=template_release threads=no $COMMON_ARGS $EXTRA_OPT_ARGS proxy_to_pthread=true
+        scons platform=web target=template_release $COMMON_ARGS $EXTRA_OPT_ARGS threads=no 
+        echo "Wait zip file to finished ..."
+        sleep 2
+        cp bin/godot.web.template_release.wasm32$thread_flags.zip bin/web_dlink_debug.zip
+        cp bin/web_dlink_debug.zip "$template_dir/web_dlink_nothreads_debug.zip"
+        cp bin/web_dlink_debug.zip "$template_dir/web_dlink_nothreads_release.zip"
+        cp bin/web_dlink_debug.zip "$template_dir/web_nothreads_debug.zip"
+        cp bin/web_dlink_debug.zip "$template_dir/web_nothreads_release.zip"
+        # copy to tool dir
+        cp bin/web_dlink_debug.zip $GOPATH/bin/gdspx$VERSION"_webpack_minigame.zip"
+
+        # build web templates with threads(web worker)
+        thread_flags=""
+        scons platform=web target=template_release $COMMON_ARGS $EXTRA_OPT_ARGS threads=yes proxy_to_pthread=true 
         echo "Wait zip file to finished ..."
         sleep 2
         cp bin/godot.web.template_release.wasm32$thread_flags.zip bin/web_dlink_debug.zip
         rm "$template_dir"/web_*.zip
-        cp bin/web_dlink_debug.zip "$template_dir/web_dlink_debug.zip"
-        cp bin/web_dlink_debug.zip "$template_dir/web_dlink_release.zip"
         cp bin/web_dlink_debug.zip "$template_dir/web_dlink_nothreads_debug.zip"
         cp bin/web_dlink_debug.zip "$template_dir/web_dlink_nothreads_release.zip"
-        cp bin/web_dlink_debug.zip "$template_dir/web_debug.zip"
-        cp bin/web_dlink_debug.zip "$template_dir/web_release.zip"
         cp bin/web_dlink_debug.zip "$template_dir/web_nothreads_debug.zip"
         cp bin/web_dlink_debug.zip "$template_dir/web_nothreads_release.zip"
-        # copy to tool dir
+        cp bin/web_dlink_debug.zip "$template_dir/web_dlink_debug.zip"
+        cp bin/web_dlink_debug.zip "$template_dir/web_dlink_release.zip"
+        cp bin/web_dlink_debug.zip "$template_dir/web_debug.zip"
+        cp bin/web_dlink_debug.zip "$template_dir/web_release.zip"
+
         cp bin/web_dlink_debug.zip $GOPATH/bin/gdspx$VERSION"_webpack.zip"
+
     else
         echo "Unknown platform"
     fi
