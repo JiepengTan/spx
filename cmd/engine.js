@@ -1484,15 +1484,10 @@ var Godot = (() => {
 			 * This function will be called on godot_js_spx_on_engine_start callback
 			 */
 			async function initExtensionWasm() {
-				var createWrapper = function (module, name) {
-					return function () {
-						return module["asm"][name].apply(null, arguments);
-					};
-				}
 				const workerId = Module['workerID'] || 'main';
 				const threadInfo = typeof importScripts !== 'undefined' ? 'Worker' : 'MainThread';
-				Module._cmalloc = createWrapper(Module, "malloc");
-				Module._cfree = createWrapper(Module, "free");
+		
+				console.log("initExtensionWasm=========2", Module)
 				FFI = null
 
 				try {
