@@ -165,12 +165,12 @@ runserver:
 	cd $(path) && python3 ./project/.godot/gdspx_web_server.py -r "../.builds/web" -p $(port)
 
 runminigamefast:
-	make cmd &&\ 
-	cd  $(path) && spx exportminiprogram -build=fast && cd $(CURRENT_PATH) 
+	make cmd &&\
+	cd  $(path) && spx exportminigame -build=fast && cd $(CURRENT_PATH) 
 	
 runminigame:
 	make wasmopt &&\
-	cd  $(path) && spx exportminiprogram && cd $(CURRENT_PATH) 
+	cd  $(path) && spx exportminigame && cd $(CURRENT_PATH) 
 
 runminiprogram:
 	make cmd &&\
