@@ -701,7 +701,6 @@ var Godot = (() => {
         assert(!ENVIRONMENT_IS_SHELL, 'shell environment detected but not enabled at build time.  Add `shell` to `-sENVIRONMENT` to enable.');
         var workerID = 0;
         if (ENVIRONMENT_IS_PTHREAD) {
-            console.log('ENVIRONMENT_IS_PTHREAD  ==>');
             var wasmPromiseResolve;
             var wasmPromiseReject;
             var initializedJS = false;
@@ -732,7 +731,6 @@ var Godot = (() => {
                 try {
                     var msgData = e['data'];
                     var cmd = msgData['cmd'];
-                    console.log('====> handleMessage', cmd, msgData);
                     if (cmd === 'load') {
                         workerID = msgData['workerID'];
                         let messageQueue = [];
@@ -797,7 +795,7 @@ var Godot = (() => {
                 }
             }
             self.onmessage = handleMessage;
-            class GoWasmBridge {
+			class GoWasmBridge {
                 constructor() {
                     this.goInstance = null;
                     this.goRuntime = null;
@@ -1682,7 +1680,6 @@ var Godot = (() => {
             if (!worker) {
                 return 6;
             }
-            console.log('====> spawnThread', threadParams);
             assert(!worker.pthread_ptr, 'Internal error!');
             PThread.runningWorkers.push(worker);
             PThread.pthreads[threadParams.pthread_ptr] = worker;
@@ -7557,7 +7554,6 @@ var Godot = (() => {
             _game_datas: null,
             _set_game_data_cb: null,
             getPThread: function () {
-                console.log('=====getPThread', PThread);
                 return PThread;
             },
             update_game_datas: function (path, files) {
@@ -10855,7 +10851,6 @@ var Godot = (() => {
         }
         async function _godot_js_spx_on_engine_start() {
             FFI = null;
-            console.log('=====>');
             await self.initExtensionWasm();
         }
         function _godot_js_spx_on_engine_update(delta) {
@@ -12550,7 +12545,8 @@ if (typeof window !== 'undefined') {
 }
 class GdspxFuncs {
     gdspx_audio_stop_all() {
-        console.log('===========================> gdspx_audio_stop_all', Module);
+        var _gdFuncPtr = Module._gdspx_audio_stop_all;
+        _gdFuncPtr();
     }
     gdspx_audio_create_audio() {
         var _gdFuncPtr = Module._gdspx_audio_create_audio;
