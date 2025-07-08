@@ -105,8 +105,10 @@ class GameApp {
             GameGlobal.engine = this.game;
             godotSdk.set_engine(this.game);
         }else{
-            await this.loadLogicWasm()
-            await this.runLogicWasm()
+            if(!this.proxyThreadMode){
+                await this.loadLogicWasm()
+                await this.runLogicWasm()
+            }
         }
 
         // register global functions

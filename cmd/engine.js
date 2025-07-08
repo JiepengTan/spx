@@ -1453,10 +1453,19 @@ var Godot = (() => {
 					return;
 				}
 
-				console.log("tryRunGoWasm=========")
+				console.log("tryRunGoWasm=========1")
 
 				// register global functions
-
+				
+				// register global functions
+				const spxfuncs = new GdspxFuncs();
+				const methodNames = Object.getOwnPropertyNames(Object.getPrototypeOf(spxfuncs));
+				methodNames.forEach(key => {
+					if (key.startsWith('gdspx_') && typeof spxfuncs[key] === 'function') {
+						self[key] = spxfuncs[key].bind(spxfuncs);
+					}
+				});
+				self.Module = Module;
 				console.log("tryRunGoWasm=========2")
 
 				if (self.goBridge && self.goBridge.isReady) {
