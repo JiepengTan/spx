@@ -108,17 +108,17 @@ class GameApp {
             if(!this.proxyThreadMode){
                 await this.loadLogicWasm()
                 await this.runLogicWasm()
+
+                // register global functions
+                const spxfuncs = new GdspxFuncs();
+                const methodNames = Object.getOwnPropertyNames(Object.getPrototypeOf(spxfuncs));
+                methodNames.forEach(key => {
+                    if (key.startsWith('gdspx_') && typeof spxfuncs[key] === 'function') {
+                        window[key] = spxfuncs[key].bind(spxfuncs);
+                    }
+                });
             }
         }
-
-        // register global functions
-        const spxfuncs = new GdspxFuncs();
-        const methodNames = Object.getOwnPropertyNames(Object.getPrototypeOf(spxfuncs));
-        methodNames.forEach(key => {
-            if (key.startsWith('gdspx_') && typeof spxfuncs[key] === 'function') {
-                window[key] = spxfuncs[key].bind(spxfuncs);
-            }
-        });
 
         curGame.init().then(async () => {
             this.onProgress(0.6);

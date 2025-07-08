@@ -24,7 +24,7 @@ function handleGameAppMessage(data) {
 
 async function handleProjectDataUpdate(data) {
   Module["gameProjectData"] = data.data;
-  self.tryRunGoWasm()
+  tryRunGoWasm()
 }
 
 async function handleCustomCall(data) {
@@ -109,6 +109,15 @@ function tryRunGoWasm() {
   if (!Module["gameProjectData"]) {
     return;
   }
+  
+  const spxfuncs = new GdspxFuncs();
+  const methodNames = Object.getOwnPropertyNames(Object.getPrototypeOf(spxfuncs));
+  methodNames.forEach(key => {
+      if (key.startsWith('gdspx_') && typeof spxfuncs[key] === 'function') {
+          self[key] = spxfuncs[key].bind(spxfuncs);
+      }
+  });
+  self.Module = Module;
 
   if (self.goBridge && self.goBridge.isReady) {
     try {
@@ -134,7 +143,7 @@ async function initExtensionWasm() {
     // Load Go WASM module
     await loadGoWasmModule();
     FFI = Module["FFI"];
-    self.tryRunGoWasm()
+    tryRunGoWasm()
     return true;
   } catch (error) {
     console.error(`[Thread ${threadInfo}-${workerId}] Go WASM initialization failed:`, error);

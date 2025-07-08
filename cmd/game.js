@@ -139,7 +139,6 @@ class GameApp {
                 this.gameCanvas.focus();
                 if(this.proxyThreadMode) {
                     this.pthreads = curGame.getPThread()
-                    console.log("====> callWorkerProjectDataUpdate")
                     this.callWorkerProjectDataUpdate(this.projectData)
                 }else{
                     window.goLoadData(new Uint8Array(this.projectData));

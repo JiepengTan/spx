@@ -89,6 +89,7 @@ func (pself *CmdTool) exportWeb() error {
 }
 
 func (pself *CmdTool) _exportWeb(dstPath string) error {
+	println("==> _exportWeb", dstPath)
 	// copy project files
 	util.CopyDir(pself.ProjectFS, "template/project", pself.ProjectDir, true)
 	dir := pself.TargetDir
@@ -100,11 +101,12 @@ func (pself *CmdTool) _exportWeb(dstPath string) error {
 	// overwrite web files
 	util.CopyDir(pself.ProjectFS, "template/project/.builds/web", pself.WebDir, true)
 	// Append ext/*.js to engine.worker.js then remove them
-	workerFile := path.Join(pself.WebDir, "engine.worker.js")
 
 	// merge ext/*.js to engine.worker.js
 	extDir := path.Join(pself.WebDir, "worker")
 	var filesToMerge []string
+
+	filesToMerge = append(filesToMerge, path.Join(pself.WebDir, "wasm_exec.js"))
 	if entries, err := os.ReadDir(extDir); err == nil {
 		for _, entry := range entries {
 			if entry.IsDir() {
@@ -116,25 +118,14 @@ func (pself *CmdTool) _exportWeb(dstPath string) error {
 		}
 	}
 
-	workerFD, err := os.OpenFile(workerFile, os.O_WRONLY|os.O_APPEND, 0644)
-	if err != nil {
-		return err
-	}
-	defer workerFD.Close()
-
+	insertCode := ""
 	for _, jsFile := range filesToMerge {
 		if util.IsFileExist(jsFile) {
 			content, err := os.ReadFile(jsFile)
 			if err != nil {
 				return err
 			}
-			// Separate each file with a comment marker for clarity
-			if _, err := workerFD.Write([]byte("\n\n// -------- merged from " + path.Base(jsFile) + " --------\n")); err != nil {
-				return err
-			}
-			if _, err := workerFD.Write(content); err != nil {
-				return err
-			}
+			insertCode += "\n\n\n" + string(content)
 			if err := os.Remove(jsFile); err != nil {
 				log.Printf("warning: failed to remove %s: %v", jsFile, err)
 			}
@@ -142,6 +133,17 @@ func (pself *CmdTool) _exportWeb(dstPath string) error {
 	}
 
 	pack.PackProject(pself.TargetDir, path.Join(pself.WebDir, "game.zip"))
+	engineBytes, _ := os.ReadFile(path.Join(pself.WebDir, "engine.js"))
+	engineStr := string(engineBytes)
+
+	keyStr := "{if(initializedJS){checkMailbox()}}"
+	// insert handleGameAppMessage
+	engineStr = strings.ReplaceAll(engineStr, keyStr, keyStr+"else if(e.data._gameAppMessageId) {handleGameAppMessage(e.data);}")
+	keyStr = ";throw ex}}self.onmessage=handleMessage}"
+	// insert worker code
+	engineStr = strings.ReplaceAll(engineStr, keyStr, keyStr+insertCode)
+
+	os.WriteFile(path.Join(pself.WebDir, "engine.js"), []byte(engineStr), 0644)
 
 	//pack.PackEngineRes(pself.ProjectFS, pself.WebDir)
 	util.CopyFile(pself.getWasmPath(), path.Join(pself.WebDir, "gdspx.wasm"))
