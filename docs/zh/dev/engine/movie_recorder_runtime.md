@@ -1,5 +1,9 @@
 ## Godot MovieWriter 实时录制技术方案
 
+### 0. 调研
+https://zhuanlan.zhihu.com/p/343790643
+
+
 ### 1. 当前系统的实时录制限制
 
 #### 核心问题分析
