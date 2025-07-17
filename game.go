@@ -132,11 +132,30 @@ type Game struct {
 	// debug
 	debug      bool
 	debugPanel *ui.UiDebug
+
+	sprCollisionInfos       map[string]*spriteCollisionInfo
+	isCollisionByPixel      bool
+	isAutoSetCollisionLayer bool
+}
+
+const maxCollisionLayerIdx = 32 // engine limit support 32 layers
+
+type spriteCollisionInfo struct {
+	Id    int
+	Layer int64
+	Mask  int64
 }
 
 type Gamer interface {
 	engine.IGame
 	initGame(sprites []Sprite) *Game
+}
+
+func (p *Game) getSpriteCollisionInfo(name string) *spriteCollisionInfo {
+	if info, ok := p.sprCollisionInfos[name]; ok {
+		return info
+	}
+	panic("Unknown sprite " + name)
 }
 
 func (p *Game) IsRunned() bool {
@@ -196,6 +215,7 @@ func (p *Game) getGame() *Game {
 }
 
 func (p *Game) initGame(sprites []Sprite) *Game {
+	engine.SetGame(p)
 	p.eventSinks.init(&p.sinkMgr, p)
 	p.sprs = make(map[string]Sprite)
 	p.typs = make(map[string]reflect.Type)
@@ -228,6 +248,8 @@ func Gopt_Game_Run(game Gamer, resource any, gameConf ...*Config) {
 	if err != nil {
 		panic(err)
 	}
+	resMgr.SetDefaultFont("res://engine/fonts/CnFont.ttf")
+	engine.RegisterFileSystem(fs)
 
 	var conf Config
 	var proj projConfig
@@ -297,6 +319,28 @@ func Gopt_Game_Run(game Gamer, resource any, gameConf ...*Config) {
 	if debugLoad {
 		log.Println("==> StartLoad", resource)
 	}
+
+	g.isCollisionByPixel = !proj.CollisionByShape
+	// auto set collision layer by default
+	g.isAutoSetCollisionLayer = proj.AutoSetCollisionLayer == nil || *proj.AutoSetCollisionLayer
+
+	if debugLoad {
+		log.Println("==> isCollisionByPixel", g.isCollisionByPixel)
+		log.Println("==> isAutoSetCollisionLayer", g.isAutoSetCollisionLayer)
+	}
+
+	physicMgr.SetCollisionSystemType(g.isCollisionByPixel)
+	if g.isAutoSetCollisionLayer {
+		g.sprCollisionInfos = make(map[string]*spriteCollisionInfo)
+		idx := 0
+		for name, _ := range g.typs {
+			modIdx := int(math.Mod(float64(idx), maxCollisionLayerIdx))
+			info := &spriteCollisionInfo{Id: idx, Layer: 1 << modIdx}
+			g.sprCollisionInfos[name] = info
+			idx++
+		}
+	}
+
 	g.startLoad(fs, &conf)
 	for i, n := 0, v.NumField(); i < n; i++ {
 		name, val := getFieldPtrOrAlloc(g, v, i)
@@ -501,8 +545,6 @@ func (p *Game) loadIndex(g reflect.Value, proj *projConfig) (err error) {
 	p.Camera.SetCameraZoom(p.windowScale)
 	ui.SetWindowScale(p.windowScale)
 
-	physicMgr.SetCollisionSystemType(!proj.CollisionByShape)
-
 	// setup syncSprite's property
 	p.syncSprite = engine.NewBackdropProxy(p, p.getCostumePath(), p.getCostumeRenderScale())
 	p.setupBackdrop()
@@ -534,6 +576,35 @@ func (p *Game) loadIndex(g reflect.Value, proj *projConfig) (err error) {
 	}
 	if loader, ok := g.Addr().Interface().(interface{ OnLoaded() }); ok {
 		loader.OnLoaded()
+	}
+
+	if p.isAutoSetCollisionLayer {
+		// Warning: Here, the sprite's `idx % maxCollisionLayerIdx` is treated as the actual layer.
+		// This means multiple sprites may share the same layer, and their collision masks are also shared
+		// (taking the union of all target layers). This impacts performance but does not affect correctness,
+		// since collision events will be filtered by `onTouchStart`.
+		maskMap := make([]int64, maxCollisionLayerIdx)
+		// gather masks
+		for _, ini := range inits {
+			spr := spriteOf(ini)
+			info := p.getSpriteCollisionInfo(spr.name)
+			info.Mask = 0
+			modIdx := int(math.Mod(float64(info.Id), maxCollisionLayerIdx))
+			for target, _ := range spr.collisionTargets {
+				targetLayer := p.getSpriteCollisionInfo(target)
+				maskMap[modIdx] |= targetLayer.Layer
+			}
+		}
+		// apply final masks
+		for _, ini := range inits {
+			spr := spriteOf(ini)
+			info := p.getSpriteCollisionInfo(spr.name)
+			modIdx := int(math.Mod(float64(info.Id), maxCollisionLayerIdx))
+			info.Mask = maskMap[modIdx]
+			if debugLoad {
+				log.Println("init sprite collision info", spr.name, info.Layer, info.Mask)
+			}
+		}
 	}
 
 	p.audioId = p.sounds.allocAudio()
@@ -652,20 +723,20 @@ func (p *Game) addStageSprite(g reflect.Value, v specsp, inits []Sprite) []Sprit
 }
 
 /*
-	{
-	  "type": "sprites",
-	  "target": "bananas",
-	  "items": [
-	    {
-	      "x": -100,
-	      "y": -21
-	    },
-	    {
-	      "x": 50,
-	      "y": -21
-	    }
-	  ]
-	}
+	 {
+	   "type": "sprites",
+	   "target": "bananas",
+	   "items": [
+		 {
+		   "x": -100,
+		   "y": -21
+		 },
+		 {
+		   "x": 50,
+		   "y": -21
+		 }
+	   ]
+	 }
 */
 func (p *Game) addStageSprites(g reflect.Value, v specsp, inits []Sprite) []Sprite {
 	target := v["target"].(string)
@@ -734,17 +805,20 @@ type clicker interface {
 	Visible() bool
 }
 
-func (p *Game) doWhenLeftButtonDown(ev *eventLeftButtonDown) {
-	// add a global click cooldown
-	if !p.inputs.canTriggerClickEvent(inputGlobalClickTimerId) {
-		return
-	}
-
+func (p *Game) doWhenLeftButtonUp(ev *eventLeftButtonUp) {
 	point := ev.Pos
+	p.inputs.checkTracking(point)
+}
+
+func (p *Game) doWhenLeftButtonDown(ev *eventLeftButtonDown) {
+	point := ev.Pos
+
+	// Detect target sprite for both swipe and click events
 	tempItems := p.getTempShapes()
 	count := len(tempItems)
 
 	var target clicker = nil
+	var targetSprite *SpriteImpl = nil
 	for i := 0; i < count; i++ {
 		item := tempItems[count-i-1]
 		if o, ok := item.(clicker); ok {
@@ -753,10 +827,22 @@ func (p *Game) doWhenLeftButtonDown(ev *eventLeftButtonDown) {
 				isClicked := spriteMgr.CheckCollisionWithPoint(syncSprite.GetId(), point, true)
 				if isClicked {
 					target = o
+					// Try to get the SpriteImpl from the clicker
+					if sprite, ok := o.(*SpriteImpl); ok {
+						targetSprite = sprite
+					}
 					break
 				}
 			}
 		}
+	}
+
+	// Start swipe tracking with detected target sprite (can be nil for stage swipes)
+	p.inputs.startTracking(point, targetSprite)
+
+	// add a global click cooldown
+	if !p.inputs.canTriggerClickEvent(inputGlobalClickTimerId) {
+		return
 	}
 
 	if target != nil {
@@ -771,11 +857,21 @@ func (p *Game) doWhenLeftButtonDown(ev *eventLeftButtonDown) {
 	}
 }
 
+func (p *Game) doWhenMouseMove(ev *eventMouseMove) {
+	// Update current mouse position
+	p.mousePos = ev.Pos
+	// If swipe tracking is active, record the movement
+	p.inputs.onMouseMove(ev.Pos)
+}
+
 func (p *Game) handleEvent(event event) {
 	switch ev := event.(type) {
-
+	case *eventLeftButtonUp:
+		p.doWhenLeftButtonUp(ev)
 	case *eventLeftButtonDown:
 		p.doWhenLeftButtonDown(ev)
+	case *eventMouseMove:
+		p.doWhenMouseMove(ev)
 	case *eventKeyDown:
 		p.sinkMgr.doWhenKeyPressed(ev.Key)
 	case *eventStart:
@@ -821,8 +917,12 @@ func (p *Game) logicLoop(me coroutine.Thread) int {
 
 func (p *Game) inputEventLoop(me coroutine.Thread) int {
 	lastLbtnPressed := false
+	lastMousePos := mathf.Vec2{}       // Track last mouse position
+	const mouseMovementThreshold = 1.0 // Minimum movement to trigger event (pixels)
 	keyEvents := make([]engine.KeyEvent, 0)
+
 	for {
+		// Check mouse button state
 		curLbtnPressed := inputMgr.GetMouseState(MOUSE_BUTTON_LEFT)
 		if curLbtnPressed != lastLbtnPressed {
 			if lastLbtnPressed {
@@ -833,6 +933,21 @@ func (p *Game) inputEventLoop(me coroutine.Thread) int {
 		}
 		lastLbtnPressed = curLbtnPressed
 
+		// Check mouse movement
+		// Note: We need to get the actual current mouse position from the engine
+		// For now, we'll use the stored mousePos which should be updated elsewhere
+		curMousePos := inputMgr.GetMousePos()
+		mathfMousePos := mathf.Vec2{X: float64(curMousePos.X), Y: float64(curMousePos.Y)}
+
+		// Check if mouse moved significantly
+		dx := mathfMousePos.X - lastMousePos.X
+		dy := mathfMousePos.Y - lastMousePos.Y
+		if math.Abs(dx) > mouseMovementThreshold || math.Abs(dy) > mouseMovementThreshold {
+			p.inputs.onMouseMove(mathfMousePos)
+			lastMousePos = mathfMousePos
+		}
+
+		// Handle keyboard events
 		keyEvents = engine.GetKeyEvents(keyEvents)
 		for _, ev := range keyEvents {
 			if ev.IsPressed {
@@ -1417,6 +1532,7 @@ func (p *Game) loadSound(name SoundName) (media Sound, err error) {
 		return
 	}
 	media.Path = prefix + "/" + media.Path
+	engine.CheckAssetFile(media.Path)
 	p.sounds.audios[name] = media
 	return
 }
@@ -1436,7 +1552,6 @@ func (p *Game) Play__0(media Sound, action *PlayOptions) {
 	if debugInstr {
 		log.Println("Play", media.Path)
 	}
-
 	p.checkAudioId()
 	err := p.play(p.audioId, media, action)
 	if err != nil {

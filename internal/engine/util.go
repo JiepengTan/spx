@@ -1,11 +1,75 @@
 package engine
 
 import (
+	"fmt"
+	"io"
 	"math"
 
+	"log"
+
+	"github.com/goplus/spx/v2/fs"
+	"github.com/goplus/spx/v2/internal/engine/platform"
 	gdx "github.com/goplus/spx/v2/pkg/gdspx/pkg/engine"
 	. "github.com/realdream-ai/mathf"
 )
+
+var supportedFileTypes = map[string]bool{
+	".png":  true,
+	".jpg":  true,
+	".jpeg": true,
+	".svg":  true,
+	".webp": true,
+	".mp3":  true,
+	".wav":  true,
+}
+
+// check invalid files
+var checkedAssetFiles = make(map[string]bool)
+
+func RegisterFileSystem(fs fs.Dir) {
+	if platform.IsWeb() {
+		RegisterIoReader(func(file string, length int) ([]byte, error) {
+			rc, err := fs.Open(file)
+			if err != nil {
+				return nil, err
+			}
+			buf := make([]byte, length)
+			defer rc.Close()
+
+			n, err := io.ReadFull(rc, buf)
+			if err != nil {
+				if err == io.ErrUnexpectedEOF {
+					return buf[:n], nil
+				}
+				return buf[:n], err
+			}
+			return buf[:n], nil
+		})
+	}
+}
+
+func CheckAssetFile(rawPath string) {
+	if checkedAssetFiles[rawPath] {
+		return
+	}
+	checkedAssetFiles[rawPath] = true
+	path := ToAssetPath(rawPath)
+	if platform.IsWeb() {
+		path = path[7:] // remove "assets/"
+	}
+	info := GetFileFormat(path)
+	if !info.IsCorrect {
+		supportStr := ""
+		if !supportedFileTypes[info.Extension] {
+			supportStr = ", \n and the current engine does not support this file type (" + info.Extension + "). "
+		}
+		msg := fmt.Sprintf("ERROR: The file (%s) has an incorrect extension, its actual format is %s"+supportStr, path, info.Extension)
+		log.Println(msg)
+	} else if !supportedFileTypes[info.Extension] {
+		msg := fmt.Sprintf("ERROR: The file (%s) has an incorrect extension, current engine does not support this file type (%s). ", path, info.Extension)
+		log.Println(msg)
+	}
+}
 
 // =============== factory ===================
 
@@ -24,7 +88,7 @@ func NewBackdropProxy(obj any, path string, renderScale float64) *Sprite {
 		_ret1.Target = obj
 		_ret1.SetZIndex(-1)
 		_ret1.DisablePhysic()
-		_ret1.UpdateTexture(path, renderScale)
+		_ret1.UpdateTexture(path, renderScale, true)
 	})
 	return _ret1
 }
@@ -37,6 +101,9 @@ func ReadAllText(path string) string {
 
 func SetDebugMode(isDebug bool) {
 	platformMgr.SetDebugMode(isDebug)
+}
+func SetDefaultFont(path string) {
+	resMgr.SetDefaultFont(path)
 }
 
 // =============== setting ===================

@@ -180,10 +180,11 @@ func syncCheckUpdateCostume(p *baseObj) {
 	rect := p.getCostumeAltasRegion()
 	isAltas := p.isCostumeAltas()
 	if isAltas {
-		syncSprite.UpdateTextureAltas(path, rect, renderScale)
+		// if is animating, will not update render texture
+		syncSprite.UpdateTextureAltas(path, rect, renderScale, !p.isAnimating)
 		syncOnAltasChanged(p)
 	} else {
-		syncSprite.UpdateTexture(path, renderScale)
+		syncSprite.UpdateTexture(path, renderScale, !p.isAnimating)
 	}
 }
 func syncOnAltasChanged(p *baseObj) {
@@ -214,6 +215,7 @@ func (*Game) syncUpdatePhysic() {
 }
 
 func syncInitSpritePhysicInfo(sprite *SpriteImpl, syncProxy *engine.Sprite) {
+	sprite.initCollisionParams()
 	// update collision layers
 	syncProxy.SetTriggerLayer(sprite.triggerLayer)
 	syncProxy.SetTriggerMask(sprite.triggerMask)
@@ -252,8 +254,11 @@ func syncInitSpritePhysicInfo(sprite *SpriteImpl, syncProxy *engine.Sprite) {
 		syncProxy.SetTriggerEnabled(false)
 	}
 }
-
 func syncGetCostumeBoundByAlpha(p *SpriteImpl, pscale float64) (mathf.Vec2, mathf.Vec2) {
+	return getCostumeBoundByAlpha(p, pscale, true)
+}
+
+func getCostumeBoundByAlpha(p *SpriteImpl, pscale float64, isSync bool) (mathf.Vec2, mathf.Vec2) {
 	cs := p.costumes[p.costumeIndex_]
 	var rect mathf.Rect2
 	// GetBoundFromAlpha is very slow, so we should cache the result
@@ -266,7 +271,11 @@ func syncGetCostumeBoundByAlpha(p *SpriteImpl, pscale float64) (mathf.Vec2, math
 			rect = cache
 		} else {
 			assetPath := engine.ToAssetPath(cs.path)
-			rect = engine.SyncGetBoundFromAlpha(assetPath)
+			if isSync {
+				rect = engine.SyncGetBoundFromAlpha(assetPath)
+			} else {
+				rect = resMgr.GetBoundFromAlpha(assetPath)
+			}
 		}
 		cachedBounds_[cs.path] = rect
 	}
@@ -288,6 +297,9 @@ func syncGetCostumeBoundByAlpha(p *SpriteImpl, pscale float64) (mathf.Vec2, math
 }
 
 func calcRenderRotation(p *SpriteImpl) (float64, float64) {
+	if p.rotationStyle == None {
+		return 0, 1.0
+	}
 	cs := p.costumes[p.costumeIndex_]
 	degree := p.Heading() + cs.faceRight
 	degree -= 90
@@ -317,15 +329,20 @@ func applyRenderOffset(p *SpriteImpl, cx, cy *float64) {
 	*cy = *cy + y
 }
 
-func registerAnimToEngine(spriteName string, animName string, animCfg *aniConfig, costumes []*costume, isCostumeSet bool) {
+func registerAnimToEngine(spriteName string, animName string, animCfg *aniConfig, costumes []*costume, isCostumeSet bool, applyCustumeOffset2Animation bool) {
+	// TODO(jiepengtan): here we should optimize the implementation, it's better to use json to map, avoid manually writing parsing code
 	sb := strings.Builder{}
 	from, to := animCfg.IFrameFrom, animCfg.IFrameTo
 	if from >= len(costumes) {
 		log.Panicf("animation key [%s] from [%d] is out of costumes length [%d]", animName, from, len(costumes))
 		return
 	}
+	splitTag := "|"
 	if isCostumeSet {
 		assetPath := engine.ToAssetPath(costumes[0].path)
+		if strings.Contains(assetPath, splitTag) {
+			panic("assetPath is invalid, should not contains " + splitTag + " " + costumes[0].path)
+		}
 		sb.WriteString(assetPath)
 		sb.WriteString(";")
 		ary := make([]int, 0)
@@ -348,7 +365,17 @@ func registerAnimToEngine(spriteName string, animName string, animCfg *aniConfig
 	} else {
 		for i := from; i <= to; i++ {
 			assetPath := engine.ToAssetPath(costumes[i].path)
+			if strings.Contains(assetPath, splitTag) {
+				panic("assetPath is invalid, should not contains " + splitTag + " " + costumes[i].path)
+			}
 			sb.WriteString(assetPath)
+			if applyCustumeOffset2Animation {
+				costume := costumes[i]
+				halfSize := mathf.Vec2.Mulf(costume.imageSize, 0.5)
+				sb.WriteString(splitTag + fmt.Sprintf("%f,%f", costume.center.X-halfSize.X, -costume.center.Y+halfSize.Y))
+			} else {
+				sb.WriteString(splitTag + fmt.Sprintf("%f,%f", 0.0, 0.0))
+			}
 			if i != to {
 				sb.WriteString(";")
 			}

@@ -64,6 +64,7 @@ type costume struct {
 	name          SpriteCostumeName
 	width, height int
 	center        mathf.Vec2 // center point
+	imageSize     mathf.Vec2
 
 	faceRight        float64
 	bitmapResolution int
@@ -83,6 +84,7 @@ func newCostumeWithSize(width, height int) *costume {
 	}
 	value.posX = 0
 	value.posY = 0
+	value.imageSize = mathf.NewVec2(float64(width), float64(height))
 	value.center.X = float64(value.width) / 2
 	value.center.Y = float64(value.height) / 2
 	value.altasUVRect = mathf.NewVec4(0, 0, 1, 1)
@@ -96,6 +98,7 @@ func newCostumeWith(name string, img *costumeSetImage, faceRight float64, i, bit
 		faceRight: faceRight, bitmapResolution: bitmapResolution,
 	}
 	imageSize := getCustomeAssetSize(img.path)
+	value.imageSize = imageSize
 	value.width = int(imageSize.X) / img.nx
 	value.height = int(imageSize.Y)
 	value.posX = i * value.width
@@ -129,6 +132,7 @@ func newCostume(base string, c *costumeConfig) *costume {
 		path:             path,
 	}
 	imageSize := getCustomeAssetSize(path)
+	value.imageSize = imageSize
 	value.width = int(imageSize.X)
 	value.height = int(imageSize.Y)
 	value.posX = 0
@@ -174,6 +178,8 @@ type baseObj struct {
 	// effects
 	greffUniforms map[EffectKind]float64 // graphic effects
 	hasShader     bool
+
+	isAnimating bool
 }
 
 func (p *baseObj) setLayer(layer int) { // dying: visible but can't be touched
@@ -186,6 +192,7 @@ func (p *baseObj) setLayer(layer int) { // dying: visible but can't be touched
 func (p *baseObj) setCustumeIndex(value int) {
 	p.costumeIndex_ = value
 	p.isCostumeDirty = true
+	p.isAnimating = false
 }
 
 func (p *baseObj) getProxy() *engine.Sprite {
@@ -194,8 +201,10 @@ func (p *baseObj) getProxy() *engine.Sprite {
 
 func (p *baseObj) initWith(base string, sprite *spriteConfig) {
 	if sprite.CostumeSet != nil {
+		engine.CheckAssetFile(path.Join(base, sprite.CostumeSet.Path))
 		initWithCS(p, base, sprite.CostumeSet)
 	} else if sprite.CostumeMPSet != nil {
+		engine.CheckAssetFile(path.Join(base, sprite.CostumeMPSet.Path))
 		initWithCMPS(p, base, sprite.CostumeMPSet)
 	} else {
 		panic("sprite.init should have one of costumes, costumeSet and costumeMPSet")
@@ -264,6 +273,7 @@ func addCostumeWith(p *baseObj, name SpriteCostumeName, img *costumeSetImage, fa
 func (p *baseObj) initBackdrops(base string, costumes []*backdropConfig, costumeIndex int) {
 	p.costumes = make([]*costume, len(costumes))
 	for i, c := range costumes {
+		engine.CheckAssetFile(path.Join(base, c.Path))
 		p.costumes[i] = newCostume(base, &c.costumeConfig) // has error how to fixed it
 	}
 	if costumeIndex >= len(costumes) || costumeIndex < 0 {
@@ -275,6 +285,7 @@ func (p *baseObj) initBackdrops(base string, costumes []*backdropConfig, costume
 func (p *baseObj) init(base string, costumes []*costumeConfig, costumeIndex int) {
 	p.costumes = make([]*costume, len(costumes))
 	for i, c := range costumes {
+		engine.CheckAssetFile(path.Join(base, c.Path))
 		p.costumes[i] = newCostume(base, c)
 	}
 	if costumeIndex >= len(costumes) || costumeIndex < 0 {
