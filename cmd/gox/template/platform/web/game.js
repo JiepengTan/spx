@@ -24,6 +24,7 @@ class GameApp {
                 this.onGameExit()
             },
         };
+        this.movie_path = config.movie_path || ""
         this.logicPromise = Promise.resolve();
         this.curProjectHash = ''
         // web worker mode
@@ -90,6 +91,9 @@ class GameApp {
             '--main-pack', this.persistentPath + "/" + this.packName,
             '--main-project-data', this.persistentPath + "/" + this.projectDataName,
         ];
+        if (this.movie_path != "") {
+            args.push('--write-movie', this.persistentPath + "/" + this.movie_path)
+        }
 
         this.logVerbose("RunGame ", args);
         if (this.game) {
@@ -138,7 +142,6 @@ class GameApp {
     }
 
 
-
     async stopGame(resolve, reject) {
         this.stopGameTask--
         if (this.game == null) {
@@ -154,6 +157,18 @@ class GameApp {
         }
         this.onProgress(1.0);
         this.game.requestQuit()
+        if(this.movie_path){
+            let fileName = `spx_${new Date().getTime()}.webm`;
+            this.downloadVideo(fileName)
+        } 
+    }
+
+    async downloadVideo(fileName) { 
+        Module.downloadRecordedVideo(fileName)
+    }
+
+    async getRecordedVideo() { 
+        Module.getRecordedVideo()
     }
 
     onGameExit() {
