@@ -19,12 +19,11 @@ import "C"
 
 import (
 	"fmt"
-	"reflect"
-	"unsafe"
-
 	. "github.com/goplus/spbase/mathf"
 	. "github.com/goplus/spx/v2/pkg/gdspx/internal/ffi"
 	. "github.com/goplus/spx/v2/pkg/gdspx/pkg/engine"
+	"reflect"
+	"unsafe"
 )
 
 func BindMgr(mgrs []IManager) {
