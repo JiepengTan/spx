@@ -7,13 +7,41 @@ import (
 )
 
 var (
-	gco *coroutine.Coroutines
+	gco   *coroutine.Coroutines
+	pgame any // pointer to the current game object
 )
+
+func SetGame(game any) {
+	pgame = game
+}
+
+func GetGame() any {
+	return pgame
+}
+
+func IsInCoroutine() bool {
+	if gco == nil {
+		return false
+	}
+	return gco.IsInCoroutine()
+}
+
+func IsAbortThreadError(err any) bool {
+	return coroutine.IsAbortThreadError(err)
+}
+
+func GetCoroutineOwner() any {
+	if IsInCoroutine() {
+		return gco.Current().Obj
+	}
+	return nil
+}
 
 func SetCoroutines(co *coroutine.Coroutines) {
 	gco = co
 	profiler.SetGco(co)
 }
+
 func Go(tobj coroutine.ThreadObj, fn func()) {
 	gco.CreateAndStart(false, tobj, func(me coroutine.Thread) int {
 		fn()

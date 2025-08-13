@@ -56,10 +56,97 @@ func (cmd *CmdTool) setupPaths(dstRelDir string) error {
 // PrepareEnv prepares the environment for the command
 func (pself *CmdTool) PrepareEnv(fsRelDir, dstDir string) {
 	util.CopyDir(pself.ProjectFS, fsRelDir, dstDir, false)
+
+	// Handle go.mod file adaptively
+	pself.adaptGoMod()
+
+	// create a temp go file to run go mod tidy
+	tempFile, _ := filepath.Abs(path.Join(pself.TargetDir, "xgo_autogen.go"))
+	if _, err := os.Stat(tempFile); os.IsNotExist(err) {
+		tmp := `
+package main
+import "github.com/goplus/spx/v2"
+func main() {print(&spx.Game{})}
+`
+		os.WriteFile(tempFile, []byte(tmp), 0644)
+	}
 	rawDir, _ := os.Getwd()
-	os.Chdir(pself.GoDir)
+	os.Chdir(pself.TargetDir)
 	util.RunGolang(nil, "mod", "tidy")
+	// delete temp go file
+	os.Remove(tempFile)
 	os.Chdir(rawDir)
+}
+
+// adaptGoMod adapts the go.mod file for different directory structures
+func (pself *CmdTool) adaptGoMod() {
+	// Check if go.mod exists in project root
+	rootGoModPath, _ := filepath.Abs(path.Join(pself.TargetDir, "go.mod"))
+	if _, err := os.Stat(rootGoModPath); os.IsNotExist(err) {
+		// No go.mod in root, create one
+		pself.createDefaultGoMod(pself.TargetDir, false)
+	}
+	// Check if we need to add replace directive for local spx development
+	absTargetDir, _ := filepath.Abs(pself.TargetDir)
+	spxPath := pself.findSpxRoot(absTargetDir)
+
+	if spxPath != "" {
+		// We're in spx development environment, add replace directive
+		content, err := os.ReadFile(rootGoModPath)
+		if err != nil {
+			return
+		}
+
+		strContent := string(content)
+		// Check if replace directive already exists
+		if !strings.Contains(strContent, "replace github.com/goplus/spx/v2") {
+			// Calculate relative path from project to spx root
+			relPath, err := filepath.Rel(absTargetDir, spxPath)
+			if err != nil {
+				return
+			}
+
+			// Add replace directive
+			replaceDir := fmt.Sprintf("\n\nreplace github.com/goplus/spx/v2 => %s\n", relPath)
+			strContent += replaceDir
+
+			// Write back the modified content
+			os.WriteFile(rootGoModPath, []byte(strContent), 0644)
+		}
+	}
+}
+
+// createDefaultGoMod ensures gop.mod exists if not in spx directory
+func (pself *CmdTool) createDefaultGoMod(dir string, forceWrite bool) {
+	// Not in spx directory, create gop.mod in target directory
+	gopModPath, _ := filepath.Abs(path.Join(dir, "go.mod"))
+	if _, err := os.Stat(gopModPath); os.IsNotExist(err) || forceWrite {
+		gopModContent := pself.GoModTemplate
+		os.WriteFile(gopModPath, []byte(gopModContent), 0644)
+	}
+}
+
+// findSpxRoot finds the spx root directory by looking for gop.mod
+func (pself *CmdTool) findSpxRoot(startDir string) string {
+	currentDir := filepath.Dir(startDir)
+	for {
+		gopModPath := path.Join(currentDir, "gop.mod")
+		if _, err := os.Stat(gopModPath); err == nil {
+			// Check if this gop.mod contains spx project definition
+			content, err := os.ReadFile(gopModPath)
+			if err == nil && strings.Contains(string(content), "github.com/goplus/spx/v2") {
+				return currentDir
+			}
+		}
+
+		parent := filepath.Dir(currentDir)
+		if parent == currentDir {
+			// Reached root directory
+			break
+		}
+		currentDir = parent
+	}
+	return ""
 }
 
 // SetupEnv sets up the environment for the command
@@ -250,6 +337,15 @@ func (pself *CmdTool) Clear() error {
 	if err := os.Remove(gitignorePath); err != nil && !os.IsNotExist(err) {
 		// Only return an error if the file exists and couldn't be removed
 		return fmt.Errorf("failed to remove gitignore file: %w", err)
+	}
+	// Remove go.mod
+	if err := os.RemoveAll(path.Join(pself.TargetDir, "go.sum")); err != nil {
+		return fmt.Errorf("failed to remove project directory: %w", err)
+	}
+
+	// Remove go.mod
+	if err := os.RemoveAll(path.Join(pself.TargetDir, "xgo_autogen.go")); err != nil {
+		return fmt.Errorf("failed to remove project directory: %w", err)
 	}
 
 	return nil

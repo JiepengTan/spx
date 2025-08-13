@@ -18,11 +18,20 @@ import (
 	"github.com/goplus/ixgo"
 	"github.com/goplus/ixgo/xgobuild"
 	"github.com/goplus/mod/modfile"
-	_ "github.com/goplus/reflectx/icall/icall8192"
+	_ "github.com/goplus/reflectx/icall/icall10240"
 	_ "github.com/goplus/spx/v2"
 	"github.com/goplus/spx/v2/cmd/igox/zipfs"
 	goxfs "github.com/goplus/spx/v2/fs"
 )
+
+var aiDescription string
+
+func setAIDescription(this js.Value, args []js.Value) any {
+	if len(args) > 0 {
+		aiDescription = args[0].String()
+	}
+	return nil
+}
 
 var aiInteractionAPIEndpoint string
 
@@ -149,6 +158,7 @@ func logErrorAndExit(msg string, err error) {
 }
 
 func main() {
+	js.Global().Set("setAIDescription", js.FuncOf(setAIDescription))
 	js.Global().Set("setAIInteractionAPIEndpoint", js.FuncOf(setAIInteractionAPIEndpoint))
 	js.Global().Set("setAIInteractionAPITokenProvider", js.FuncOf(setAIInteractionAPITokenProvider))
 	js.Global().Set("goLoadData", js.FuncOf(loadData))
@@ -221,15 +231,8 @@ func Gopt_Player_Gopx_OnCmd[T any](p *Player, handler func(cmd T) error) {
 		wasmtrans.WithEndpoint(aiInteractionAPIEndpoint),
 		wasmtrans.WithTokenProvider(aiInteractionAPITokenProvider),
 	))
-	ai.SetDefaultTaskRunner(func(task func()) {
-		var done bool
-		go func() {
-			task()
-			done = true
-		}()
-		for !done {
-			spxEngineWaitNextFrame()
-		}
+	ai.SetDefaultKnowledgeBase(map[string]any{
+		"AI-generated descriptive summary of the game world": aiDescription,
 	})
 
 	ctx.RegisterExternal("fmt.Print", func(frame *ixgo.Frame, a ...any) (n int, err error) {
@@ -260,6 +263,3 @@ func Gopt_Player_Gopx_OnCmd[T any](p *Player, handler func(cmd T) error) {
 		return
 	}
 }
-
-//go:linkname spxEngineWaitNextFrame github.com/goplus/spx/internal/engine.WaitNextFrame
-func spxEngineWaitNextFrame() float64
