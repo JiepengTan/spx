@@ -84,11 +84,12 @@ init:
 setup-dev: initdev
 initdev:
 	chmod +x ./pkg/gdspx/tools/*.sh && \
-	echo "===>step1/5: cmd" && make install && \
-	echo "===>step2/5: wasm" && make build-wasm && \
-	echo "===>step3/5: pce" && make build-editor && \
-	echo "===>step4/5: pc" && make build-desktop && \
-	echo "===>step5/5: web" && make build-web && \
+	echo "===>step1/6: cmd" && make install && \
+	echo "===>step2/6: download engine" && make download && \
+	echo "===>step3/6: wasm" && make build-wasm && \
+	echo "===>step4/6: pce" && make build-editor && \
+	echo "===>step5/6: pc" && make build-desktop && \
+	echo "===>step6/6: web" && make build-web && \
 	echo "===>initdev done,use `make run` to run demo"
 
 # Download engines 
