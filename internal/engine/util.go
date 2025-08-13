@@ -5,7 +5,12 @@ import (
 	"io"
 	"math"
 
+	"log"
+
 	. "github.com/goplus/spbase/mathf"
+
+	"github.com/goplus/spx/v2/fs"
+	"github.com/goplus/spx/v2/internal/engine/platform"
 	gdx "github.com/goplus/spx/v2/pkg/gdspx/pkg/engine"
 )
 

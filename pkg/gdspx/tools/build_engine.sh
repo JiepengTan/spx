@@ -208,6 +208,8 @@ download_editor() {
     cp -f $filename "$template_dir/web_dlink_release.zip"
     cp -f $filename "$template_dir/web_debug.zip"
     cp -f $filename "$template_dir/web_release.zip"
+    cp -f $filename "$template_dir/web_nothreads_debug.zip"
+    cp -f $filename "$template_dir/web_nothreads_release.zip"
     
     platform_name=$platform
     local binary_postfix=""
@@ -308,8 +310,6 @@ build_editor(){
         build_template "$PLATFORM"
         return 0
     fi
-    
-    echo target=editor dev_build=yes $COMMON_ARGS
     if [ "$OS" = "Windows_NT" ]; then
         scons target=editor dev_build=yes $COMMON_ARGS vsproj=yes 
     else

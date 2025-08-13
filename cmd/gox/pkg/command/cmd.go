@@ -127,11 +127,6 @@ func (cmd *CmdTool) RunCmd(projectName, fileSuffix, version string, fs embed.FS,
 		return err
 	}
 
-	// Handle init command
-	if cmd.Args.CmdName == "init" {
-		return nil
-	}
-
 	// Execute the command based on its type
 	return cmd.executeCommand()
 }

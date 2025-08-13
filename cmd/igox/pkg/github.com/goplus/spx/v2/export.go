@@ -21,6 +21,7 @@ func init() {
 			"flag":                              "flag",
 			"fmt":                               "fmt",
 			"github.com/goplus/spbase/mathf":    "mathf",
+			"github.com/realdream-ai/mathf":     "mathf",
 			"github.com/goplus/spx/v2/fs":       "fs",
 			"github.com/goplus/spx/v2/fs/asset": "asset",
 			"github.com/goplus/spx/v2/fs/zip":   "zip",

@@ -6,6 +6,7 @@ require github.com/goplus/spx/v2 v2.0.0-00010101000000-000000000000
 
 require (
 	github.com/goplus/spbase v0.1.0 // indirect
+	github.com/h2non/filetype v1.1.3 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	golang.org/x/image v0.23.0 // indirect
 	golang.org/x/mobile v0.0.0-20220518205345-8578da9835fd // indirect
