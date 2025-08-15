@@ -97,7 +97,7 @@ do_exportweb() {
      mkdir -p assets 
      echo '{"map":{"width":480,"height":360}}' > assets/index.json 
      echo "" > main.spx 
-     rm -rf ./project/.builds/*web 
+     rm -rf ./project/.builds/*web
      spx exportweb 
      cd ./project/.builds/web 
      rm -f game.zip 
@@ -153,7 +153,7 @@ do_prepare_export() {
 
 # Define a function for the exportpack functionality
 do_extra_webtemplate() {
-    local mode="${1:-default}"
+    local mode="${1:-normal}"
     do_prepare_export
     dstdir="$GOPATH/bin/gdspxrt"$TEMP_VERSION"_web"$mode
     echo "exporting web runtime..."
