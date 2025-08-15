@@ -183,7 +183,7 @@ exportpack:
 # Export web engine for builder
 export-web: exportweb
 exportweb:
-	cd ./cmd/gox/ && ./install.sh --web --opt && cd $(CURRENT_PATH) &&\
+	cd ./cmd/gox/ && ./install.sh --web && cd $(CURRENT_PATH) &&\
 	./pkg/gdspx/tools/make_util.sh exportweb && cd $(CURRENT_PATH) 
 
 # ============================================================================

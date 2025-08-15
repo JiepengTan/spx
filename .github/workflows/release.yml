@@ -85,6 +85,7 @@ jobs:
             echo "spx_web.zip not found"
             exit 1
           fi
+          ls -l
 
       - name: Upload Web Build Results
         uses: actions/upload-artifact@v4
