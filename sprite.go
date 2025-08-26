@@ -832,15 +832,14 @@ func (p *SpriteImpl) doTween(name SpriteAnimationName, ani *aniConfig) {
 	p.curTweenState = info
 	animName := info.Name
 	p.doAnimation(animName, ani, ani.IsLoop, ani.Speed, false)
-
-	if info.IsCanceled {
-		return
-	}
 	duration := info.Duration
 	timer := 0.0
 	pre_x, pre_y := p.x, p.y
 	pre_direction := p.direction
 	for timer < duration {
+		if info.IsCanceled {
+			return
+		}
 		timer += time.DeltaTime()
 		percent := mathf.Clamp01f(timer / duration)
 		switch info.AniType {
@@ -860,9 +859,6 @@ func (p *SpriteImpl) doTween(name SpriteAnimationName, ani *aniConfig) {
 			dst, _ := tools.GetFloat(info.To)
 			val := mathf.Lerpf(src, dst, percent)
 			p.setDirection(val, false)
-		}
-		if info.IsCanceled {
-			return
 		}
 		engine.WaitNextFrame()
 	}
