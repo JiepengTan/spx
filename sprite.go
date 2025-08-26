@@ -611,7 +611,7 @@ func (p *SpriteImpl) Die() {
 
 	p.Stop(OtherScriptsInSprite)
 	if ani, ok := p.animations[aniName]; ok {
-		p.goAnimate(aniName, ani)
+		p.doAnimation(aniName, ani, false, 1, true)
 	}
 	p.Destroy()
 }
@@ -1199,15 +1199,15 @@ func (p *SpriteImpl) Glide__0(x, y float64, secs float64) {
 	x0, y0 := p.getXY()
 	from := mathf.NewVec2(x0, y0)
 	to := mathf.NewVec2(x, y)
-	ani := &aniConfig{
+	aniCopy := aniConfig{
 		Duration: secs,
 		From:     &from,
 		To:       &to,
 		AniType:  aniTypeGlide,
 	}
-	ani.IsLoop = true
+	aniCopy.IsLoop = true
 	animName := p.getStateAnimName(StateGlide)
-	p.goAnimate(animName, ani)
+	p.goAnimate(animName, &aniCopy)
 }
 
 func (p *SpriteImpl) goGlide(obj any, secs float64) {
