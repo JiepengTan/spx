@@ -230,6 +230,7 @@ type SpriteImpl struct {
 
 	gamer               reflect.Value
 	curAnimState        *animState
+	curTweenState       *animState
 	defaultCostumeIndex int
 
 	triggerMask   int64
@@ -469,6 +470,8 @@ func cloneSprite(out reflect.Value, outPtr Sprite, in reflect.Value, v specsp) *
 		runMain(outPtr.Main)
 	}
 	dest.syncSprite = nil
+	dest.curAnimState = nil
+	dest.curTweenState = nil
 	engine.WaitMainThread(func() {
 		dest.syncCheckInitProxy()
 	})
@@ -786,14 +789,14 @@ func (p *SpriteImpl) doAnimation(animName SpriteAnimationName, ani *aniConfig, l
 	if !p.hasAnim(animName) {
 		return
 	}
-	if p.curAnimState != nil {
-		p.curAnimState.IsCanceled = true
+	if p.curTweenState != nil {
+		p.curTweenState.IsCanceled = true
 	}
-	p.curAnimState = &animState{
+	p.curTweenState = &animState{
 		IsCanceled: false,
 		Name:       animName,
 	}
-	info := p.curAnimState
+	info := p.curTweenState
 
 	p.isCostumeDirty = false
 	spriteMgr.PlayAnim(p.syncSprite.GetId(), animName, speed, loop, false)
@@ -828,57 +831,40 @@ func (p *SpriteImpl) goAnimate(name SpriteAnimationName, ani *aniConfig) {
 	}
 	p.curAnimState = info
 	animName := info.Name
-	if !p.hasAnim(animName) {
-		return
-	}
-	if info.OnStart != nil && info.OnStart.Play != "" {
-		p.Play__1(info.OnStart.Play)
-	}
+	p.doAnimation(animName, ani, ani.IsLoop, ani.Speed, false)
+
 	if info.IsCanceled {
 		return
 	}
-	p.isCostumeDirty = false
-	spriteMgr.PlayAnim(p.syncSprite.GetId(), animName, info.Speed, info.IsLoop, false)
-	if info.AniType == aniTypeFrame {
-		p.isAnimating = true
-		for spriteMgr.IsPlayingAnim(p.syncSprite.GetId()) {
-			if info.IsCanceled {
-				break
-			}
-			engine.WaitNextFrame()
+	duration := info.Duration
+	timer := 0.0
+	pre_x, pre_y := p.x, p.y
+	pre_direction := p.direction
+	for timer < duration {
+		timer += time.DeltaTime()
+		percent := mathf.Clamp01f(timer / duration)
+		switch info.AniType {
+		case aniTypeMove:
+			src, _ := tools.GetFloat(info.From)
+			dst, _ := tools.GetFloat(info.To)
+			val := mathf.Lerpf(src, dst, percent)
+			sin, cos := math.Sincos(toRadian(pre_direction))
+			p.doMoveToForAnim(pre_x+val*sin, pre_y+val*cos)
+		case aniTypeGlide:
+			src, _ := tools.GetVec2(info.From)
+			dst, _ := tools.GetVec2(info.To)
+			val := src.Lerp(dst, percent)
+			p.SetXYpos(val.X, val.Y)
+		case aniTypeTurn:
+			src, _ := tools.GetFloat(info.From)
+			dst, _ := tools.GetFloat(info.To)
+			val := mathf.Lerpf(src, dst, percent)
+			p.setDirection(val, false)
 		}
-		p.isAnimating = false
-	} else {
-		duration := info.Duration
-		timer := 0.0
-		pre_x, pre_y := p.x, p.y
-		pre_direction := p.direction
-		for timer < duration {
-			timer += time.DeltaTime()
-			percent := mathf.Clamp01f(timer / duration)
-			switch info.AniType {
-			case aniTypeMove:
-				src, _ := tools.GetFloat(info.From)
-				dst, _ := tools.GetFloat(info.To)
-				val := mathf.Lerpf(src, dst, percent)
-				sin, cos := math.Sincos(toRadian(pre_direction))
-				p.doMoveToForAnim(pre_x+val*sin, pre_y+val*cos)
-			case aniTypeGlide:
-				src, _ := tools.GetVec2(info.From)
-				dst, _ := tools.GetVec2(info.To)
-				val := src.Lerp(dst, percent)
-				p.SetXYpos(val.X, val.Y)
-			case aniTypeTurn:
-				src, _ := tools.GetFloat(info.From)
-				dst, _ := tools.GetFloat(info.To)
-				val := mathf.Lerpf(src, dst, percent)
-				p.setDirection(val, false)
-			}
-			if info.IsCanceled {
-				break
-			}
-			engine.WaitNextFrame()
+		if info.IsCanceled {
+			break
 		}
+		engine.WaitNextFrame()
 	}
 	if !info.IsCanceled {
 		isNeedPlayDefault := false
