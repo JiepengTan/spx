@@ -767,18 +767,10 @@ func (p *SpriteImpl) hasAnim(animName string) bool {
 }
 
 type animState struct {
-	AniType  aniTypeEnum
-	Name     string
-	Duration float64
-	From     any
-	To       any
-	Speed    float64
-	IsLoop   bool
+	AniType aniTypeEnum
+	Name    string
 
-	OnStart      *actionConfig
-	OnPlay       *actionConfig
-	IsCanceled   bool
-	IsKeepOnStop bool
+	IsCanceled bool
 }
 
 func (p *SpriteImpl) doAnimation(animName SpriteAnimationName, ani *aniConfig, loop bool, speed float64, isBlocking bool) {
@@ -793,6 +785,7 @@ func (p *SpriteImpl) doAnimation(animName SpriteAnimationName, ani *aniConfig, l
 		p.curAnimState.IsCanceled = true
 	}
 	p.curAnimState = &animState{
+		AniType:    aniTypeFrame,
 		IsCanceled: false,
 		Name:       animName,
 	}
@@ -814,17 +807,9 @@ func (p *SpriteImpl) doAnimation(animName SpriteAnimationName, ani *aniConfig, l
 
 func (p *SpriteImpl) doTween(name SpriteAnimationName, ani *aniConfig) {
 	info := &animState{
-		AniType:      ani.AniType,
-		Name:         name,
-		Duration:     ani.Duration,
-		From:         ani.From,
-		To:           ani.To,
-		Speed:        ani.Speed,
-		IsLoop:       ani.IsLoop,
-		OnStart:      ani.OnStart,
-		OnPlay:       ani.OnPlay,
-		IsKeepOnStop: ani.IsKeepOnStop,
-		IsCanceled:   false,
+		AniType:    ani.AniType,
+		Name:       name,
+		IsCanceled: false,
 	}
 	if p.curTweenState != nil {
 		p.curTweenState.IsCanceled = true
@@ -832,7 +817,7 @@ func (p *SpriteImpl) doTween(name SpriteAnimationName, ani *aniConfig) {
 	p.curTweenState = info
 	animName := info.Name
 	p.doAnimation(animName, ani, ani.IsLoop, ani.Speed, false)
-	duration := info.Duration
+	duration := ani.Duration
 	timer := 0.0
 	pre_x, pre_y := p.x, p.y
 	pre_direction := p.direction
@@ -842,27 +827,27 @@ func (p *SpriteImpl) doTween(name SpriteAnimationName, ani *aniConfig) {
 		}
 		timer += time.DeltaTime()
 		percent := mathf.Clamp01f(timer / duration)
-		switch info.AniType {
+		switch ani.AniType {
 		case aniTypeMove:
-			src, _ := tools.GetFloat(info.From)
-			dst, _ := tools.GetFloat(info.To)
+			src, _ := tools.GetFloat(ani.From)
+			dst, _ := tools.GetFloat(ani.To)
 			val := mathf.Lerpf(src, dst, percent)
 			sin, cos := math.Sincos(toRadian(pre_direction))
 			p.doMoveToForAnim(pre_x+val*sin, pre_y+val*cos)
 		case aniTypeGlide:
-			src, _ := tools.GetVec2(info.From)
-			dst, _ := tools.GetVec2(info.To)
+			src, _ := tools.GetVec2(ani.From)
+			dst, _ := tools.GetVec2(ani.To)
 			val := src.Lerp(dst, percent)
 			p.SetXYpos(val.X, val.Y)
 		case aniTypeTurn:
-			src, _ := tools.GetFloat(info.From)
-			dst, _ := tools.GetFloat(info.To)
+			src, _ := tools.GetFloat(ani.From)
+			dst, _ := tools.GetFloat(ani.To)
 			val := mathf.Lerpf(src, dst, percent)
 			p.setDirection(val, false)
 		}
 		engine.WaitNextFrame()
 	}
-	if animName != p.defaultAnimation && p.isVisible && !info.IsKeepOnStop && !p.isDying {
+	if animName != p.defaultAnimation && p.isVisible && !ani.IsKeepOnStop && !p.isDying {
 		p.playDefaultAnim()
 	}
 }
@@ -1168,15 +1153,15 @@ func (p *SpriteImpl) Glide__0(x, y float64, secs float64) {
 	x0, y0 := p.getXY()
 	from := mathf.NewVec2(x0, y0)
 	to := mathf.NewVec2(x, y)
-	aniCopy := aniConfig{
+	anicopy := aniConfig{
 		Duration: secs,
 		From:     &from,
 		To:       &to,
 		AniType:  aniTypeGlide,
 	}
-	aniCopy.IsLoop = true
+	anicopy.IsLoop = true
 	animName := p.getStateAnimName(StateGlide)
-	p.doTween(animName, &aniCopy)
+	p.doTween(animName, &anicopy)
 }
 
 func (p *SpriteImpl) goGlide(obj any, secs float64) {
