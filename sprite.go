@@ -779,9 +779,6 @@ type animState struct {
 }
 
 func (p *SpriteImpl) goAnimate(name SpriteAnimationName, ani *aniConfig) {
-	p.goAnimateInternal(name, ani, true)
-}
-func (p *SpriteImpl) goAnimateInternal(name SpriteAnimationName, ani *aniConfig, isBlocking bool) *animState {
 	info := &animState{
 		AniType:      ani.AniType,
 		Name:         name,
@@ -799,14 +796,38 @@ func (p *SpriteImpl) goAnimateInternal(name SpriteAnimationName, ani *aniConfig,
 		p.curAnimState.IsCanceled = true
 	}
 	p.curAnimState = info
-	if isBlocking {
-		doAnimation(p, info)
-	} else {
-		engine.Go(p.pthis, func() {
-			doAnimation(p, info)
-		})
+	doAnimation(p, info)
+}
+
+func (p *SpriteImpl) doAnimation(animName SpriteAnimationName, ani *aniConfig, loop bool, speed float64, isBlocking bool) {
+	if ani.OnStart != nil && ani.OnStart.Play != "" {
+		p.Play__1(ani.OnStart.Play)
 	}
-	return info
+
+	if !p.hasAnim(animName) {
+		return
+	}
+	if p.curAnimState != nil {
+		p.curAnimState.IsCanceled = true
+	}
+	p.curAnimState = &animState{
+		IsCanceled: false,
+		Name:       animName,
+	}
+	info := p.curAnimState
+
+	p.isCostumeDirty = false
+	spriteMgr.PlayAnim(p.syncSprite.GetId(), animName, speed, loop, false)
+	if isBlocking {
+		p.isAnimating = true
+		for spriteMgr.IsPlayingAnim(p.syncSprite.GetId()) {
+			if info.IsCanceled {
+				break
+			}
+			engine.WaitNextFrame()
+		}
+		p.isAnimating = false
+	}
 }
 
 func doAnimation(p *SpriteImpl, info *animState) {
@@ -886,7 +907,7 @@ func (p *SpriteImpl) Animate__1(name SpriteAnimationName, loop bool) {
 		log.Println("==> Animation", name)
 	}
 	if ani, ok := p.animations[name]; ok {
-		p.goAnimateInternal(name, ani, false)
+		p.doAnimation(name, ani, loop, 1, false)
 	} else {
 		log.Println("Animation not found:", name)
 	}
@@ -897,7 +918,7 @@ func (p *SpriteImpl) AnimateAndWait(name SpriteAnimationName) {
 		log.Println("==> AnimateAndWait", name)
 	}
 	if ani, ok := p.animations[name]; ok {
-		p.goAnimateInternal(name, ani, true)
+		p.doAnimation(name, ani, false, 1, true)
 	} else {
 		log.Println("Animation not found:", name)
 	}
@@ -917,7 +938,7 @@ func (p *SpriteImpl) StopAnimation() {
 
 	// play default animation async
 	if ani, ok := p.animations[defaultAnim]; ok {
-		p.goAnimateInternal(defaultAnim, ani, false)
+		p.doAnimation(defaultAnim, ani, true, 1, false)
 	}
 }
 
@@ -1103,7 +1124,7 @@ func (p *SpriteImpl) playDefaultAnim() {
 			isPlayAnim = true
 			anicopy := *ani
 			anicopy.IsLoop = true
-			p.goAnimateInternal(animName, &anicopy, false)
+			spriteMgr.PlayAnim(p.syncSprite.GetId(), animName, 1, true, false)
 		}
 		if !isPlayAnim {
 			p.goSetCostume(p.defaultCostumeIndex)
