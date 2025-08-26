@@ -778,27 +778,6 @@ type animState struct {
 	IsKeepOnStop bool
 }
 
-func (p *SpriteImpl) goAnimate(name SpriteAnimationName, ani *aniConfig) {
-	info := &animState{
-		AniType:      ani.AniType,
-		Name:         name,
-		Duration:     ani.Duration,
-		From:         ani.From,
-		To:           ani.To,
-		Speed:        ani.Speed,
-		IsLoop:       ani.IsLoop,
-		OnStart:      ani.OnStart,
-		OnPlay:       ani.OnPlay,
-		IsKeepOnStop: ani.IsKeepOnStop,
-		IsCanceled:   false,
-	}
-	if p.curAnimState != nil {
-		p.curAnimState.IsCanceled = true
-	}
-	p.curAnimState = info
-	doAnimation(p, info)
-}
-
 func (p *SpriteImpl) doAnimation(animName SpriteAnimationName, ani *aniConfig, loop bool, speed float64, isBlocking bool) {
 	if ani.OnStart != nil && ani.OnStart.Play != "" {
 		p.Play__1(ani.OnStart.Play)
@@ -830,7 +809,24 @@ func (p *SpriteImpl) doAnimation(animName SpriteAnimationName, ani *aniConfig, l
 	}
 }
 
-func doAnimation(p *SpriteImpl, info *animState) {
+func (p *SpriteImpl) goAnimate(name SpriteAnimationName, ani *aniConfig) {
+	info := &animState{
+		AniType:      ani.AniType,
+		Name:         name,
+		Duration:     ani.Duration,
+		From:         ani.From,
+		To:           ani.To,
+		Speed:        ani.Speed,
+		IsLoop:       ani.IsLoop,
+		OnStart:      ani.OnStart,
+		OnPlay:       ani.OnPlay,
+		IsKeepOnStop: ani.IsKeepOnStop,
+		IsCanceled:   false,
+	}
+	if p.curAnimState != nil {
+		p.curAnimState.IsCanceled = true
+	}
+	p.curAnimState = info
 	animName := info.Name
 	if !p.hasAnim(animName) {
 		return
