@@ -862,21 +862,12 @@ func (p *SpriteImpl) doTween(name SpriteAnimationName, ani *aniConfig) {
 			p.setDirection(val, false)
 		}
 		if info.IsCanceled {
-			break
+			return
 		}
 		engine.WaitNextFrame()
 	}
-	if !info.IsCanceled {
-		isNeedPlayDefault := false
-		if animName != p.defaultAnimation && p.isVisible && !info.IsKeepOnStop {
-			dieAnimName := p.getStateAnimName(StateDie)
-			if animName != dieAnimName {
-				isNeedPlayDefault = true
-			}
-		}
-		if isNeedPlayDefault && !p.isDying {
-			p.playDefaultAnim()
-		}
+	if animName != p.defaultAnimation && p.isVisible && !info.IsKeepOnStop && !p.isDying {
+		p.playDefaultAnim()
 	}
 }
 
