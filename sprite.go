@@ -819,31 +819,36 @@ func (p *SpriteImpl) doTween(name SpriteAnimationName, ani *aniConfig) {
 	p.doAnimation(animName, ani, ani.IsLoop, ani.Speed, false)
 	duration := ani.Duration
 	timer := 0.0
-	pre_x, pre_y := p.x, p.y
-	pre_direction := p.direction
+	predirection := p.direction
+	dirSin, dirCos := math.Sincos(toRadian(predirection))
+	prePercent := 0.0
 	for timer < duration {
 		if info.IsCanceled {
 			return
 		}
 		timer += time.DeltaTime()
 		percent := mathf.Clamp01f(timer / duration)
+		deltaPercent := percent - prePercent
+		prePercent = percent
 		switch ani.AniType {
 		case aniTypeMove:
 			src, _ := tools.GetFloat(ani.From)
 			dst, _ := tools.GetFloat(ani.To)
-			val := mathf.Lerpf(src, dst, percent)
-			sin, cos := math.Sincos(toRadian(pre_direction))
-			p.doMoveToForAnim(pre_x+val*sin, pre_y+val*cos)
+			diff := dst - src
+			val := diff * deltaPercent
+			p.ChangeXYpos(val*dirSin, val*dirCos)
 		case aniTypeGlide:
 			src, _ := tools.GetVec2(ani.From)
 			dst, _ := tools.GetVec2(ani.To)
-			val := src.Lerp(dst, percent)
-			p.SetXYpos(val.X, val.Y)
+			diff := dst.Sub(src)
+			val := diff.Mulf(deltaPercent)
+			p.ChangeXYpos(val.X, val.Y)
 		case aniTypeTurn:
 			src, _ := tools.GetFloat(ani.From)
 			dst, _ := tools.GetFloat(ani.To)
-			val := mathf.Lerpf(src, dst, percent)
-			p.setDirection(val, false)
+			diff := dst - src
+			val := diff * deltaPercent
+			p.ChangeHeading(val)
 		}
 		engine.WaitNextFrame()
 	}
