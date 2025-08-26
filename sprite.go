@@ -847,9 +847,10 @@ func (p *SpriteImpl) doTween(name SpriteAnimationName, ani *aniConfig) {
 		}
 		engine.WaitNextFrame()
 	}
-	if animName != p.defaultAnimation && p.isVisible && !ani.IsKeepOnStop && !p.isDying {
+	if animName != p.defaultAnimation && !ani.IsKeepOnStop {
 		p.playDefaultAnim()
 	}
+	p.curTweenState = nil
 }
 
 func (p *SpriteImpl) Animate__0(name SpriteAnimationName) {
@@ -1071,16 +1072,31 @@ func (p *SpriteImpl) doStep(step float64, speed float64, animation SpriteAnimati
 	p.goMoveForward(step)
 }
 func (p *SpriteImpl) playDefaultAnim() {
-	animName := p.defaultAnimation
-	if p.isVisible {
-		isPlayAnim := false
-		if ani, ok := p.animations[animName]; ok {
-			isPlayAnim = true
-			anicopy := *ani
-			anicopy.IsLoop = true
-			spriteMgr.PlayAnim(p.syncSprite.GetId(), animName, 1, true, false)
+	animName := ""
+	if p.curTweenState == nil {
+		animName = p.defaultAnimation
+	} else {
+		switch p.curAnimState.AniType {
+		case aniTypeMove:
+			animName = p.getStateAnimName(StateStep)
+			break
+		case aniTypeTurn:
+			animName = p.getStateAnimName(StateTurn)
+			break
+		case aniTypeGlide:
+			animName = p.getStateAnimName(StateGlide)
+			break
 		}
-		if !isPlayAnim {
+	}
+
+	if animName == "" {
+		animName = p.defaultAnimation
+	}
+
+	if p.isVisible && !p.isDying {
+		if _, ok := p.animations[animName]; ok {
+			spriteMgr.PlayAnim(p.syncSprite.GetId(), animName, 1, true, false)
+		} else {
 			p.goSetCostume(p.defaultCostumeIndex)
 		}
 	}
