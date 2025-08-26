@@ -789,14 +789,14 @@ func (p *SpriteImpl) doAnimation(animName SpriteAnimationName, ani *aniConfig, l
 	if !p.hasAnim(animName) {
 		return
 	}
-	if p.curTweenState != nil {
-		p.curTweenState.IsCanceled = true
+	if p.curAnimState != nil {
+		p.curAnimState.IsCanceled = true
 	}
-	p.curTweenState = &animState{
+	p.curAnimState = &animState{
 		IsCanceled: false,
 		Name:       animName,
 	}
-	info := p.curTweenState
+	info := p.curAnimState
 
 	p.isCostumeDirty = false
 	spriteMgr.PlayAnim(p.syncSprite.GetId(), animName, speed, loop, false)
@@ -812,7 +812,7 @@ func (p *SpriteImpl) doAnimation(animName SpriteAnimationName, ani *aniConfig, l
 	}
 }
 
-func (p *SpriteImpl) goAnimate(name SpriteAnimationName, ani *aniConfig) {
+func (p *SpriteImpl) doTween(name SpriteAnimationName, ani *aniConfig) {
 	info := &animState{
 		AniType:      ani.AniType,
 		Name:         name,
@@ -826,10 +826,10 @@ func (p *SpriteImpl) goAnimate(name SpriteAnimationName, ani *aniConfig) {
 		IsKeepOnStop: ani.IsKeepOnStop,
 		IsCanceled:   false,
 	}
-	if p.curAnimState != nil {
-		p.curAnimState.IsCanceled = true
+	if p.curTweenState != nil {
+		p.curTweenState.IsCanceled = true
 	}
-	p.curAnimState = info
+	p.curTweenState = info
 	animName := info.Name
 	p.doAnimation(animName, ani, ani.IsLoop, ani.Speed, false)
 
@@ -1093,7 +1093,7 @@ func (p *SpriteImpl) doStep(step float64, speed float64, animation SpriteAnimati
 		anicopy.Duration = math.Abs(step) * ani.StepDuration / speed
 		anicopy.IsLoop = true
 		anicopy.Speed = speed
-		p.goAnimate(animation, &anicopy)
+		p.doTween(animation, &anicopy)
 		return
 	}
 	p.goMoveForward(step)
@@ -1189,7 +1189,7 @@ func (p *SpriteImpl) Glide__0(x, y float64, secs float64) {
 	}
 	aniCopy.IsLoop = true
 	animName := p.getStateAnimName(StateGlide)
-	p.goAnimate(animName, &aniCopy)
+	p.doTween(animName, &aniCopy)
 }
 
 func (p *SpriteImpl) goGlide(obj any, secs float64) {
@@ -1344,7 +1344,7 @@ func (p *SpriteImpl) doTurn(val Direction, speed float64, animation SpriteAnimat
 		anicopy.AniType = aniTypeTurn
 		anicopy.IsLoop = true
 		anicopy.Speed = speed
-		p.goAnimate(animation, &anicopy)
+		p.doTween(animation, &anicopy)
 		return
 	}
 	p.setDirection(delta, true)
@@ -1385,7 +1385,7 @@ func (p *SpriteImpl) doTurnTo(obj any, speed float64, animation SpriteAnimationN
 		anicopy.AniType = aniTypeTurn
 		anicopy.IsLoop = true
 		anicopy.Speed = speed
-		p.goAnimate(animation, &anicopy)
+		p.doTween(animation, &anicopy)
 		return
 	}
 	if p.setDirection(angle, false) && debugInstr {
