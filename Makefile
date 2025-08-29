@@ -167,7 +167,7 @@ export-pack: ## Export runtime pck file
 	./pkg/gdspx/tools/make_util.sh exportpack && cd $(CURRENT_PATH)
 
 export-web: ## Export web engine
-	cd ./cmd/gox && ./install.sh --web --opt && cd $(CURRENT_PATH) \
+	cd ./cmd/gox && ./install.sh --web && cd $(CURRENT_PATH) && \
 	./pkg/gdspx/tools/make_util.sh exportweb && cd $(CURRENT_PATH)
 
 stop: ## Stop running processes
