@@ -900,6 +900,7 @@ func (p *Game) logicLoop(me coroutine.Thread) int {
 	tempAudios := []string{}
 	tempAnimations := []string{}
 	for {
+		p.Camera.onUpdate(gtime.DeltaTime())
 		tempItems := p.getTempShapes()
 		for _, item := range tempItems {
 			if result, ok := item.(interface{ onUpdate(float64) }); ok {

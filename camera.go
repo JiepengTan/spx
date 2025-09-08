@@ -30,6 +30,15 @@ type Camera struct {
 func (c *Camera) init(g *Game) {
 	c.g = g
 }
+func (c *Camera) onUpdate(delta float64) {
+	if c.on_ == nil {
+		return
+	}
+	val, pos := c.getFollowPos()
+	if val {
+		c.SetXYpos(pos.X, pos.Y)
+	}
+}
 func (c *Camera) SetCameraZoom(scale float64) {
 	cameraMgr.SetCameraZoom(mathf.NewVec2(scale, scale))
 }
@@ -56,8 +65,12 @@ func (c *Camera) ChangeXYpos(x float64, y float64) {
 func (c *Camera) getFollowPos() (bool, mathf.Vec2) {
 	if c.on_ != nil {
 		switch v := c.on_.(type) {
-		case SpriteImpl:
+		case *SpriteImpl:
 			return true, mathf.NewVec2(v.x, v.y)
+		case specialObj:
+			if c.on_ == Mouse {
+				return true, c.g.mousePos
+			}
 		}
 	}
 	return false, mathf.NewVec2(0, 0)
@@ -76,6 +89,7 @@ func (c *Camera) on(obj any) {
 	case nil:
 	case Sprite:
 		obj = spriteOf(v)
+		println("Camera.On: obj -", obj.(*SpriteImpl).name)
 	case specialObj:
 		if v != Mouse {
 			log.Println("Camera.On: not support -", v)
