@@ -28,7 +28,8 @@ func SyncSetCameraPosition(pos Vec2) {
 }
 
 func SyncScreenToWorld(pos Vec2) Vec2 {
-	camPos := gdx.CameraMgr.GetCameraPosition()
+	zoom := gdx.CameraMgr.GetCameraZoom()
+	camPos := gdx.CameraMgr.GetCameraPosition().Mul(zoom)
 	camPos.Y *= -1
 	return pos.Add(camPos)
 }
