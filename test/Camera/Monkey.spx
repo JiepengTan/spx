@@ -14,12 +14,12 @@ onStart => {
 
 onKey KeySpace, => {
 	println "onKeySpace"
-	Camera.on Monkey
+	Camera.Follow Monkey
 }
 
 onKey KeyEnter, => {
 	println "onKeyEnter"
-	Camera.on "Monkey"
+	Camera.Follow "Monkey"
 }
 
 onKey KeyB, => {
