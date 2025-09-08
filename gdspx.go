@@ -120,7 +120,6 @@ func (p *Game) syncUpdateCamera() {
 func (p *Game) syncUpdateInput() {
 	pos := engine.SyncGetMousePos()
 	wpos := engine.SyncScreenToWorld(pos)
-	println("mouse pos", pos.String(), "wpos ", wpos.String())
 	p.mousePos = wpos
 	p.mousePos = p.mousePos.Divf(p.windowScale)
 }
