@@ -539,6 +539,7 @@ func (p *Game) loadIndex(g reflect.Value, proj *projConfig) (err error) {
 	platformMgr.SetWindowSize(int64(float64(p.windowWidth_)*p.windowScale), int64(float64(p.windowHeight_)*p.windowScale))
 	println("p.windowscale ", p.windowScale)
 	p.Camera.init(p)
+	engine.SetWindowScale(p.windowScale)
 	ui.SetWindowScale(p.windowScale)
 
 	// setup syncSprite's property

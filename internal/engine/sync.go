@@ -5,6 +5,14 @@ import (
 	gdx "github.com/goplus/spx/v2/pkg/gdspx/pkg/engine"
 )
 
+var (
+	windowScale float64
+)
+
+func SetWindowScale(scale float64) {
+	windowScale = scale
+}
+
 // !!!Warning these method can only be called in main thread
 func SyncNewSprite(obj any) *Sprite {
 	syncSprite := gdx.CreateEmptySprite[Sprite]()
@@ -28,16 +36,17 @@ func SyncSetCameraPosition(pos Vec2) {
 }
 
 func SyncScreenToWorld(pos Vec2) Vec2 {
-	zoom := gdx.CameraMgr.GetCameraZoom()
-	camPos := gdx.CameraMgr.GetCameraPosition().Mul(zoom)
+	zoom := gdx.CameraMgr.GetCameraZoom().X
+	camPos := gdx.CameraMgr.GetCameraPosition()
 	camPos.Y *= -1
-	return pos.Add(camPos)
+	return pos.Divf(zoom / windowScale).Add(camPos.Mulf(windowScale))
 }
 
 func SyncWorldToScreen(pos Vec2) Vec2 {
+	zoom := gdx.CameraMgr.GetCameraZoom().X
 	camPos := gdx.CameraMgr.GetCameraPosition()
 	camPos.Y *= -1
-	return pos.Sub(camPos)
+	return pos.Sub(camPos.Mulf(windowScale)).Mulf(zoom / windowScale)
 }
 
 func SyncGetBoundFromAlpha(assetPath string) Rect2 {
