@@ -140,10 +140,10 @@ download_engine() {
 prepare_env() {
     setup_global_variables
 
-    if command -v python3 &>/dev/null; then
-        PYTHON=python3
-    elif command -v python &>/dev/null; then
+    if command -v python &>/dev/null; then
         PYTHON=python
+    elif command -v python3 &>/dev/null; then
+        PYTHON=python3
     else
         echo "Neither python3 nor python is installed."
         exit 1
@@ -225,6 +225,56 @@ ensure_jdk() {
     exit 1
 }
 
+# Function to install emsdk on Windows with SSL fix
+install_emsdk_windows() {
+    local version=$1
+    
+    # Set environment variables to disable SSL verification
+    export SSL_CERT_FILE=""
+    export REQUESTS_CA_BUNDLE=""
+    export CURL_CA_BUNDLE=""
+    export PYTHONHTTPSVERIFY=0
+    
+    # Use SSL-disabled wrapper if available, otherwise create and use it
+    if [ ! -f "emsdk_no_ssl.py" ]; then
+        # Create wrapper that disables SSL verification
+        cat > emsdk_no_ssl.py << 'EOF'
+import ssl
+import sys
+import os
+
+# Disable SSL certificate verification globally
+ssl._create_default_https_context = ssl._create_unverified_context
+
+# Set environment variables to disable SSL
+os.environ['SSL_CERT_FILE'] = ''
+os.environ['REQUESTS_CA_BUNDLE'] = ''
+os.environ['CURL_CA_BUNDLE'] = ''
+os.environ['PYTHONHTTPSVERIFY'] = '0'
+
+# Run the Python emsdk script directly
+sys.argv[0] = 'emsdk.py'
+exec(open('emsdk.py').read())
+EOF
+    fi
+    
+    # Install with SSL verification disabled
+    python emsdk_no_ssl.py install "$version"
+}
+
+# Function to install emsdk version (Windows vs other platforms)
+install_emsdk_version() {
+    local version=$1
+    
+    if [[ "$(uname -o 2>/dev/null)" == "Msys" ]] || [[ "$(uname -o 2>/dev/null)" == "Cygwin" ]]; then
+        # Windows: use SSL fix
+        install_emsdk_windows "$version"
+    else
+        # Linux/macOS: use regular install
+        ./emsdk install "$version"
+    fi
+}
+
 # Function to setup emsdk for web builds
 ensure_emsdk() {
     local EMSDK_VERSION="3.1.62"
@@ -237,7 +287,7 @@ ensure_emsdk() {
         EMSDK_DIR="$HOME/Library/Application Support/emsdk"
     elif [[ "$(uname -o 2>/dev/null)" == "Msys" ]] || [[ "$(uname -o 2>/dev/null)" == "Cygwin" ]]; then
         # Windows (Git Bash, Cygwin, MSYS)
-        EMSDK_DIR="$APPDATA/emsdk"
+        EMSDK_DIR="$HOME/.local/share/emsdk"
     else
         echo "Unsupported OS for emsdk installation"
         exit 1
@@ -245,20 +295,20 @@ ensure_emsdk() {
     
     echo "Using emsdk installation directory: $EMSDK_DIR"
     
-    # Create the directory if it doesn't exist
-    mkdir -p "$EMSDK_DIR"
-    
+    # Create the directory if it doesn't exist    
     # Check if emsdk is already installed in the global location
-    if [ ! -d "$EMSDK_DIR/emsdk" ]; then
+    if [ ! -d "$EMSDK_DIR" ]; then
         echo "emsdk not found in global location, installing emsdk..."
+        mkdir -p "$(dirname "$EMSDK_DIR")"
+        git clone https://github.com/emscripten-core/emsdk.git "$EMSDK_DIR"
         cd "$EMSDK_DIR" || exit
-        git clone git@github.com:emscripten-core/emsdk.git
-        cd emsdk || exit
-        ./emsdk install $EMSDK_VERSION
+        
+        install_emsdk_version $EMSDK_VERSION
+        
         ./emsdk activate $EMSDK_VERSION
     else
         # emsdk exists, check if version matches
-        cd "$EMSDK_DIR/emsdk" || exit
+        cd "$EMSDK_DIR" || exit
         
         # activate environment variables to make emcc available
         source ./emsdk_env.sh &> /dev/null
@@ -271,14 +321,19 @@ ensure_emsdk() {
             # compare versions
             if [ "$CURRENT_VERSION" != "$EMSDK_VERSION" ]; then
                 echo "emcc version mismatch, installing target version $EMSDK_VERSION..."
-                ./emsdk install $EMSDK_VERSION
+                
+                install_emsdk_version $EMSDK_VERSION
+                
                 ./emsdk activate $EMSDK_VERSION
             else
                 echo "emcc version matches, no need to re-install"
                 ./emsdk activate $EMSDK_VERSION
             fi
         else
-            echo "emcc not found, activating emsdk..."
+            echo "emcc not found, installing and activating emsdk..."
+            
+            install_emsdk_version $EMSDK_VERSION
+            
             ./emsdk activate $EMSDK_VERSION
         fi
     fi
@@ -289,7 +344,7 @@ ensure_emsdk() {
         source ./emsdk_env.sh
         # Windows path check, need to consider backslashes (\) and possible different path prefixes
         # Get the actual path of emscripten
-        EMSCRIPTEN_PATH="$(cd "$EMSDK_DIR/emsdk/upstream/emscripten" 2>/dev/null && pwd -W 2>/dev/null || echo "$EMSDK_DIR/emsdk/upstream/emscripten")"
+        EMSCRIPTEN_PATH="$(cd "$EMSDK_DIR/upstream/emscripten" 2>/dev/null && (pwd -W 2>/dev/null || pwd) || echo "$EMSDK_DIR/upstream/emscripten")"
         
         # First check if this path already exists in PATH (considering path separators)
         PATH_FOUND=0
@@ -315,6 +370,12 @@ ensure_emsdk() {
             echo "Added emscripten to PATH: $EMSCRIPTEN_PATH"
         else
             echo "Emscripten path already in PATH"
+        fi
+        # Try to run Windows batch file first, fallback to shell script
+        if command -v cmd.exe >/dev/null 2>&1; then
+            cmd.exe //c "emsdk_env.bat" 2>/dev/null || source ./emsdk_env.sh
+        else
+            source ./emsdk_env.sh
         fi
     else
         # Linux and macOS
