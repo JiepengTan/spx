@@ -48,33 +48,23 @@ list-demos: ## List all demos with index
 # ============================================
 # Setup Commands
 # ============================================
-setup: ## Initialize the user environment
+setup: 
 	chmod +x ./pkg/gdspx/tools/*.sh && \
-	echo "===> Step 1/4: Install spx" && \
-	$(MAKE) install && \
-	echo "===> Step 2/4: Download engine" && \
-	$(MAKE) download && \
-	echo "===> Step 3/4: Export runtime package" && \
-	$(MAKE) export-pack && \
-	echo "===> Step 4/4: Prepare web template" && \
-	./pkg/gdspx/tools/make_util.sh extrawebtemplate && \
-	echo "===> setup done"
+	echo "===>step1/4: cmd" && make install && \
+	echo "===>step2/4: download engine" && make download && \
+	echo "===>step3/4: prepare dev env" && make export-pack && \
+	echo "===>step4/4: prepare web template" && ./pkg/gdspx/tools/make_util.sh extrawebtemplate && \
+	echo "===>init done"
 
-setup-dev: ## Initialize development environment (full)
+setup-dev: 
 	chmod +x ./pkg/gdspx/tools/*.sh && \
-	echo "===> Step 1/6: Install spx" && \
-	$(MAKE) install && \
-	echo "===> Step 2/6: Download engine" && \
-	$(MAKE) download && \
-	echo "===> Step 3/6: Build wasm" && \
-	$(MAKE) build-wasm && \
-	echo "===> Step 4/6: Build editor engine" && \
-	$(MAKE) build-editor && \
-	echo "===> Step 5/6: Build desktop engine" && \
-	$(MAKE) build-desktop && \
-	echo "===> Step 6/6: Build web engine" && \
-	$(MAKE) build-web && \
-	echo "===> setup-dev done, use 'make run DEMO_INDEX=N' to run demo"
+	echo "===>step1/6: cmd" && make install && \
+	echo "===>step2/6: download engine" && make download && \
+	echo "===>step3/6: wasm" && make build-wasm && \
+	echo "===>step4/6: pce" && make build-editor && \
+	echo "===>step5/6: pc" && make build-desktop && \
+	echo "===>step6/6: web" && make build-web && \
+	echo "===>initdev done,use `make run` to run demo"
 
 
 # ============================================
@@ -84,17 +74,17 @@ install: ## Install spx command
 	$(INSTALL_CMD)
 
 download: ## Download engines
-	$(MAKE) install && ./pkg/gdspx/tools/build_engine.sh -e -d 
+	make install && ./pkg/gdspx/tools/build_engine.sh -e -d 
 
 
 # ============================================
 # Build Commands
 # ============================================
 build-editor: ## Build editor mode engine
-	$(MAKE) install && ./pkg/gdspx/tools/build_engine.sh -e
+	make install && ./pkg/gdspx/tools/build_engine.sh -e
 
 build-desktop: ## Build desktop engine
-	$(MAKE) install && ./pkg/gdspx/tools/build_engine.sh && \
+	make install && ./pkg/gdspx/tools/build_engine.sh && \
 	./pkg/gdspx/tools/make_util.sh exportpack 
 
 build-web: ## Build web engine template
