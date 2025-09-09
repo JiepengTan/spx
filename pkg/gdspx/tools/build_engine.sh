@@ -313,7 +313,7 @@ build_editor(){
     
     echo scons target=editor dev_build=yes $COMMON_ARGS
     if [ "$OS" = "Windows_NT" ]; then
-        scons target=editor dev_build=yes $COMMON_ARGS vsproj=yes 
+        scons target=editor dev_build=yes $COMMON_ARGS
     else
         scons target=editor dev_build=yes $COMMON_ARGS
     fi
@@ -321,7 +321,7 @@ build_editor(){
     dstBinPath="$GOPATH/bin/gdspx$VERSION"
     echo "Destination binary path: $dstBinPath"
     if [ "$OS" = "Windows_NT" ]; then
-        cp bin/godot.windows.editor.dev.$ARCH $dstBinPath".exe"
+        cp bin/godot.windows.editor.dev.$ARCH.exe $dstBinPath".exe"
     elif [[ "$(uname)" == "Linux" ]]; then
         cp bin/godot.linuxbsd.editor.dev.$ARCH $dstBinPath
     else

@@ -148,7 +148,7 @@ ifndef DEMO_INDEX
 endif
 	@DEMO=$(GET_DEMO); \
 	echo "Running web demo #$(DEMO_INDEX): $$DEMO"; \
-	$(MAKE) stop && $(MAKE) build-wasm && \
+	make stop && make build-wasm && \
 	cd $$DEMO && spx clear && spx runweb -serveraddr=":$(PORT)"
 
 
@@ -159,7 +159,7 @@ format: ## Format Go code
 	go fmt ./...
 
 generate: ## Generate code
-	cd ./pkg/gdspx/cmd/codegen && go run . && cd $(CURRENT_PATH) && $(MAKE) format
+	cd ./pkg/gdspx/cmd/codegen && go run . && cd $(CURRENT_PATH) && make format
 
 export-pack: ## Export runtime pck file
 	./pkg/gdspx/tools/make_util.sh exportpack && cd $(CURRENT_PATH)
