@@ -51,6 +51,9 @@ func (p *eventSink) doDeleteClone(this any) (ret *eventSink) {
 	}
 }
 
+func (p *eventSink) asyncSquenceCall(start bool, data any, doSth func(*eventSink)) {
+
+}
 func (p *eventSink) asyncCall(start bool, data any, doSth func(*eventSink)) {
 	for p != nil {
 		if p.cond == nil || p.cond(data) {
@@ -148,6 +151,16 @@ func (p *eventSinkMgr) doWhenStart() {
 			ev.sink.(func())()
 		})
 	}
+}
+
+func (p *eventSinkMgr) doWhenAwakeStart() {
+	p.doWhenAwake(nil)
+	p.doWhenStart()
+}
+
+func (p *eventSinkMgr) doWhenAwakeClone(this threadObj, data any) {
+	//p.doWhenAwake(this) // TODO tanjp
+	p.doWhenCloned(this, data)
 }
 
 func (p *eventSinkMgr) doWhenAwake(this threadObj) {

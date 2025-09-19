@@ -521,6 +521,10 @@ func Gopt_SpriteImpl_Clone__0(sprite Sprite) {
 }
 
 func Gopt_SpriteImpl_Clone__1(sprite Sprite, data any) {
+	doClone(sprite, data, nil)
+}
+
+func doClone(sprite Sprite, data any, onCloned func(sprite *SpriteImpl)) {
 	src := spriteOf(sprite)
 	if debugInstr {
 		log.Println("Clone", src.name)
@@ -530,13 +534,13 @@ func Gopt_SpriteImpl_Clone__1(sprite Sprite, data any) {
 	out, outPtr := v.Elem(), v.Interface().(Sprite)
 	dest := cloneSprite(out, outPtr, in, nil)
 	src.g.addClonedShape(src, dest)
-
+	if onCloned != nil {
+		onCloned(dest)
+	}
 	if dest.hasOnCloned {
-		dest.doWhenAwake(dest)
-		dest.doWhenCloned(dest, data)
+		dest.doWhenAwakeClone(dest, data)
 	}
 }
-
 func (p *SpriteImpl) OnCloned__0(onCloned func(data any)) {
 	p.hasOnCloned = true
 	p.allWhenCloned = &eventSink{

@@ -902,8 +902,7 @@ func (p *Game) handleEvent(event event) {
 	case *eventKeyDown:
 		p.sinkMgr.doWhenKeyPressed(ev.Key)
 	case *eventStart:
-		p.sinkMgr.doWhenAwake(nil)
-		p.sinkMgr.doWhenStart()
+		p.sinkMgr.doWhenAwakeStart()
 	case *eventTimer:
 		p.sinkMgr.doWhenTimer(ev.Time)
 	}
@@ -1868,6 +1867,11 @@ func (p *Game) DebugDrawLine(fromX, fromY, toX, toY float64, color Color) {
 // -----------------------------------------------------------------------------
 func (p *Game) SetTileMapLayerIndex(index int64) {
 	extMgr.SetLayerIndex(index)
+}
+
+func (p *Game) SetTile(texturePath string, isCollision bool) {
+	path := engine.ToAssetPath(texturePath)
+	extMgr.SetTile(path, isCollision)
 }
 
 func (p *Game) PlaceTiles__0(positions []float64, texturePath string) {

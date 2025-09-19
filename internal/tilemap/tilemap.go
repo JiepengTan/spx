@@ -97,21 +97,38 @@ type TscnMapData struct {
 }
 
 type Transform struct {
-	X   float64
-	Y   float64
-	Dir int64
+	x   float64
+	y   float64
+	dir int64
 }
 
+func NewTransform(x, y float64, dir int64) *Transform {
+	return &Transform{x: x, y: y, dir: dir}
+}
+func (p *Transform) X() float64 {
+	return p.x
+}
+func (p *Transform) Y() float64 {
+	return p.y
+}
+func (p *Transform) Dir() int64 {
+	return p.dir
+}
 func (p *Transform) ToString() string {
-	return fmt.Sprintf("TransformData %.1f %.1f %d", p.X, p.Y, p.Dir)
+	return fmt.Sprintf("TransformData %.1f %.1f %d", p.x, p.y, p.dir)
 }
 
 // Runtime utilities for parsing tile data
-func LoadTilemaps(datas *TscnMapData, funcSetLayer func(layerIndex int64),
+func LoadTilemaps(datas *TscnMapData, funcSetTile func(texturePath string, isCollision bool), funcSetLayer func(layerIndex int64),
 	funcPlaceTiles func(positions []float64, texturePath string, layerIndex int64)) {
 	paths := make(map[int32]string)
 	for _, item := range datas.TileMap.TileSet.Sources {
 		paths[item.ID] = item.TexturePath
+		hasCollision := false
+		for _, tile := range item.Tiles {
+			hasCollision = hasCollision || tile.Physics.CollisionPoints != nil
+		}
+		funcSetTile(item.TexturePath, false)
 	}
 	for idx, layer := range datas.TileMap.Layers {
 		layerId := int64(idx)

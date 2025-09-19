@@ -44,7 +44,7 @@ func (p *tilemapMgr) init(g *Game, fs spxfs.Dir, path string) {
 }
 
 func (p *tilemapMgr) loadTilemaps(datas *tm.TscnMapData) {
-	tm.LoadTilemaps(datas, p.g.SetTileMapLayerIndex, p.g.PlaceTiles__1)
+	tm.LoadTilemaps(datas, p.g.SetTile, p.g.SetTileMapLayerIndex, p.g.PlaceTiles__1)
 
 }
 func (p *tilemapMgr) loadSprite2ds(datas *tm.TscnMapData) {
@@ -58,8 +58,9 @@ func (p *tilemapMgr) loadGameObjs(datas *tm.TscnMapData) {
 		sp, ok := p.g.sprs[item.PrefabPath]
 		if ok {
 			x, y := item.Position.X, -item.Position.Y
-			trans := tm.Transform{X: x, Y: y}
-			Gopt_SpriteImpl_Clone__1(sp, trans)
+			doClone(sp, nil, func(sprite *SpriteImpl) {
+				sprite.SetXYpos(x, y)
+			})
 		}
 	}
 }
