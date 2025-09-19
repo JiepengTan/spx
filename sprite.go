@@ -521,10 +521,10 @@ func Gopt_SpriteImpl_Clone__0(sprite Sprite) {
 }
 
 func Gopt_SpriteImpl_Clone__1(sprite Sprite, data any) {
-	doClone(sprite, data, nil)
+	doClone(sprite, data, false, nil)
 }
 
-func doClone(sprite Sprite, data any, onCloned func(sprite *SpriteImpl)) {
+func doClone(sprite Sprite, data any, isAsync bool, onCloned func(sprite *SpriteImpl)) {
 	src := spriteOf(sprite)
 	if debugInstr {
 		log.Println("Clone", src.name)
@@ -538,7 +538,15 @@ func doClone(sprite Sprite, data any, onCloned func(sprite *SpriteImpl)) {
 		onCloned(dest)
 	}
 	if dest.hasOnCloned {
-		dest.doWhenAwakeClone(dest, data)
+		if isAsync {
+			engine.Go(dest.pthis, func() {
+				dest.doWhenAwake(dest)
+				dest.doWhenCloned(dest, data)
+			})
+		} else {
+			dest.doWhenAwake(dest)
+			dest.doWhenCloned(dest, data)
+		}
 	}
 }
 func (p *SpriteImpl) OnCloned__0(onCloned func(data any)) {

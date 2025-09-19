@@ -58,7 +58,7 @@ func (p *tilemapMgr) loadGameObjs(datas *tm.TscnMapData) {
 		sp, ok := p.g.sprs[item.PrefabPath]
 		if ok {
 			x, y := item.Position.X, -item.Position.Y
-			doClone(sp, nil, func(sprite *SpriteImpl) {
+			doClone(sp, nil, true, func(sprite *SpriteImpl) {
 				sprite.SetXYpos(x, y)
 			})
 		}

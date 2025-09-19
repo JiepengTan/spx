@@ -153,16 +153,6 @@ func (p *eventSinkMgr) doWhenStart() {
 	}
 }
 
-func (p *eventSinkMgr) doWhenAwakeStart() {
-	p.doWhenAwake(nil)
-	p.doWhenStart()
-}
-
-func (p *eventSinkMgr) doWhenAwakeClone(this threadObj, data any) {
-	//p.doWhenAwake(this) // TODO tanjp
-	p.doWhenCloned(this, data)
-}
-
 func (p *eventSinkMgr) doWhenAwake(this threadObj) {
 	p.allWhenAwake.syncCall(this, func(ev *eventSink) {
 		if debugEvent {
