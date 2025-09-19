@@ -146,7 +146,8 @@ type projConfig struct {
 	AudioAttenuation *float64 `json:"audioAttenuation"` // default 0 indicates no attenuation will occur
 
 	//
-	TilemapConfig string `json:"tilemapConfig"`
+	TilemapPath   string `json:"tilemapPath"`
+	LayerSortMode string `json:"layerSortMode"` // layer sort method, default "" , options: "vertical"
 }
 
 func (p *projConfig) getBackdrops() []*backdropConfig {

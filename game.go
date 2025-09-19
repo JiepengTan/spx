@@ -378,7 +378,7 @@ func Gopt_Game_Run(game Gamer, resource any, gameConf ...*Config) {
 			// p.sprs[name] = fld (has been set by loadSprite)
 		}
 	}
-	g.tilemapMgr.init(g, fs, proj.TilemapConfig)
+	g.tilemapMgr.init(g, fs, proj.TilemapPath)
 
 	if err := g.endLoad(v, &proj); err != nil {
 		panic(err)
