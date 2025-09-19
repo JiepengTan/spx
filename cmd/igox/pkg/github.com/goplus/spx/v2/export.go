@@ -81,6 +81,7 @@ func init() {
 		},
 		AliasTypes: map[string]reflect.Type{
 			"BackdropName":        reflect.TypeOf((*q.BackdropName)(nil)).Elem(),
+			"ColliderShapeType":   reflect.TypeOf((*q.ColliderShapeType)(nil)).Elem(),
 			"Direction":           reflect.TypeOf((*q.Direction)(nil)).Elem(),
 			"Key":                 reflect.TypeOf((*q.Key)(nil)).Elem(),
 			"PhysicsMode":         reflect.TypeOf((*q.PhysicsMode)(nil)).Elem(),

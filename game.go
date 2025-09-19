@@ -149,6 +149,8 @@ type Game struct {
 	//
 	audioAttenuation float64
 	audioMaxDistance float64
+
+	tilemapMgr tilemapMgr
 }
 
 const maxCollisionLayerIdx = 32 // engine limit support 32 layers
@@ -275,6 +277,7 @@ func Gopt_Game_Run(game Gamer, resource any, gameConf ...*Config) {
 	if err != nil {
 		panic(err)
 	}
+
 	if !conf.DontParseFlags {
 		f := flag.CommandLine
 		verbose := f.Bool("v", false, "print verbose information")
@@ -375,6 +378,8 @@ func Gopt_Game_Run(game Gamer, resource any, gameConf ...*Config) {
 			// p.sprs[name] = fld (has been set by loadSprite)
 		}
 	}
+	g.tilemapMgr.init(g, fs, proj.TilemapConfig)
+
 	if err := g.endLoad(v, &proj); err != nil {
 		panic(err)
 	}
@@ -631,6 +636,8 @@ func (p *Game) loadIndex(g reflect.Value, proj *projConfig) (err error) {
 		})
 	}
 
+	// load tilemap
+	p.tilemapMgr.parseTilemap()
 	p.audioId = p.sounds.allocAudio()
 	if proj.Bgm != "" {
 		p.Play__0(proj.Bgm, true)
