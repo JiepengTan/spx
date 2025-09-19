@@ -55,11 +55,10 @@ func (p *tilemapMgr) loadSprite2ds(datas *tm.TscnMapData) {
 
 func (p *tilemapMgr) loadGameObjs(datas *tm.TscnMapData) {
 	for _, item := range datas.Prefabs {
-		name := item.PrefabPath
-		x, y := item.Position.X, -item.Position.Y
-		trans := tm.Transform{X: x, Y: y}
-		sp, ok := p.g.sprs[name]
+		sp, ok := p.g.sprs[item.PrefabPath]
 		if ok {
+			x, y := item.Position.X, -item.Position.Y
+			trans := tm.Transform{X: x, Y: y}
 			Gopt_SpriteImpl_Clone__1(sp, trans)
 		}
 	}
