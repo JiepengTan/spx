@@ -128,7 +128,7 @@ func LoadTilemaps(datas *TscnMapData, funcSetTile func(texturePath string, isCol
 		for _, tile := range item.Tiles {
 			hasCollision = hasCollision || tile.Physics.CollisionPoints != nil
 		}
-		funcSetTile(item.TexturePath, false)
+		funcSetTile(item.TexturePath, hasCollision)
 	}
 	for idx, layer := range datas.TileMap.Layers {
 		layerId := int64(idx)
