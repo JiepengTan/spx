@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"sort"
 	"sync"
 
 	stime "time"
@@ -29,6 +30,55 @@ var (
 
 type Object = gdx.Object
 type Array = gdx.Array
+
+type layerSortMode = int
+
+const (
+	LAYER_SORT_MODE_NONE     layerSortMode = 0
+	LAYER_SORT_MODE_VERTICAL layerSortMode = 1
+)
+
+type LayerSortInfo struct {
+	X    float64
+	Y    float64
+	Data Sprite
+}
+
+var curLayerSortMode layerSortMode
+
+func SetLayerSortMode(s string) {
+	switch s {
+	case "":
+		curLayerSortMode = LAYER_SORT_MODE_NONE
+	case "none":
+		curLayerSortMode = LAYER_SORT_MODE_NONE
+	case "vertical":
+		curLayerSortMode = LAYER_SORT_MODE_VERTICAL
+	default:
+		panic("Unknown layer sort mode " + s)
+	}
+}
+
+func HasLayerSortMethod() bool {
+	return curLayerSortMode != LAYER_SORT_MODE_NONE
+}
+func SortLayers(infos []LayerSortInfo) {
+	if curLayerSortMode == LAYER_SORT_MODE_NONE {
+		return
+	}
+	if curLayerSortMode == LAYER_SORT_MODE_VERTICAL {
+		// sort infos by y
+		sort.Slice(infos, func(i, j int) bool {
+			if infos[i].Y == infos[j].Y {
+				return infos[i].X > infos[j].X
+			}
+			return infos[i].Y > infos[j].Y
+		})
+		for idx, info := range infos {
+			info.Data.SetZIndex(int64(1 + idx))
+		}
+	}
+}
 
 const Float2IntFactor = gdx.Float2IntFactor
 

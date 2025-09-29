@@ -348,6 +348,7 @@ func Gopt_Game_Run(game Gamer, resource any, gameConf ...*Config) {
 	g.pathCellSizeX = parseDefaultNumber(proj.PathCellSizeX, 16)
 	g.pathCellSizeY = parseDefaultNumber(proj.PathCellSizeY, 16)
 
+	engine.SetLayerSortMode(proj.LayerSortMode)
 	g.audioAttenuation = parseDefaultFloatValue(proj.AudioAttenuation, 0) // 0 indicates no attenuation will occur, to compatibility with previous behavior.
 	g.audioMaxDistance = parseDefaultFloatValue(proj.AudioMaxDistance, 2000)
 	if debugLoad {
@@ -994,7 +995,6 @@ func (p *Game) logicLoop(me coroutine.Thread) int {
 		if targetTimer >= 0 {
 			p.fireEvent(&eventTimer{Time: targetTimer})
 		}
-
 		engine.WaitNextFrame()
 		p.showDebugPanel()
 	}
@@ -1302,6 +1302,11 @@ func (p *Game) gotoBack(spr *SpriteImpl) {
 }
 
 func (p *Game) goBackLayers(spr *SpriteImpl, n int) {
+	if engine.HasLayerSortMethod() {
+		log.Println("Can not set sprite's layer, because layerSortMode is not none")
+		return
+	}
+
 	idx := p.doFindSprite(spr)
 	if idx < 0 {
 		return
@@ -1361,6 +1366,10 @@ func (p *Game) goBackLayers(spr *SpriteImpl, n int) {
 	p.updateRenderLayers()
 }
 func (p *Game) updateRenderLayers() {
+	// if layer sort mode is not none, then we should not update render layers
+	if engine.HasLayerSortMethod() {
+		return
+	}
 	layer := 0
 	for _, item := range p.items {
 		if sp, ok := item.(*SpriteImpl); ok {

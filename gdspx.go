@@ -43,10 +43,12 @@ var (
 
 var (
 	cachedBounds_ map[string]mathf.Rect2
+	tempSortInfos []engine.LayerSortInfo
 )
 
 func (p *Game) OnEngineStart() {
 	cachedBounds_ = make(map[string]mathf.Rect2)
+	tempSortInfos = make([]engine.LayerSortInfo, 0, 100)
 	onStart := func() {
 		defer engine.CheckPanic()
 		initInput()
@@ -79,8 +81,22 @@ func (p *Game) OnEngineRender(delta float64) {
 	if !p.isRunned {
 		return
 	}
+	p.sortLayers(tempSortInfos)
 	p.syncUpdateProxy()
 	p.syncUpdatePhysic()
+}
+
+func (p *Game) sortLayers(infos []engine.LayerSortInfo) {
+	infos = infos[:0]
+	if !engine.HasLayerSortMethod() {
+		return
+	}
+	for _, item := range p.items {
+		if sp, ok := item.(*SpriteImpl); ok {
+			infos = append(infos, engine.LayerSortInfo{Data: *sp.syncSprite, X: sp.x, Y: sp.y})
+		}
+	}
+	engine.SortLayers(infos)
 }
 
 func (p *Game) OnEnginePause(isPaused bool) {
@@ -214,7 +230,9 @@ func checkUpdateCostume(p *baseObj) {
 func syncCheckUpdateCostume(p *baseObj) {
 	syncSprite := p.syncSprite
 	if p.isLayerDirty {
-		syncSprite.SetZIndex(int64(p.layer))
+		if !engine.HasLayerSortMethod() {
+			syncSprite.SetZIndex(int64(p.layer))
+		}
 		p.isLayerDirty = false
 	}
 	if !p.isCostumeDirty {
