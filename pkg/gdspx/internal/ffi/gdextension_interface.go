@@ -661,7 +661,7 @@ func (a *ArrayInfoImpl) ToInt64s() []int64 {
 	if size == 0 {
 		return []int64{}
 	}
-	slice := (*[1 << 30]C.int64_t)(unsafe.Pointer(a.gdArray.data))[:size:size]
+	slice := (*[1 << 27]C.int64_t)(unsafe.Pointer(a.gdArray.data))[:size:size]
 	result := make([]int64, size)
 	for i, v := range slice {
 		result[i] = int64(v)
@@ -677,7 +677,7 @@ func (a *ArrayInfoImpl) ToFloats() []float32 {
 	if size == 0 {
 		return []float32{}
 	}
-	slice := (*[1 << 30]C.float)(unsafe.Pointer(a.gdArray.data))[:size:size]
+	slice := (*[1 << 27]C.float)(unsafe.Pointer(a.gdArray.data))[:size:size]
 	result := make([]float32, size)
 	for i, v := range slice {
 		result[i] = float32(v)
@@ -693,7 +693,7 @@ func (a *ArrayInfoImpl) ToBools() []bool {
 	if size == 0 {
 		return []bool{}
 	}
-	slice := (*[1 << 30]C.int64_t)(unsafe.Pointer(a.gdArray.data))[:size:size]
+	slice := (*[1 << 27]C.int64_t)(unsafe.Pointer(a.gdArray.data))[:size:size]
 	result := make([]bool, size)
 	for i, v := range slice {
 		result[i] = int64(v) != 0
@@ -709,7 +709,7 @@ func (a *ArrayInfoImpl) ToBytes() []byte {
 	if size == 0 {
 		return []byte{}
 	}
-	slice := (*[1 << 30]C.uchar)(unsafe.Pointer(a.gdArray.data))[:size:size]
+	slice := (*[1 << 27]C.uchar)(unsafe.Pointer(a.gdArray.data))[:size:size]
 	result := make([]byte, size)
 	for i, v := range slice {
 		result[i] = byte(v)
@@ -725,7 +725,7 @@ func (a *ArrayInfoImpl) ToObjects() []int64 {
 	if size == 0 {
 		return []int64{}
 	}
-	slice := (*[1 << 30]C.GdObj)(unsafe.Pointer(a.gdArray.data))[:size:size]
+	slice := (*[1 << 27]C.GdObj)(unsafe.Pointer(a.gdArray.data))[:size:size]
 	result := make([]int64, size)
 	for i, v := range slice {
 		result[i] = int64(v)
@@ -741,7 +741,7 @@ func (a *ArrayInfoImpl) ToStrings() []string {
 	if size == 0 {
 		return []string{}
 	}
-	slice := (*[1 << 30]*C.char)(unsafe.Pointer(a.gdArray.data))[:size:size]
+	slice := (*[1 << 27]*C.char)(unsafe.Pointer(a.gdArray.data))[:size:size]
 	result := make([]string, size)
 	for i, cStr := range slice {
 		result[i] = C.GoString(cStr)
@@ -808,7 +808,7 @@ func createGdArrayFromInt64s(ints []int64) *ArrayInfoImpl {
 	if arrayInfo == nil {
 		return nil
 	}
-	cIntSlice := (*[1 << 30]C.int64_t)(unsafe.Pointer(arrayInfo.data))[:len(ints):len(ints)]
+	cIntSlice := (*[1 << 27]C.int64_t)(unsafe.Pointer(arrayInfo.data))[:len(ints):len(ints)]
 	for i, v := range ints {
 		cIntSlice[i] = C.int64_t(v)
 	}
@@ -823,7 +823,7 @@ func createGdArrayFromFloats(floats []float32) *ArrayInfoImpl {
 	if arrayInfo == nil {
 		return nil
 	}
-	cFloatSlice := (*[1 << 30]C.float)(unsafe.Pointer(arrayInfo.data))[:len(floats):len(floats)]
+	cFloatSlice := (*[1 << 27]C.float)(unsafe.Pointer(arrayInfo.data))[:len(floats):len(floats)]
 	for i, v := range floats {
 		cFloatSlice[i] = C.float(v)
 	}
@@ -838,7 +838,7 @@ func createGdArrayFromBools(bools []bool) *ArrayInfoImpl {
 	if arrayInfo == nil {
 		return nil
 	}
-	cBoolSlice := (*[1 << 30]C.uint8_t)(unsafe.Pointer(arrayInfo.data))[:len(bools):len(bools)]
+	cBoolSlice := (*[1 << 27]C.uint8_t)(unsafe.Pointer(arrayInfo.data))[:len(bools):len(bools)]
 	for i, v := range bools {
 		if v {
 			cBoolSlice[i] = 1
@@ -857,7 +857,7 @@ func createGdArrayFromBytes(bytes []byte) *ArrayInfoImpl {
 	if arrayInfo == nil {
 		return nil
 	}
-	cByteSlice := (*[1 << 30]C.uchar)(unsafe.Pointer(arrayInfo.data))[:len(bytes):len(bytes)]
+	cByteSlice := (*[1 << 27]C.uchar)(unsafe.Pointer(arrayInfo.data))[:len(bytes):len(bytes)]
 	for i, v := range bytes {
 		cByteSlice[i] = C.uchar(v)
 	}
@@ -872,7 +872,7 @@ func createGdArrayFromObjects(objects []GdObj) *ArrayInfoImpl {
 	if arrayInfo == nil {
 		return nil
 	}
-	cObjSlice := (*[1 << 30]C.GdObj)(unsafe.Pointer(arrayInfo.data))[:len(objects):len(objects)]
+	cObjSlice := (*[1 << 27]C.GdObj)(unsafe.Pointer(arrayInfo.data))[:len(objects):len(objects)]
 	for i, v := range objects {
 		cObjSlice[i] = C.GdObj(v)
 	}
@@ -887,7 +887,7 @@ func createGdArrayFromStrings(strings []string) *ArrayInfoImpl {
 	if arrayInfo == nil {
 		return nil
 	}
-	cStrSlice := (*[1 << 30]*C.char)(unsafe.Pointer(arrayInfo.data))[:len(strings):len(strings)]
+	cStrSlice := (*[1 << 27]*C.char)(unsafe.Pointer(arrayInfo.data))[:len(strings):len(strings)]
 	for i, v := range strings {
 		cStr := C.CString(v)
 		cStrSlice[i] = cStr
