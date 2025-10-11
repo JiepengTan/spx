@@ -1,0 +1,16 @@
+# act configuration file
+# Use GitHub recommended act images
+-P ubuntu-latest=catthehacker/ubuntu:act-latest
+-P ubuntu-22.04=catthehacker/ubuntu:act-22.04
+
+# Set container architecture (for macOS M1/M2 users)
+--container-architecture linux/amd64
+
+# Enable verbose output
+--verbose
+
+# Set artifact server path
+--artifact-server-path /tmp/artifacts
+
+# Reuse containers to speed up subsequent runs
+--reuse

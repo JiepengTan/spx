@@ -1,0 +1,6 @@
+{
+  "inputs": {
+    "release_tag": "v2.0.1",
+    "platforms": "web"
+  }
+}
