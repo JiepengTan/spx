@@ -11,8 +11,13 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 60
+
     steps:
-    - uses: actions/checkout@v5
+    - name: Checkout
+      uses: actions/checkout@v5
+      with:
+        submodules: recursive
 
     - name: Get dependencies
       run: sudo apt-get update && sudo apt-get install gcc libgl1-mesa-dev libegl1-mesa-dev libgles2-mesa-dev libx11-dev xorg-dev libasound2-dev libopenal-dev
@@ -24,8 +29,45 @@ jobs:
         distribution: temurin
         java-version: 17
 
+    - name: Set up Android NDK
+      uses: nttld/setup-ndk@v1
+      id: setup-ndk
+      with:
+        ndk-version: r23c
+        add-to-path: true
+        local-cache: true
+
     - name: Setup go/xgo & engine
       uses: ./.github/actions/deps
 
-    - name: Test
-      uses: ./.github/actions/project-test
+    - name: Set Android NDK environment variable
+      run: echo "ANDROID_NDK_ROOT=${{ steps.setup-ndk.outputs.ndk-path }}" >> $GITHUB_ENV
+
+    - name: Verify NDK installation
+      run: |
+        echo "ANDROID_NDK_ROOT: $ANDROID_NDK_ROOT"
+        ls -la "$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt"
+
+    - name: Run test demo
+      shell: bash
+      run: cd test/CI && spx exportapk 2>&1 | tee build_apk.txt || true
+
+    - name: Check result
+      shell: bash
+      run: pwd && ls -l test/CI/project/.builds/android
+
+    - name: Upload APK artifact
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: android-apk
+        path: test/CI/project/.builds/android/*.apk
+        if-no-files-found: warn
+
+    - name: Upload build log
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: android-build-log
+        path: test/CI/build_apk.txt
+        if-no-files-found: warn
