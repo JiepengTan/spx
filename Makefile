@@ -51,11 +51,11 @@ list-demos: ## List all demos with index
 setup: ## Initialize the user environment
 	chmod +x ./pkg/gdspx/tools/*.sh && \
 	echo "===> Step 1/4: Install spx" && \
-	$(MAKE) install && \
+	make install && \
 	echo "===> Step 2/4: Download engine" && \
-	$(MAKE) download && \
+	make download && \
 	echo "===> Step 3/4: Export runtime package" && \
-	$(MAKE) export-pack && \
+	make export-pack && \
 	echo "===> Step 4/4: Prepare web template" && \
 	./pkg/gdspx/tools/make_util.sh extrawebtemplate && \
 	echo "===> setup done"
@@ -63,17 +63,17 @@ setup: ## Initialize the user environment
 setup-dev: ## Initialize development environment (full)
 	chmod +x ./pkg/gdspx/tools/*.sh && \
 	echo "===> Step 1/6: Install spx" && \
-	$(MAKE) install && \
+	make install && \
 	echo "===> Step 2/6: Download engine" && \
-	$(MAKE) download && \
+	make download && \
 	echo "===> Step 3/6: Build wasm" && \
-	$(MAKE) build-wasm && \
+	make build-wasm && \
 	echo "===> Step 4/6: Build editor engine" && \
-	$(MAKE) build-editor && \
+	make build-editor && \
 	echo "===> Step 5/6: Build desktop engine" && \
-	$(MAKE) build-desktop && \
+	make build-desktop && \
 	echo "===> Step 6/6: Build web engine" && \
-	$(MAKE) build-web && \
+	make build-web && \
 	echo "===> setup-dev done, use 'make run DEMO_INDEX=N' to run demo"
 
 
@@ -84,17 +84,17 @@ install: ## Install spx command
 	$(INSTALL_CMD)
 
 download: ## Download engines
-	$(MAKE) install && ./pkg/gdspx/tools/build_engine.sh -e -d 
+	make install && ./pkg/gdspx/tools/build_engine.sh -e -d 
 
 
 # ============================================
 # Build Commands
 # ============================================
 build-editor: ## Build editor mode engine
-	$(MAKE) install && ./pkg/gdspx/tools/build_engine.sh -e
+	make install && ./pkg/gdspx/tools/build_engine.sh -e
 
 build-desktop: ## Build desktop engine
-	$(MAKE) install && ./pkg/gdspx/tools/build_engine.sh && \
+	make install && ./pkg/gdspx/tools/build_engine.sh && \
 	./pkg/gdspx/tools/make_util.sh exportpack 
 
 build-web: ## Build web engine template
@@ -120,6 +120,11 @@ build-wasm-opt: ## Build wasm with optimization
 	cd ./cmd/gox/ && ./install.sh --web --opt && cd $(CURRENT_PATH)
 	./pkg/gdspx/tools/make_util.sh compresswasm
 
+build-android: 
+	./pkg/gdspx/tools/build_engine.sh -p android
+
+build-ios: 
+	./pkg/gdspx/tools/build_engine.sh -p ios 
 
 # ============================================
 # Run Commands (by index)
@@ -158,7 +163,7 @@ ifndef DEMO_INDEX
 endif
 	@DEMO=$(GET_DEMO); \
 	echo "Running web demo #$(DEMO_INDEX): $$DEMO"; \
-	$(MAKE) stop && $(MAKE) build-wasm && \
+	make stop && make build-wasm && \
 	cd $$DEMO && spx clear && spx runweb -serveraddr=":$(PORT)"
 
 
@@ -169,7 +174,7 @@ format: ## Format Go code
 	go fmt ./...
 
 generate: ## Generate code
-	cd ./pkg/gdspx/cmd/codegen && go run . && cd $(CURRENT_PATH) && $(MAKE) format
+	cd ./pkg/gdspx/cmd/codegen && go run . && cd $(CURRENT_PATH) && make format
 
 export-pack: ## Export runtime pck file
 	./pkg/gdspx/tools/make_util.sh exportpack && cd $(CURRENT_PATH)
@@ -188,3 +193,4 @@ stop: ## Stop running processes
 		if [ -n "$$PIDS" ]; then kill -9 $$PIDS; fi \
 	fi
 	@echo "Processes stopped."
+
