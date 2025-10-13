@@ -438,6 +438,76 @@ func findFieldPtr(v reflect.Value, name string, from int) any {
 	return nil
 }
 
+func findMethodPtr(v reflect.Value, name string) any {
+	println("findMethodPtr: name=", name, "v.Kind()=", v.Kind().String(), "v.CanAddr()=", v.CanAddr())
+
+	// Helper function to find method by name (including unexported methods)
+	findMethod := func(t reflect.Type, methodName string) (reflect.Method, bool) {
+		// First try exported methods via MethodByName
+		if m, ok := t.MethodByName(methodName); ok {
+			return m, true
+		}
+		// Then try all methods (including unexported)
+		for i := 0; i < t.NumMethod(); i++ {
+			m := t.Method(i)
+			if m.Name == methodName {
+				return m, true
+			}
+		}
+		return reflect.Method{}, false
+	}
+
+	if v.Kind() == reflect.Ptr {
+		println("  Trying on pointer type...")
+		// Try MethodByName first (exported methods)
+		method := v.MethodByName(name)
+		if method.IsValid() {
+			println("  Found on pointer!")
+			return method.Interface()
+		}
+		// Try to find unexported method
+		if m, ok := findMethod(v.Type(), name); ok {
+			println("  Found unexported method on pointer!")
+			// Create method value
+			return v.Method(m.Index).Interface()
+		}
+		println("  Not found on pointer")
+	} else {
+		println("  Trying on value type...")
+		method := v.MethodByName(name)
+		if method.IsValid() {
+			println("  Found on value!")
+			return method.Interface()
+		}
+		// Try to find unexported method on value
+		if m, ok := findMethod(v.Type(), name); ok {
+			println("  Found unexported method on value!")
+			return v.Method(m.Index).Interface()
+		}
+		println("  Not found on value")
+		// Try pointer receiver methods
+		if v.CanAddr() {
+			println("  Trying on pointer (via Addr())...")
+			targetPtr := v.Addr()
+			method := targetPtr.MethodByName(name)
+			if method.IsValid() {
+				println("  Found on pointer (via Addr())!")
+				return method.Interface()
+			}
+			// Try to find unexported method on pointer
+			if m, ok := findMethod(targetPtr.Type(), name); ok {
+				println("  Found unexported method on pointer (via Addr())!")
+				return targetPtr.Method(m.Index).Interface()
+			}
+			println("  Not found on pointer (via Addr())")
+		} else {
+			println("  Value is not addressable")
+		}
+	}
+	println("  findMethodPtr: returning nil")
+	return nil
+}
+
 func findObjPtr(v reflect.Value, name string, from int) any {
 	if v.Kind() == reflect.Ptr {
 		v = v.Elem()

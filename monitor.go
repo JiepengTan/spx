@@ -128,10 +128,34 @@ const (
 )
 
 func buildMonitorEval(g reflect.Value, t, val string) func() string {
+	println("buildMonitorEval", t, "val=", val)
 	target, from := getTarget(g, t)
 	if from < 0 {
 		return nil
 	}
+
+	// Debug: print target type and kind
+	println("  target.Type():", target.Type().String())
+	println("  target.Kind():", target.Kind().String())
+	println("  target.CanAddr():", target.CanAddr())
+
+	// Debug: print all methods on target
+	println("  Methods on value:")
+	for i := 0; i < target.NumMethod(); i++ {
+		m := target.Type().Method(i)
+		println("    -", m.Name, m.Type.String())
+	}
+
+	// Debug: print methods on pointer (if addressable)
+	if target.CanAddr() {
+		targetPtr := target.Addr()
+		println("  Methods on pointer:")
+		for i := 0; i < targetPtr.NumMethod(); i++ {
+			m := targetPtr.Type().Method(i)
+			println("    -", m.Name, m.Type.String())
+		}
+	}
+
 	switch {
 	case strings.HasPrefix(val, getVarPrefix):
 		name := val[len(getVarPrefix):]
@@ -139,21 +163,32 @@ func buildMonitorEval(g reflect.Value, t, val string) func() string {
 			log.Println("Bind monitor error: name is empty")
 			return nil
 		}
+
+		println("  Looking for field or method:", name)
+
 		// check field
 		ref := getValueRef(target, name, from)
 		if ref.IsValid() {
+			println("  Found field:", name)
 			return func() string {
 				return fmt.Sprint(ref.Interface())
 			}
 		}
-		// check method
-		m := target.Addr().MethodByName(name)
-		if m.IsValid() {
-			mType := m.Type()
-			// only property method (getter) with one parameter and one return value
+
+		println("  Field not found, trying method...")
+
+		// check method using findMethodPtr
+		if method := findMethodPtr(target, name); method != nil {
+			println("  Found method:", name)
+			mValue := reflect.ValueOf(method)
+			mType := mValue.Type()
+			println("  Method type:", mType.String())
+			println("  Method NumIn:", mType.NumIn(), "NumOut:", mType.NumOut())
+			// only property method (getter) with no parameters and one return value
 			if mType.NumIn() == 0 && mType.NumOut() == 1 {
+				println("  Method is a valid getter")
 				return func() string {
-					result := m.Call(nil)[0].Interface()
+					result := mValue.Call(nil)[0].Interface()
 					// special case for float
 					fVal, succ := result.(float64)
 					if succ {
@@ -165,7 +200,11 @@ func buildMonitorEval(g reflect.Value, t, val string) func() string {
 					}
 					return fmt.Sprint(result)
 				}
+			} else {
+				println("  Method signature doesn't match getter requirements")
 			}
+		} else {
+			println("  Method not found by findMethodPtr")
 		}
 		log.Println("Bind monitor error: cannot find property or method (getter):", name)
 	default:
