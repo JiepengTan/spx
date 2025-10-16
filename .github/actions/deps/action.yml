@@ -4,7 +4,7 @@ inputs:
   go-version:
     description: 'Go version to setup'
     required: false
-    default: '1.23.0'
+    default: '1.24.0'
   xgo-version:
     description: 'XGo version to setup'
     required: false

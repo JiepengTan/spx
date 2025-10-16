@@ -9,6 +9,7 @@ import (
 	"path"
 	"path/filepath"
 	"runtime"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -166,7 +167,7 @@ func (pself *CmdTool) SetupEnv(version string, fs embed.FS, fsRelDir string, pro
 	if GOARCH != "amd64" && GOARCH != "arm64" {
 		return errors.New("gdx requires an amd64, or an arm64 system")
 	}
-	
+
 	// Check if pure_engine tag is present
 	if pself.Args.Tags != nil && strings.Contains(*pself.Args.Tags, "pure_engine") {
 		// Skip engine detection for pure_engine mode
@@ -182,7 +183,7 @@ func (pself *CmdTool) SetupEnv(version string, fs embed.FS, fsRelDir string, pro
 			return fmt.Errorf(ENV_NAME+"requires engine to be installed as a binary at %s: %w", pself.GoBinPath, err)
 		}
 	}
-	
+
 	pself.ProjectDir, _ = filepath.Abs(path.Join(pself.TargetDir, pself.ProjectRelPath))
 	pself.GoDir, _ = filepath.Abs(pself.ProjectDir + "/go")
 
@@ -348,6 +349,105 @@ func (pself *CmdTool) Reimport() {
 	cmd.Dir = pself.ProjectDir
 	cmd.Start()
 	cmd.Wait()
+}
+
+// setupPortableGoEnv configures the portable Go environment
+func (cmd *CmdTool) setupPortableGoEnv() error {
+	goEnvDir, err := filepath.Abs(*cmd.Args.GoEnv)
+	if err != nil {
+		return fmt.Errorf("invalid goenv path: %w", err)
+	}
+
+	cmd.GoEnvDir = goEnvDir
+
+	// Check if goenv directory exists
+	if _, err := os.Stat(goEnvDir); os.IsNotExist(err) {
+		return fmt.Errorf("goenv directory does not exist: %s", goEnvDir)
+	}
+
+	// Detect system platform
+	goos := runtime.GOOS
+	goarch := runtime.GOARCH
+
+	// Find matching Go toolchain
+	toolchainDir := filepath.Join(goEnvDir, "gotoolchain")
+	pattern := fmt.Sprintf("go*.*%s-%s", goos, goarch)
+	matches, err := filepath.Glob(filepath.Join(toolchainDir, pattern))
+
+	if err != nil {
+		return fmt.Errorf("failed to search for Go toolchain: %w", err)
+	}
+
+	if len(matches) == 0 {
+		return fmt.Errorf(`no matching Go toolchain found for %s-%s in: %s
+
+Expected directory structure:
+  %s/
+    gotoolchain/
+      go<version>.%s-%s/
+        bin/
+        pkg/
+        ...
+    go/
+
+Please download the appropriate Go toolchain from https://go.dev/dl/
+and extract it to the gotoolchain directory.`,
+			goos, goarch, toolchainDir, goEnvDir, goos, goarch)
+	}
+
+	// Use the first match (or select latest version)
+	// Sort to get the latest version
+	if len(matches) > 1 {
+		sort.Strings(matches)
+	}
+	cmd.GoRoot = matches[len(matches)-1]
+	cmd.GoPath = filepath.Join(goEnvDir, "go")
+
+	// Set GoBinPath to point to portable Go environment's bin directory
+	cmd.GoBinPath, err = filepath.Abs(filepath.Join(cmd.GoPath, "bin"))
+	if err != nil {
+		return fmt.Errorf("failed to resolve Go bin path: %w", err)
+	}
+
+	// Verify GOPATH/bin directory exists
+	if _, err := os.Stat(cmd.GoBinPath); os.IsNotExist(err) {
+		return fmt.Errorf("Go bin directory not found: %s", cmd.GoBinPath)
+	}
+
+	// Verify GOROOT/bin exists
+	goRootBinPath := filepath.Join(cmd.GoRoot, "bin")
+	if _, err := os.Stat(goRootBinPath); os.IsNotExist(err) {
+		return fmt.Errorf("Go bin directory not found: %s", goRootBinPath)
+	}
+
+	// Set environment variables
+	os.Setenv("GOROOT", cmd.GoRoot)
+	os.Setenv("GOPATH", cmd.GoPath)
+	os.Setenv("GOTOOLCHAIN", "")
+
+	// Update PATH: Add both GOPATH/bin (for gdspx, gdspxrt, etc.) and GOROOT/bin (for go compiler)
+	currentPath := os.Getenv("PATH")
+	newPath := cmd.GoBinPath + string(os.PathListSeparator) + goRootBinPath + string(os.PathListSeparator) + currentPath
+	os.Setenv("PATH", newPath)
+
+	// Log the configuration
+	fmt.Printf("Using portable Go environment:\n")
+	fmt.Printf("  GOROOT: %s\n", cmd.GoRoot)
+	fmt.Printf("  GOPATH: %s\n", cmd.GoPath)
+	fmt.Printf("  GoBinPath: %s (for gdspx, gdspxrt, etc.)\n", cmd.GoBinPath)
+	fmt.Printf("  Go binary: %s\n", filepath.Join(goRootBinPath, "go"))
+
+	// Verify Go works
+	goExe := "go"
+	if runtime.GOOS == "windows" {
+		goExe = "go.exe"
+	}
+	goPath := filepath.Join(goRootBinPath, goExe)
+	if _, err := os.Stat(goPath); os.IsNotExist(err) {
+		return fmt.Errorf("Go executable not found: %s", goPath)
+	}
+
+	return nil
 }
 
 // Clear removes the project directory and associated files

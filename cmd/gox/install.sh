@@ -1,7 +1,20 @@
 #!/bin/bash
 # Read app name from appname.txt file
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd $SCRIPT_DIR
+
+# Pin Go toolchain version
+export GOTOOLCHAIN=go1.24.4
 
 go mod tidy
+go generate pkg/gengo/embedded_pkgs.go
+if ! go generate pkg/gengo/embedded_pkgs.go > /dev/null 2>&1; then
+    echo "Error during go generate, showing full output:"
+    go generate pkg/gengo/embedded_pkgs.go
+fi
+
+go mod tidy
+
 target_font_dir=./template/project/engine/fonts/
 mkdir -p $target_font_dir
 font_path=$target_font_dir/CnFont.ttf
@@ -20,7 +33,12 @@ if [ "$OS" = "Windows_NT" ]; then
    appname="${appname}.exe"
 fi
 
-go build -o $appname
+if [ "$OS" = "Windows_NT" ]; then
+   # Fix for Windows MinGW linker duplicate symbol errors with Go 1.24
+   go build -ldflags="-checklinkname=0 -extldflags=-Wl,--allow-multiple-definition" -o $appname
+else
+   go build -ldflags="-checklinkname=0" -o $appname
+fi 
 if [ "$OS" = "Windows_NT" ]; then
     IFS=';' read -r first_gopath _ <<< "$(go env GOPATH)"
     GOPATH="$first_gopath"
@@ -29,8 +47,13 @@ else
     GOPATH="$first_gopath"
 fi
 
-mv $appname $GOPATH/bin/
 
+if [ ! -f "$appname" ]; then
+    echo "Error: $appname not found"
+    exit 1
+fi
+
+mv $appname $GOPATH/bin/
 go env -w GOFLAGS="-buildvcs=false"
 if [ "$1" = "--web" ]; then
     cd ../igox || exit

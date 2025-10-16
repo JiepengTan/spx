@@ -8,6 +8,7 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/goplus/spx/v2/cmd/gox/pkg/gengo"
 	"github.com/goplus/spx/v2/cmd/gox/pkg/util"
 )
 
@@ -152,10 +153,51 @@ func (pself *CmdTool) BuildDll() error {
 	os.Chdir(rawdir)
 	return nil
 }
-func (pself *CmdTool) genGo() string {
-	rawdir, _ := os.Getwd()
-	spxProjPath, _ := filepath.Abs(pself.ProjectDir + "/..")
 
+func (pself *CmdTool) genGo() string {
+	rawdir, err := os.Getwd()
+	if err != nil {
+		log.Fatalf("Failed to get current working directory: %v", err)
+	}
+	spxProjPath, err := filepath.Abs(pself.ProjectDir + "/..")
+	if err != nil {
+		log.Fatalf("Failed to determine spx project path: %v", err)
+	}
+	if pself.UseXgobuildForCodegen {
+		return pself.genGoUsingXgobuild(rawdir, spxProjPath)
+	}
+	return pself.genGoUsingXgoCLI(rawdir, spxProjPath)
+}
+
+// genGoUsingXgobuild generates Go code using xgobuild library (new method)
+func (pself *CmdTool) genGoUsingXgobuild(rawdir, spxProjPath string) string {
+	// Prepare output path
+	os.MkdirAll(pself.GoDir, 0755)
+	outputPath := path.Join(pself.GoDir, "main.go")
+
+	// Create a DirFS from the spx project path
+	fsys := gengo.NewDirFS(spxProjPath)
+
+	// Generate Go code using gengo package
+	if err := gengo.GenGoFromFS(fsys, outputPath); err != nil {
+		log.Fatalf("Failed to generate Go code using xgobuild: %v", err)
+	}
+
+	// Run go mod tidy in root directory
+	os.Chdir(spxProjPath)
+	util.RunGolang(nil, "mod", "tidy")
+	os.Chdir(rawdir)
+
+	// Return tags string for subsequent build steps
+	tagStr := ""
+	if *pself.Args.Tags != "" {
+		tagStr = "-tags=" + *pself.Args.Tags
+	}
+	return tagStr
+}
+
+// genGoUsingXgoCLI generates Go code using xgo CLI (old method)
+func (pself *CmdTool) genGoUsingXgoCLI(rawdir, spxProjPath string) string {
 	// Generate code in spx project root directory
 	os.Chdir(spxProjPath)
 	envVars := []string{""}
