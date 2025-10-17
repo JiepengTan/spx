@@ -202,10 +202,20 @@ jobs:
       - name: Package goenv
         shell: msys2 {0}
         run: |
+          # Get GOPATH from go env
+          GOPATH=$(go env GOPATH)
+          # Convert Windows path to Unix path for MSYS2
+          GOPATH_UNIX=$(cygpath "$GOPATH")
+
+          # Copy runtime files from GOPATH/bin
           mkdir -p goenv/go/bin
-          cp $HOME/go/bin/gdspxrt* goenv/go/bin/ || true
-          cp $HOME/go/bin/runtime.gdextension goenv/go/bin/ || true
-          cp $HOME/go/bin/spx.exe goenv/go/bin/
+          cp "$GOPATH_UNIX"/bin/gdspxrt* goenv/go/bin/ || true
+          cp "$GOPATH_UNIX"/bin/runtime.gdextension goenv/go/bin/ || true
+
+          # Copy spx executable from GOPATH/bin
+          cp "$GOPATH_UNIX"/bin/spx.exe goenv/go/bin/
+
+          # Create archive
           zip -r goenv-windows-${{ steps.platform.outputs.arch }}.zip goenv
 
       - name: Upload artifact
