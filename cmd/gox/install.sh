@@ -7,7 +7,6 @@ cd $SCRIPT_DIR
 export GOTOOLCHAIN=go1.24.4
 
 go mod tidy
-go generate pkg/gengo/embedded_pkgs.go
 if ! go generate pkg/gengo/embedded_pkgs.go > /dev/null 2>&1; then
     echo "Error during go generate, showing full output:"
     go generate pkg/gengo/embedded_pkgs.go
