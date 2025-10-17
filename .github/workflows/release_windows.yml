@@ -46,13 +46,18 @@ jobs:
           rm go1.24.0.windows-${{ matrix.arch }}.zip
           cd ../..
 
+      - name: Get GOPATH
+        id: gopath
+        shell: pwsh
+        run: |
+          $gopath = go env GOPATH
+          echo "gopath=$gopath" >> $env:GITHUB_OUTPUT
+
       - name: Package goenv
         shell: msys2 {0}
         run: |
-          # Get GOPATH from go env
-          GOPATH=$(go env GOPATH)
-          # Convert Windows path to Unix path for MSYS2
-          GOPATH_UNIX=$(cygpath "$GOPATH")
+          # Convert Windows GOPATH to Unix path for MSYS2
+          GOPATH_UNIX=$(cygpath "${{ steps.gopath.outputs.gopath }}")
 
           # Copy runtime files from GOPATH/bin
           mkdir -p goenv/go/bin
