@@ -31,4 +31,53 @@ jobs:
 
     - name: Test
       uses: ./.github/actions/project-test
-      
+
+    - name: Build spx binary
+      shell: msys2 {0}
+      run: |
+        cd cmd/gox
+        go build -o ../../spx.exe
+        cd ../..
+
+    - name: Determine architecture
+      id: platform
+      shell: msys2 {0}
+      run: |
+        ARCH=$(uname -m)
+        if [ "$ARCH" = "x86_64" ]; then
+          echo "arch=amd64" >> $GITHUB_OUTPUT
+          echo "go_arch=amd64" >> $GITHUB_OUTPUT
+        fi
+        echo "platform=windows" >> $GITHUB_OUTPUT
+
+    - name: Download and extract Go toolchain
+      shell: msys2 {0}
+      run: |
+        mkdir -p goenv/gotoolchain
+        cd goenv/gotoolchain
+        curl -L -O https://go.dev/dl/go1.24.0.windows-${{ steps.platform.outputs.go_arch }}.zip
+        unzip -q go1.24.0.windows-${{ steps.platform.outputs.go_arch }}.zip
+        rm go1.24.0.windows-${{ steps.platform.outputs.go_arch }}.zip
+        cd ../..
+
+    - name: Package goenv
+      shell: msys2 {0}
+      run: |
+        # Copy runtime files from GOPATH/bin
+        mkdir -p goenv/gotoolchain/go/bin
+        cp $HOME/go/bin/gdspxrt* goenv/gotoolchain/go/bin/ || true
+        cp $HOME/go/bin/runtime.gdextension goenv/gotoolchain/go/bin/ || true
+
+        # Copy spx executable
+        cp spx.exe goenv/gotoolchain/go/bin/
+
+        # Create archive
+        zip -r goenv-windows-${{ steps.platform.outputs.arch }}.zip goenv
+
+    - name: Upload goenv artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: goenv-windows-${{ steps.platform.outputs.arch }}
+        path: goenv-windows-${{ steps.platform.outputs.arch }}.zip
+        retention-days: 7
+

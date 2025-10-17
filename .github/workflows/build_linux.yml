@@ -22,3 +22,51 @@ jobs:
 
     - name: Test
       uses: ./.github/actions/project-test
+
+    - name: Build spx binary
+      run: |
+        cd cmd/gox
+        go build -o ../../spx
+        cd ../..
+
+    - name: Determine architecture
+      id: platform
+      run: |
+        ARCH=$(uname -m)
+        if [ "$ARCH" = "x86_64" ]; then
+          echo "arch=amd64" >> $GITHUB_OUTPUT
+          echo "go_arch=amd64" >> $GITHUB_OUTPUT
+        elif [ "$ARCH" = "aarch64" ]; then
+          echo "arch=arm64" >> $GITHUB_OUTPUT
+          echo "go_arch=arm64" >> $GITHUB_OUTPUT
+        fi
+        echo "platform=linux" >> $GITHUB_OUTPUT
+
+    - name: Download and extract Go toolchain
+      run: |
+        mkdir -p goenv/gotoolchain
+        cd goenv/gotoolchain
+        curl -L -O https://go.dev/dl/go1.24.0.linux-${{ steps.platform.outputs.go_arch }}.tar.gz
+        tar -xzf go1.24.0.linux-${{ steps.platform.outputs.go_arch }}.tar.gz
+        rm go1.24.0.linux-${{ steps.platform.outputs.go_arch }}.tar.gz
+        cd ../..
+
+    - name: Package goenv
+      run: |
+        # Copy runtime files from GOPATH/bin
+        mkdir -p goenv/gotoolchain/go/bin
+        cp $HOME/go/bin/gdspxrt* goenv/gotoolchain/go/bin/ || true
+        cp $HOME/go/bin/runtime.gdextension goenv/gotoolchain/go/bin/ || true
+
+        # Copy spx executable
+        cp spx goenv/gotoolchain/go/bin/
+
+        # Create archive
+        tar -czf goenv-linux-${{ steps.platform.outputs.arch }}.tar.gz goenv
+
+    - name: Upload goenv artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: goenv-linux-${{ steps.platform.outputs.arch }}
+        path: goenv-linux-${{ steps.platform.outputs.arch }}.tar.gz
+        retention-days: 7
