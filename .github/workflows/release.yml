@@ -50,11 +50,11 @@ jobs:
           else
             PLATFORMS="${{ github.event.inputs.platforms }}"
           fi
-          
+
           if [ "$PLATFORMS" == "all" ]; then
             PLATFORMS="web"
           fi
-          
+
           echo "PLATFORMS=$PLATFORMS"
           echo "platforms=$PLATFORMS" >> $GITHUB_OUTPUT
 
@@ -65,39 +65,28 @@ jobs:
 
   web-build:
     name: 🌐 Web Release
-    needs: static-checks
-    if: contains(needs.setup.outputs.platforms, 'web') || contains(needs.setup.outputs.platforms, 'all')
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
+    needs: [setup, static-checks]
+    uses: ./.github/workflows/release_web.yml
+    with:
+      version: ${{ needs.setup.outputs.version }}
 
-      - name: Get dependencies
-        run: sudo apt-get update && sudo apt-get install gcc libgl1-mesa-dev libegl1-mesa-dev libgles2-mesa-dev libx11-dev xorg-dev libasound2-dev libopenal-dev binaryen
-        if: ${{ runner.os == 'Linux' }}
+  macos-build:
+    name: 🍎 macOS Release
+    needs: [setup, static-checks]
+    uses: ./.github/workflows/release_macos.yml
+    with:
+      version: ${{ needs.setup.outputs.version }}
 
-      - name: Setup go/xgo & engine
-        uses: ./.github/actions/deps
+  windows-build:
+    name: 🏁 Windows Release
+    needs: [setup, static-checks]
+    uses: ./.github/workflows/release_windows.yml
+    with:
+      version: ${{ needs.setup.outputs.version }}
 
-      - name: Build release pack
-        run: |
-          make export-web
-          if [ ! -f "spx_web.zip" ]; then
-            echo "spx_web.zip not found"
-            exit 1
-          fi
-
-      - name: Upload Web Build Results
-        uses: actions/upload-artifact@v4
-        with: 
-          name: web-${{ needs.setup.outputs.version }}
-          path: spx_web.zip
-          retention-days: 14
-
-      - name: Publish to GitHub Release
-        if: github.event_name == 'release'
-        uses: softprops/action-gh-release@v2
-        with:
-          files: spx_web.zip
-          tag_name: ${{ github.event.release.tag_name }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  linux-build:
+    name: 🐧 Linux Release
+    needs: [setup, static-checks]
+    uses: ./.github/workflows/release_linux.yml
+    with:
+      version: ${{ needs.setup.outputs.version }}

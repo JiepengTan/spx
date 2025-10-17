@@ -1,0 +1,43 @@
+name: Replace Version
+description: Replace version in go.mod.template with the release version
+inputs:
+  version:
+    description: 'Version to replace (e.g., v2.0.1)'
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Replace version in go.mod.template
+      shell: bash
+      run: |
+        VERSION="${{ inputs.version }}"
+        pwd && ls -la
+        
+        # Update version in go.mod.template
+        FILE="cmd/gox/template/go.mod.template"
+
+        if [ ! -f "$FILE" ]; then
+          echo "Error: $FILE not found"
+          exit 1
+        fi
+
+        echo "=========================================="
+        echo "Replacing version with: $VERSION"
+        echo "=========================================="
+        echo ""
+        echo "📄 Before replacement:"
+        echo "----------------------------------------"
+        cat "$FILE"
+        echo "----------------------------------------"
+        echo ""
+
+        # Create backup and replace version
+        sed -i.bak -E "s|(require github.com/goplus/spx/v2) v[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.]+)? (//gop:class)|\1 $VERSION \3|" "$FILE"
+        rm -f "$FILE.bak"
+
+        echo "📄 After replacement:"
+        echo "----------------------------------------"
+        cat "$FILE"
+        echo "----------------------------------------"
+        echo ""
+        echo "✅ Successfully updated $FILE with version $VERSION"

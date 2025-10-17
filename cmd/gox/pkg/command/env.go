@@ -9,7 +9,6 @@ import (
 	"path"
 	"path/filepath"
 	"runtime"
-	"sort"
 	"strconv"
 	"strings"
 
@@ -365,44 +364,12 @@ func (cmd *CmdTool) setupPortableGoEnv() error {
 		return fmt.Errorf("goenv directory does not exist: %s", goEnvDir)
 	}
 
-	// Detect system platform
-	goos := runtime.GOOS
-	goarch := runtime.GOARCH
-
 	// Find matching Go toolchain
-	toolchainDir := filepath.Join(goEnvDir, "gotoolchain")
-	pattern := fmt.Sprintf("go*.*%s-%s", goos, goarch)
-	matches, err := filepath.Glob(filepath.Join(toolchainDir, pattern))
-
-	if err != nil {
-		return fmt.Errorf("failed to search for Go toolchain: %w", err)
-	}
-
-	if len(matches) == 0 {
-		return fmt.Errorf(`no matching Go toolchain found for %s-%s in: %s
-
-Expected directory structure:
-  %s/
-    gotoolchain/
-      go<version>.%s-%s/
-        bin/
-        pkg/
-        ...
-    go/
-
-Please download the appropriate Go toolchain from https://go.dev/dl/
-and extract it to the gotoolchain directory.`,
-			goos, goarch, toolchainDir, goEnvDir, goos, goarch)
-	}
-
-	// Use the first match (or select latest version)
-	// Sort to get the latest version
-	if len(matches) > 1 {
-		sort.Strings(matches)
-	}
-	cmd.GoRoot = matches[len(matches)-1]
+	cmd.GoRoot = path.Join(goEnvDir, "gotoolchain", "go")
 	cmd.GoPath = filepath.Join(goEnvDir, "go")
-
+	if _, err := os.Stat(cmd.GoRoot); os.IsNotExist(err) {
+		return fmt.Errorf("portable Go toolchain not found at the expected path: %s\n\nThis is expected to be provided by the SPX release package. If you are setting this up manually, please ensure the Go toolchain is extracted to '%s/gotoolchain/go'.", cmd.GoRoot, goEnvDir)
+	}
 	// Set GoBinPath to point to portable Go environment's bin directory
 	cmd.GoBinPath, err = filepath.Abs(filepath.Join(cmd.GoPath, "bin"))
 	if err != nil {
