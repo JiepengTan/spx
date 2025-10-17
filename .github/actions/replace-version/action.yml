@@ -12,7 +12,7 @@ runs:
       run: |
         VERSION="${{ inputs.version }}"
         pwd && ls -la
-        
+
         # Update version in go.mod.template
         FILE="cmd/gox/template/go.mod.template"
 
@@ -41,3 +41,5 @@ runs:
         echo "----------------------------------------"
         echo ""
         echo "✅ Successfully updated $FILE with version $VERSION"
+        echo "reinstall spx"
+        make install
