@@ -26,11 +26,6 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Replace version
-        uses: ./.github/actions/replace-version
-        with:
-          version: ${{ inputs.version }}
-
       - name: Set up MSYS2
         uses: msys2/setup-msys2@v2
         with:
@@ -45,6 +40,11 @@ jobs:
 
       - name: Setup go/xgo & engine
         uses: ./.github/actions/deps
+
+      - name: Replace version
+        uses: ./.github/actions/replace-version
+        with:
+          version: ${{ inputs.version }}
 
       - name: Download and extract Go toolchain
         shell: msys2 {0}
@@ -88,6 +88,12 @@ jobs:
           name: spx-windows-${{ matrix.arch_name }}
           path: spx-windows-${{ matrix.arch_name }}.zip
           retention-days: 14
+
+      - name: Verify release package
+        uses: ./.github/actions/verify-release
+        with:
+          package-file: spx-windows-${{ matrix.arch_name }}.zip
+          platform: windows
 
       - name: Publish to GitHub Release
         if: github.event_name == 'release'

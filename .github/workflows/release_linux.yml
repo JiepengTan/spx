@@ -27,17 +27,17 @@ jobs:
             arch_name: arm64
     steps:
       - uses: actions/checkout@v5
-
-      - name: Replace version
-        uses: ./.github/actions/replace-version
-        with:
-          version: ${{ inputs.version }}
-
+      
       - name: Get dependencies
         run: sudo apt-get update && sudo apt-get install gcc libgl1-mesa-dev libegl1-mesa-dev libgles2-mesa-dev libx11-dev xorg-dev libasound2-dev libopenal-dev zip
 
       - name: Setup go/xgo & engine
         uses: ./.github/actions/deps
+
+      - name: Replace version
+        uses: ./.github/actions/replace-version
+        with:
+          version: ${{ inputs.version }}
 
       - name: Download and extract Go toolchain
         run: |
@@ -66,6 +66,12 @@ jobs:
           name: spx-linux-${{ matrix.arch_name }}
           path: spx-linux-${{ matrix.arch_name }}.zip
           retention-days: 14
+
+      - name: Verify release package
+        uses: ./.github/actions/verify-release
+        with:
+          package-file: spx-linux-${{ matrix.arch_name }}.zip
+          platform: linux
 
       - name: Publish to GitHub Release
         if: github.event_name == 'release'
