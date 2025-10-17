@@ -50,11 +50,11 @@ jobs:
           else
             PLATFORMS="${{ github.event.inputs.platforms }}"
           fi
-          
+
           if [ "$PLATFORMS" == "all" ]; then
             PLATFORMS="web"
           fi
-          
+
           echo "PLATFORMS=$PLATFORMS"
           echo "platforms=$PLATFORMS" >> $GITHUB_OUTPUT
 
@@ -67,227 +67,19 @@ jobs:
     name: 🌐 Web Release
     needs: static-checks
     if: contains(needs.setup.outputs.platforms, 'web') || contains(needs.setup.outputs.platforms, 'all')
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
+    uses: ./.github/workflows/release_web.yml
 
-      - name: Get dependencies
-        run: sudo apt-get update && sudo apt-get install gcc libgl1-mesa-dev libegl1-mesa-dev libgles2-mesa-dev libx11-dev xorg-dev libasound2-dev libopenal-dev binaryen
-        if: ${{ runner.os == 'Linux' }}
-
-      - name: Setup go/xgo & engine
-        uses: ./.github/actions/deps
-
-      - name: Build release pack
-        run: |
-          make export-web
-          if [ ! -f "spx_web.zip" ]; then
-            echo "spx_web.zip not found"
-            exit 1
-          fi
-
-      - name: Upload Web Build Results
-        uses: actions/upload-artifact@v4
-        with: 
-          name: web-${{ needs.setup.outputs.version }}
-          path: spx_web.zip
-          retention-days: 14
-
-      - name: Publish to GitHub Release
-        if: github.event_name == 'release'
-        uses: softprops/action-gh-release@v2
-        with:
-          files: spx_web.zip
-          tag_name: ${{ github.event.release.tag_name }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  macos-goenv:
-    name: 🍎 macOS Goenv Package
+  macos-build:
+    name: 🍎 macOS Release
     needs: static-checks
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v5
+    uses: ./.github/workflows/release_macos.yml
 
-      - name: Setup go/xgo & engine
-        uses: ./.github/actions/deps
-
-      - name: Determine platform and architecture
-        id: platform
-        run: |
-          ARCH=$(uname -m)
-          if [ "$ARCH" = "x86_64" ]; then
-            echo "arch=amd64" >> $GITHUB_OUTPUT
-            echo "go_arch=amd64" >> $GITHUB_OUTPUT
-          elif [ "$ARCH" = "arm64" ]; then
-            echo "arch=arm64" >> $GITHUB_OUTPUT
-            echo "go_arch=arm64" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Download and extract Go toolchain
-        run: |
-          mkdir -p goenv/gotoolchain
-          cd goenv/gotoolchain
-          curl -L -O https://go.dev/dl/go1.24.0.darwin-${{ steps.platform.outputs.go_arch }}.tar.gz
-          tar -xzf go1.24.0.darwin-${{ steps.platform.outputs.go_arch }}.tar.gz
-          rm go1.24.0.darwin-${{ steps.platform.outputs.go_arch }}.tar.gz
-          cd ../..
-
-      - name: Package goenv
-        run: |
-          mkdir -p goenv/go/bin
-          cp $HOME/go/bin/gdspxrt* goenv/go/bin/ || true
-          cp $HOME/go/bin/runtime.gdextension goenv/go/bin/ || true
-          cp $HOME/go/bin/spx goenv/go/bin/
-          tar -czf goenv-darwin-${{ steps.platform.outputs.arch }}.tar.gz goenv
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: goenv-darwin-${{ steps.platform.outputs.arch }}
-          path: goenv-darwin-${{ steps.platform.outputs.arch }}.tar.gz
-          retention-days: 14
-
-      - name: Publish to GitHub Release
-        if: github.event_name == 'release'
-        uses: softprops/action-gh-release@v2
-        with:
-          files: goenv-darwin-${{ steps.platform.outputs.arch }}.tar.gz
-          tag_name: ${{ github.event.release.tag_name }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  windows-goenv:
-    name: 🏁 Windows Goenv Package
+  windows-build:
+    name: 🏁 Windows Release
     needs: static-checks
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v5
+    uses: ./.github/workflows/release_windows.yml
 
-      - name: Set up MSYS2
-        uses: msys2/setup-msys2@v2
-        with:
-          update: true
-          install: >-
-            base-devel
-            mingw-w64-x86_64-toolchain
-            zip
-            unzip
-            make
-            bash
-
-      - name: Setup go/xgo & engine
-        uses: ./.github/actions/deps
-
-      - name: Determine architecture
-        id: platform
-        shell: msys2 {0}
-        run: |
-          ARCH=$(uname -m)
-          if [ "$ARCH" = "x86_64" ]; then
-            echo "arch=amd64" >> $GITHUB_OUTPUT
-            echo "go_arch=amd64" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Download and extract Go toolchain
-        shell: msys2 {0}
-        run: |
-          mkdir -p goenv/gotoolchain
-          cd goenv/gotoolchain
-          curl -L -O https://go.dev/dl/go1.24.0.windows-${{ steps.platform.outputs.go_arch }}.zip
-          unzip -q go1.24.0.windows-${{ steps.platform.outputs.go_arch }}.zip
-          rm go1.24.0.windows-${{ steps.platform.outputs.go_arch }}.zip
-          cd ../..
-
-      - name: Package goenv
-        shell: msys2 {0}
-        run: |
-          # Get GOPATH from go env
-          GOPATH=$(go env GOPATH)
-          # Convert Windows path to Unix path for MSYS2
-          GOPATH_UNIX=$(cygpath "$GOPATH")
-
-          # Copy runtime files from GOPATH/bin
-          mkdir -p goenv/go/bin
-          cp "$GOPATH_UNIX"/bin/gdspxrt* goenv/go/bin/ || true
-          cp "$GOPATH_UNIX"/bin/runtime.gdextension goenv/go/bin/ || true
-
-          # Copy spx executable from GOPATH/bin
-          cp "$GOPATH_UNIX"/bin/spx.exe goenv/go/bin/
-
-          # Create archive
-          zip -r goenv-windows-${{ steps.platform.outputs.arch }}.zip goenv
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: goenv-windows-${{ steps.platform.outputs.arch }}
-          path: goenv-windows-${{ steps.platform.outputs.arch }}.zip
-          retention-days: 14
-
-      - name: Publish to GitHub Release
-        if: github.event_name == 'release'
-        uses: softprops/action-gh-release@v2
-        with:
-          files: goenv-windows-${{ steps.platform.outputs.arch }}.zip
-          tag_name: ${{ github.event.release.tag_name }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  linux-goenv:
-    name: 🐧 Linux Goenv Package
+  linux-build:
+    name: 🐧 Linux Release
     needs: static-checks
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-
-      - name: Get dependencies
-        run: sudo apt-get update && sudo apt-get install gcc libgl1-mesa-dev libegl1-mesa-dev libgles2-mesa-dev libx11-dev xorg-dev libasound2-dev libopenal-dev
-
-      - name: Setup go/xgo & engine
-        uses: ./.github/actions/deps
-
-      - name: Determine architecture
-        id: platform
-        run: |
-          ARCH=$(uname -m)
-          if [ "$ARCH" = "x86_64" ]; then
-            echo "arch=amd64" >> $GITHUB_OUTPUT
-            echo "go_arch=amd64" >> $GITHUB_OUTPUT
-          elif [ "$ARCH" = "aarch64" ]; then
-            echo "arch=arm64" >> $GITHUB_OUTPUT
-            echo "go_arch=arm64" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Download and extract Go toolchain
-        run: |
-          mkdir -p goenv/gotoolchain
-          cd goenv/gotoolchain
-          curl -L -O https://go.dev/dl/go1.24.0.linux-${{ steps.platform.outputs.go_arch }}.tar.gz
-          tar -xzf go1.24.0.linux-${{ steps.platform.outputs.go_arch }}.tar.gz
-          rm go1.24.0.linux-${{ steps.platform.outputs.go_arch }}.tar.gz
-          cd ../..
-
-      - name: Package goenv
-        run: |
-          mkdir -p goenv/go/bin
-          cp $HOME/go/bin/gdspxrt* goenv/go/bin/ || true
-          cp $HOME/go/bin/runtime.gdextension goenv/go/bin/ || true
-          cp $HOME/go/bin/spx goenv/go/bin/
-          tar -czf goenv-linux-${{ steps.platform.outputs.arch }}.tar.gz goenv
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: goenv-linux-${{ steps.platform.outputs.arch }}
-          path: goenv-linux-${{ steps.platform.outputs.arch }}.tar.gz
-          retention-days: 14
-
-      - name: Publish to GitHub Release
-        if: github.event_name == 'release'
-        uses: softprops/action-gh-release@v2
-        with:
-          files: goenv-linux-${{ steps.platform.outputs.arch }}.tar.gz
-          tag_name: ${{ github.event.release.tag_name }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    uses: ./.github/workflows/release_linux.yml

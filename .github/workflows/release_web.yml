@@ -1,0 +1,46 @@
+name: 🌐 Release Web Build
+
+on:
+  workflow_call:
+
+concurrency:
+  group: ci-${{github.actor}}-${{github.head_ref || github.run_number}}-${{github.ref}}-release-web
+  cancel-in-progress: true
+
+jobs:
+  web-build:
+    name: 🌐 Web Release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Get dependencies
+        run: sudo apt-get update && sudo apt-get install gcc libgl1-mesa-dev libegl1-mesa-dev libgles2-mesa-dev libx11-dev xorg-dev libasound2-dev libopenal-dev binaryen
+        if: ${{ runner.os == 'Linux' }}
+
+      - name: Setup go/xgo & engine
+        uses: ./.github/actions/deps
+
+      - name: Build release pack
+        run: |
+          make export-web
+          if [ ! -f "spx_web.zip" ]; then
+            echo "spx_web.zip not found"
+            exit 1
+          fi
+
+      - name: Upload Web Build Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-release
+          path: spx_web.zip
+          retention-days: 14
+
+      - name: Publish to GitHub Release
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: spx_web.zip
+          tag_name: ${{ github.event.release.tag_name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

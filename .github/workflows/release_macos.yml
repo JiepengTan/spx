@@ -1,0 +1,62 @@
+name: 🍎 Release macOS Build
+
+on:
+  workflow_call:
+
+concurrency:
+  group: ci-${{github.actor}}-${{github.head_ref || github.run_number}}-${{github.ref}}-release-macos
+  cancel-in-progress: true
+
+jobs:
+  macos-goenv:
+    name: 🍎 macOS Goenv Package
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        include:
+          - arch: amd64
+            arch_name: x64
+          - arch: arm64
+            arch_name: arm64
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup go/xgo & engine
+        uses: ./.github/actions/deps
+
+      - name: Download and extract Go toolchain
+        run: |
+          mkdir -p goenv/gotoolchain
+          cd goenv/gotoolchain
+          curl -L -O https://go.dev/dl/go1.24.0.darwin-${{ matrix.arch }}.tar.gz
+          tar -xzf go1.24.0.darwin-${{ matrix.arch }}.tar.gz
+          rm go1.24.0.darwin-${{ matrix.arch }}.tar.gz
+          cd ../..
+
+      - name: Package goenv
+        run: |
+          mkdir -p goenv/go/bin
+          cp $HOME/go/bin/gdspxrt* goenv/go/bin/ || true
+          cp $HOME/go/bin/runtime.gdextension goenv/go/bin/ || true
+          cp $HOME/go/bin/spx goenv/go/bin/
+
+          # Create zip archive
+          cd goenv
+          zip -r ../spx-darwin-${{ matrix.arch_name }}.zip .
+          cd ..
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: spx-darwin-${{ matrix.arch_name }}
+          path: spx-darwin-${{ matrix.arch_name }}.zip
+          retention-days: 14
+
+      - name: Publish to GitHub Release
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: spx-darwin-${{ matrix.arch_name }}.zip
+          tag_name: ${{ github.event.release.tag_name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
