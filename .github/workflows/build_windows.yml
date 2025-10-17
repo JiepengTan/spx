@@ -32,13 +32,6 @@ jobs:
     - name: Test
       uses: ./.github/actions/project-test
 
-    - name: Build spx binary
-      shell: msys2 {0}
-      run: |
-        cd cmd/gox
-        go build -o ../../spx.exe
-        cd ../..
-
     - name: Determine architecture
       id: platform
       shell: msys2 {0}
@@ -68,8 +61,8 @@ jobs:
         cp $HOME/go/bin/gdspxrt* goenv/gotoolchain/go/bin/ || true
         cp $HOME/go/bin/runtime.gdextension goenv/gotoolchain/go/bin/ || true
 
-        # Copy spx executable
-        cp spx.exe goenv/gotoolchain/go/bin/
+        # Copy spx executable from GOPATH/bin
+        cp $HOME/go/bin/spx.exe goenv/gotoolchain/go/bin/
 
         # Create archive
         zip -r goenv-windows-${{ steps.platform.outputs.arch }}.zip goenv

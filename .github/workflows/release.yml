@@ -112,12 +112,6 @@ jobs:
       - name: Setup go/xgo & engine
         uses: ./.github/actions/deps
 
-      - name: Build spx binary
-        run: |
-          cd cmd/gox
-          go build -o ../../spx
-          cd ../..
-
       - name: Determine platform and architecture
         id: platform
         run: |
@@ -144,7 +138,7 @@ jobs:
           mkdir -p goenv/gotoolchain/go/bin
           cp $HOME/go/bin/gdspxrt* goenv/gotoolchain/go/bin/ || true
           cp $HOME/go/bin/runtime.gdextension goenv/gotoolchain/go/bin/ || true
-          cp spx goenv/gotoolchain/go/bin/
+          cp $HOME/go/bin/spx goenv/gotoolchain/go/bin/
           tar -czf goenv-darwin-${{ steps.platform.outputs.arch }}.tar.gz goenv
 
       - name: Upload artifact

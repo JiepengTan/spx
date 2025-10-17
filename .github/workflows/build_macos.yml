@@ -20,12 +20,6 @@ jobs:
     - name: Test
       uses: ./.github/actions/project-test
 
-    - name: Build spx binary
-      run: |
-        cd cmd/gox
-        go build -o ../../spx
-        cd ../..
-
     - name: Determine platform and architecture
       id: platform
       run: |
@@ -55,8 +49,8 @@ jobs:
         cp $HOME/go/bin/gdspxrt* goenv/gotoolchain/go/bin/ || true
         cp $HOME/go/bin/runtime.gdextension goenv/gotoolchain/go/bin/ || true
 
-        # Copy spx executable
-        cp spx goenv/gotoolchain/go/bin/
+        # Copy spx executable from GOPATH/bin
+        cp $HOME/go/bin/spx goenv/gotoolchain/go/bin/
 
         # Create archive
         tar -czf goenv-darwin-${{ steps.platform.outputs.arch }}.tar.gz goenv
