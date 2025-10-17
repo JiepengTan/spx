@@ -45,12 +45,12 @@ jobs:
     - name: Package goenv
       run: |
         # Copy runtime files from GOPATH/bin
-        mkdir -p goenv/gotoolchain/go/bin
-        cp $HOME/go/bin/gdspxrt* goenv/gotoolchain/go/bin/ || true
-        cp $HOME/go/bin/runtime.gdextension goenv/gotoolchain/go/bin/ || true
+        mkdir -p goenv/go/bin
+        cp $HOME/go/bin/gdspxrt* goenv/go/bin/ || true
+        cp $HOME/go/bin/runtime.gdextension goenv/go/bin/ || true
 
         # Copy spx executable from GOPATH/bin
-        cp $HOME/go/bin/spx goenv/gotoolchain/go/bin/
+        cp $HOME/go/bin/spx goenv/go/bin/
 
         # Create archive
         tar -czf goenv-darwin-${{ steps.platform.outputs.arch }}.tar.gz goenv

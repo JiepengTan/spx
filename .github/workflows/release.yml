@@ -135,10 +135,10 @@ jobs:
 
       - name: Package goenv
         run: |
-          mkdir -p goenv/gotoolchain/go/bin
-          cp $HOME/go/bin/gdspxrt* goenv/gotoolchain/go/bin/ || true
-          cp $HOME/go/bin/runtime.gdextension goenv/gotoolchain/go/bin/ || true
-          cp $HOME/go/bin/spx goenv/gotoolchain/go/bin/
+          mkdir -p goenv/go/bin
+          cp $HOME/go/bin/gdspxrt* goenv/go/bin/ || true
+          cp $HOME/go/bin/runtime.gdextension goenv/go/bin/ || true
+          cp $HOME/go/bin/spx goenv/go/bin/
           tar -czf goenv-darwin-${{ steps.platform.outputs.arch }}.tar.gz goenv
 
       - name: Upload artifact
@@ -179,13 +179,6 @@ jobs:
       - name: Setup go/xgo & engine
         uses: ./.github/actions/deps
 
-      - name: Build spx binary
-        shell: msys2 {0}
-        run: |
-          cd cmd/gox
-          go build -o ../../spx.exe
-          cd ../..
-
       - name: Determine architecture
         id: platform
         shell: msys2 {0}
@@ -209,10 +202,10 @@ jobs:
       - name: Package goenv
         shell: msys2 {0}
         run: |
-          mkdir -p goenv/gotoolchain/go/bin
-          cp $HOME/go/bin/gdspxrt* goenv/gotoolchain/go/bin/ || true
-          cp $HOME/go/bin/runtime.gdextension goenv/gotoolchain/go/bin/ || true
-          cp spx.exe goenv/gotoolchain/go/bin/
+          mkdir -p goenv/go/bin
+          cp $HOME/go/bin/gdspxrt* goenv/go/bin/ || true
+          cp $HOME/go/bin/runtime.gdextension goenv/go/bin/ || true
+          cp $HOME/go/bin/spx.exe goenv/go/bin/
           zip -r goenv-windows-${{ steps.platform.outputs.arch }}.zip goenv
 
       - name: Upload artifact
@@ -244,12 +237,6 @@ jobs:
       - name: Setup go/xgo & engine
         uses: ./.github/actions/deps
 
-      - name: Build spx binary
-        run: |
-          cd cmd/gox
-          go build -o ../../spx
-          cd ../..
-
       - name: Determine architecture
         id: platform
         run: |
@@ -273,10 +260,10 @@ jobs:
 
       - name: Package goenv
         run: |
-          mkdir -p goenv/gotoolchain/go/bin
-          cp $HOME/go/bin/gdspxrt* goenv/gotoolchain/go/bin/ || true
-          cp $HOME/go/bin/runtime.gdextension goenv/gotoolchain/go/bin/ || true
-          cp spx goenv/gotoolchain/go/bin/
+          mkdir -p goenv/go/bin
+          cp $HOME/go/bin/gdspxrt* goenv/go/bin/ || true
+          cp $HOME/go/bin/runtime.gdextension goenv/go/bin/ || true
+          cp $HOME/go/bin/spx goenv/go/bin/
           tar -czf goenv-linux-${{ steps.platform.outputs.arch }}.tar.gz goenv
 
       - name: Upload artifact
