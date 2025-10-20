@@ -1,6 +1,7 @@
 package command
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"path"
@@ -188,6 +189,11 @@ func (pself *CmdTool) genGoUsingXgobuild(rawdir, spxProjPath string) string {
 	util.RunGolang(nil, "mod", "tidy")
 	os.Chdir(rawdir)
 
+	// Add init.go for AI pack if specified
+	if pself.Args.AiPack != nil && *pself.Args.AiPack != "" {
+		pself.addAiInitFile()
+	}
+
 	// Return tags string for subsequent build steps
 	tagStr := ""
 	if *pself.Args.Tags != "" {
@@ -223,5 +229,29 @@ func (pself *CmdTool) genGoUsingXgoCLI(rawdir, spxProjPath string) string {
 	util.RunGolang(nil, "mod", "tidy")
 
 	os.Chdir(rawdir)
+
+	// Add init.go for AI pack if specified
+	if pself.Args.AiPack != nil && *pself.Args.AiPack != "" {
+		pself.addAiInitFile()
+	}
+
 	return tagStr
+}
+
+// addAiInitFile adds the AI initialization file to the go directory
+func (pself *CmdTool) addAiInitFile() {
+	initGoPath := filepath.Join(pself.GoDir, "init.go")
+
+	// Check if init.go already exists
+	if _, err := os.Stat(initGoPath); err == nil {
+		fmt.Println("Warning: init.go already exists, skipping AI init file creation")
+		return
+	}
+
+	// Write the init.go template
+	if err := os.WriteFile(initGoPath, []byte(pself.InitAiGoTemplate), 0644); err != nil {
+		fmt.Printf("Warning: failed to write init.go: %v\n", err)
+	} else {
+		fmt.Printf("✅ Added AI init file: %s\n", initGoPath)
+	}
 }

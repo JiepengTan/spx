@@ -1,6 +1,6 @@
 module github.com/goplus/spx/v2
 
-go 1.23.0
+go 1.24.0
 
 require (
 	github.com/goplus/spbase v0.1.0

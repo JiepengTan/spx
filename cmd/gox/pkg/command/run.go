@@ -130,3 +130,7 @@ func (pself *CmdTool) RunPureEngine(pargs ...string) error {
 	os.Chdir(rawdir)
 	return util.RunCommandInDir(pself.TargetDir, binaryPath, pargs...)
 }
+
+func (pself *CmdTool) RunWithAiMode(pargs ...string) error {
+	return pself.RunPackMode(pargs...)
+}
