@@ -23,6 +23,7 @@ func setupAITransport() {
 		fmt.Println("   Set SPX_AI_TOKEN environment variable for authentication")
 	}
 
+
 	// Create HTTP transport
 	transport := httptrans.New(
 		httptrans.WithEndpoint(endpoint),

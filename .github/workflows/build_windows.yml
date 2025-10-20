@@ -13,7 +13,7 @@ jobs:
     runs-on: "windows-latest"
     steps:
     - uses: actions/checkout@v5
-    
+
     - name: Set up MSYS2
       uses: msys2/setup-msys2@v2
       with:
@@ -21,14 +21,10 @@ jobs:
         install: >-
           base-devel
           mingw-w64-x86_64-toolchain
-          zip
-          unzip
-          make
-          bash
 
     - name: Setup go/xgo & engine
       uses: ./.github/actions/deps
 
     - name: Test
       uses: ./.github/actions/project-test
-      
+

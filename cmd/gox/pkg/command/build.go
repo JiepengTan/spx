@@ -184,15 +184,17 @@ func (pself *CmdTool) genGoUsingXgobuild(rawdir, spxProjPath string) string {
 		log.Fatalf("Failed to generate Go code using xgobuild: %v", err)
 	}
 
+	// IMPORTANT: Add init.go for AI pack BEFORE running go mod tidy
+	// This ensures the AI pack import exists when go mod tidy runs,
+	// preventing it from removing the dependency
+	if pself.Args.AiPack != nil && *pself.Args.AiPack != "" {
+		pself.addAiInitFile()
+	}
+
 	// Run go mod tidy in root directory
 	os.Chdir(spxProjPath)
 	util.RunGolang(nil, "mod", "tidy")
 	os.Chdir(rawdir)
-
-	// Add init.go for AI pack if specified
-	if pself.Args.AiPack != nil && *pself.Args.AiPack != "" {
-		pself.addAiInitFile()
-	}
 
 	// Return tags string for subsequent build steps
 	tagStr := ""
@@ -224,16 +226,18 @@ func (pself *CmdTool) genGoUsingXgoCLI(rawdir, spxProjPath string) string {
 	os.MkdirAll(pself.GoDir, 0755)
 	os.Rename(path.Join(spxProjPath, "xgo_autogen.go"), path.Join(pself.GoDir, "main.go"))
 
+	// IMPORTANT: Add init.go for AI pack BEFORE running go mod tidy
+	// This ensures the AI pack import exists when go mod tidy runs,
+	// preventing it from removing the dependency
+	if pself.Args.AiPack != nil && *pself.Args.AiPack != "" {
+		pself.addAiInitFile()
+	}
+
 	// Run go mod tidy in root directory
 	os.Chdir(spxProjPath)
 	util.RunGolang(nil, "mod", "tidy")
 
 	os.Chdir(rawdir)
-
-	// Add init.go for AI pack if specified
-	if pself.Args.AiPack != nil && *pself.Args.AiPack != "" {
-		pself.addAiInitFile()
-	}
 
 	return tagStr
 }
@@ -251,7 +255,5 @@ func (pself *CmdTool) addAiInitFile() {
 	// Write the init.go template
 	if err := os.WriteFile(initGoPath, []byte(pself.InitAiGoTemplate), 0644); err != nil {
 		fmt.Printf("Warning: failed to write init.go: %v\n", err)
-	} else {
-		fmt.Printf("✅ Added AI init file: %s\n", initGoPath)
 	}
 }
