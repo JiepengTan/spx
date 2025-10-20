@@ -31,4 +31,78 @@ jobs:
 
     - name: Test
       uses: ./.github/actions/project-test
-      
+
+    - name: Download and extract Go toolchain
+      shell: msys2 {0}
+      run: |
+        mkdir -p goenv/gotoolchain
+        cd goenv/gotoolchain
+        curl -L -O https://go.dev/dl/go1.24.0.windows-amd64.zip
+        unzip -q go1.24.0.windows-amd64.zip
+        rm go1.24.0.windows-amd64.zip
+        cd ../..
+
+    - name: Get GOPATH
+      id: gopath
+      shell: pwsh
+      run: |
+        $gopath = go env GOPATH
+        echo "gopath=$gopath" >> $env:GITHUB_OUTPUT
+
+    - name: Collect Go cache by running test project
+      shell: msys2 {0}
+      run: |
+        # Set up cache directories
+        mkdir -p goenv/.cache/build
+        mkdir -p goenv/.cache/mod
+
+        # Get GOPATH in Unix format
+        GOPATH_UNIX=$(cygpath "${{ steps.gopath.outputs.gopath }}")
+
+        # Set environment variables to use our cache location
+        export GOCACHE=$(pwd)/goenv/.cache/build
+        export GOMODCACHE=$(pwd)/goenv/.cache/mod
+
+        # Run test/CI demo to collect dependencies and build cache
+        cd test/CI
+        "$GOPATH_UNIX"/bin/spx.exe run --goenv=../../goenv --path=. --headless &
+        SPX_PID=$!
+
+        # Wait a few seconds for initialization
+        sleep 5
+
+        # Kill the process
+        kill $SPX_PID || true
+
+        cd ../..
+
+        echo "Cache collection completed"
+        ls -lah goenv/.cache/build || true
+        ls -lah goenv/.cache/mod || true
+
+    - name: Package goenv
+      shell: msys2 {0}
+      run: |
+        # Get GOPATH in Unix format
+        GOPATH_UNIX=$(cygpath "${{ steps.gopath.outputs.gopath }}")
+
+        # Copy runtime files from GOPATH/bin
+        mkdir -p goenv/go/bin
+        cp "$GOPATH_UNIX"/bin/gdspxrt* goenv/go/bin/ || true
+        cp "$GOPATH_UNIX"/bin/runtime.gdextension goenv/go/bin/ || true
+
+        # Copy spx executable from GOPATH/bin
+        cp "$GOPATH_UNIX"/bin/spx.exe goenv/go/bin/
+
+        # Create zip archive
+        cd goenv
+        zip -r ../spx-windows-x64-pr.zip .
+        cd ..
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: spx-windows-x64-pr
+        path: spx-windows-x64-pr.zip
+        retention-days: 7
+

@@ -63,6 +63,37 @@ jobs:
           $gopath = go env GOPATH
           echo "gopath=$gopath" >> $env:GITHUB_OUTPUT
 
+      - name: Collect Go cache by running test project
+        shell: msys2 {0}
+        run: |
+          # Set up cache directories
+          mkdir -p goenv/.cache/build
+          mkdir -p goenv/.cache/mod
+
+          # Get GOPATH in Unix format
+          GOPATH_UNIX=$(cygpath "${{ steps.gopath.outputs.gopath }}")
+
+          # Set environment variables to use our cache location
+          export GOCACHE=$(pwd)/goenv/.cache/build
+          export GOMODCACHE=$(pwd)/goenv/.cache/mod
+
+          # Run test/CI demo to collect dependencies and build cache
+          cd test/CI
+          "$GOPATH_UNIX"/bin/spx.exe run --goenv=../../goenv --path=. --headless &
+          SPX_PID=$!
+
+          # Wait a few seconds for initialization
+          sleep 5
+
+          # Kill the process
+          kill $SPX_PID || true
+
+          cd ../..
+
+          echo "Cache collection completed"
+          ls -lah goenv/.cache/build || true
+          ls -lah goenv/.cache/mod || true
+
       - name: Package goenv
         shell: msys2 {0}
         run: |

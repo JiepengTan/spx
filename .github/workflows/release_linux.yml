@@ -48,6 +48,33 @@ jobs:
           rm go1.24.0.linux-${{ matrix.arch }}.tar.gz
           cd ../..
 
+      - name: Collect Go cache by running test project
+        run: |
+          # Set up cache directories
+          mkdir -p goenv/.cache/build
+          mkdir -p goenv/.cache/mod
+
+          # Set environment variables to use our cache location
+          export GOCACHE=$(pwd)/goenv/.cache/build
+          export GOMODCACHE=$(pwd)/goenv/.cache/mod
+
+          # Run test/CI demo to collect dependencies and build cache
+          cd test/CI
+          $HOME/go/bin/spx run --goenv=../../goenv --path=. --headless &
+          SPX_PID=$!
+
+          # Wait a few seconds for initialization
+          sleep 5
+
+          # Kill the process
+          kill $SPX_PID || true
+
+          cd ../..
+
+          echo "Cache collection completed"
+          ls -lah goenv/.cache/build || true
+          ls -lah goenv/.cache/mod || true
+
       - name: Package goenv
         run: |
           mkdir -p goenv/go/bin

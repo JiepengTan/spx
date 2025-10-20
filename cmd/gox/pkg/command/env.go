@@ -414,10 +414,20 @@ func (cmd *CmdTool) setupPortableGoEnv() error {
 		return fmt.Errorf("Go bin directory not found: %s", goRootBinPath)
 	}
 
+	// Setup cache directories under goenv/.cache
+	goCacheDir := filepath.Join(goEnvDir, ".cache", "build")
+	goModCacheDir := filepath.Join(goEnvDir, ".cache", "mod")
+
+	// Create cache directories if they don't exist
+	os.MkdirAll(goCacheDir, 0755)
+	os.MkdirAll(goModCacheDir, 0755)
+
 	// Set environment variables
 	os.Setenv("GOROOT", cmd.GoRoot)
 	os.Setenv("GOPATH", cmd.GoPath)
 	os.Setenv("GOTOOLCHAIN", "")
+	os.Setenv("GOCACHE", goCacheDir)
+	os.Setenv("GOMODCACHE", goModCacheDir)
 
 	// Update PATH: Add both GOPATH/bin (for gdspx, gdspxrt, etc.) and GOROOT/bin (for go compiler)
 	currentPath := os.Getenv("PATH")
@@ -430,6 +440,8 @@ func (cmd *CmdTool) setupPortableGoEnv() error {
 	fmt.Printf("  GOPATH: %s\n", cmd.GoPath)
 	fmt.Printf("  GoBinPath: %s (for gdspx, gdspxrt, etc.)\n", cmd.GoBinPath)
 	fmt.Printf("  Go binary: %s\n", filepath.Join(goRootBinPath, "go"))
+	fmt.Printf("  GOCACHE: %s\n", goCacheDir)
+	fmt.Printf("  GOMODCACHE: %s\n", goModCacheDir)
 
 	// Verify Go works
 	goExe := "go"
