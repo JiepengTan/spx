@@ -13,7 +13,7 @@ jobs:
     runs-on: "windows-latest"
     steps:
     - uses: actions/checkout@v5
-    
+
     - name: Set up MSYS2
       uses: msys2/setup-msys2@v2
       with:
@@ -21,104 +21,10 @@ jobs:
         install: >-
           base-devel
           mingw-w64-x86_64-toolchain
-          zip
-          unzip
-          make
-          bash
 
     - name: Setup go/xgo & engine
       uses: ./.github/actions/deps
 
     - name: Test
       uses: ./.github/actions/project-test
-
-    - name: Download and extract Go toolchain
-      shell: msys2 {0}
-      run: |
-        mkdir -p goenv/gotoolchain
-        cd goenv/gotoolchain
-        curl -L -O https://go.dev/dl/go1.24.0.windows-amd64.zip
-        unzip -q go1.24.0.windows-amd64.zip
-        rm go1.24.0.windows-amd64.zip
-        cd ../..
-
-    - name: Get GOPATH
-      id: gopath
-      shell: pwsh
-      run: |
-        $gopath = go env GOPATH
-        echo "gopath=$gopath" >> $env:GITHUB_OUTPUT
-
-    - name: Collect Go module cache
-      shell: msys2 {0}
-      run: |
-        # Set up mod cache directory (no build cache needed)
-        mkdir -p goenv/.cache/mod
-
-        # Get GOPATH in Unix format
-        GOPATH_UNIX=$(cygpath "${{ steps.gopath.outputs.gopath }}")
-
-        # Set environment to use our mod cache location
-        export GOMODCACHE=$(pwd)/goenv/.cache/mod
-
-        # Add current spx source to mod cache so users can use offline
-        SPX_VERSION="v2.0.0-$(git rev-parse --short HEAD)"
-        DEST="$GOMODCACHE/github.com/goplus/spx/v2@$SPX_VERSION"
-
-        echo "Installing spx source to mod cache: $SPX_VERSION"
-        mkdir -p "$DEST"
-        rsync -av --exclude='.git' --exclude='goenv' \
-          --exclude='test' --exclude='tutorial' --exclude='demo-game' \
-          --exclude='spx_demos' --exclude='cmd/demo' \
-          . "$DEST/"
-
-        # Run test/CI demo to collect other dependencies
-        cd test/CI
-        "$GOPATH_UNIX"/bin/spx.exe run --goenv=../../goenv --path=. --headless &
-        SPX_PID=$!
-
-        # Wait a few seconds for initialization
-        sleep 5
-
-        # Kill the process
-        kill $SPX_PID || true
-
-        cd ../..
-
-        echo "Module cache collection completed"
-        ls -lah goenv/.cache/mod || true
-        du -sh goenv/.cache/mod || true
-
-    - name: Package goenv
-      shell: msys2 {0}
-      run: |
-        # Get GOPATH in Unix format
-        GOPATH_UNIX=$(cygpath "${{ steps.gopath.outputs.gopath }}")
-
-        # Copy runtime files from GOPATH/bin
-        mkdir -p goenv/go/bin
-        cp "$GOPATH_UNIX"/bin/gdspxrt* goenv/go/bin/ || true
-        cp "$GOPATH_UNIX"/bin/runtime.gdextension goenv/go/bin/ || true
-
-        # Copy spx executable from GOPATH/bin
-        cp "$GOPATH_UNIX"/bin/spx.exe goenv/go/bin/
-
-        # Remove build cache if it exists (users can rebuild locally)
-        rm -rf goenv/.cache/build
-
-        # Verify what will be packaged
-        echo "Contents to be packaged:"
-        du -sh goenv/* goenv/.cache/* 2>/dev/null || true
-
-        # Create zip archive
-        cd goenv
-        zip -r ../spx-windows-x64-pr.zip .
-        cd ..
-
-    - name: Upload artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: spx-windows-x64-pr
-        path: spx-windows-x64-pr.zip
-        retention-days: 7
 
