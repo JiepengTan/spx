@@ -38,7 +38,6 @@ jobs:
             make
             bash
             rsync
-            git
 
       - name: Setup go/xgo & engine
         uses: ./.github/actions/deps
@@ -58,12 +57,16 @@ jobs:
           rm go1.24.0.windows-${{ matrix.arch }}.zip
           cd ../..
 
-      - name: Get GOPATH
-        id: gopath
+      - name: Get GOPATH and short SHA
+        id: env-vars
         shell: pwsh
         run: |
           $gopath = go env GOPATH
           echo "gopath=$gopath" >> $env:GITHUB_OUTPUT
+
+          # Get short SHA (first 7 characters)
+          $shortSha = "${{ github.sha }}".Substring(0, 7)
+          echo "short_sha=$shortSha" >> $env:GITHUB_OUTPUT
 
       - name: Collect Go module cache
         shell: msys2 {0}
@@ -72,13 +75,13 @@ jobs:
           mkdir -p goenv/.cache/mod
 
           # Get GOPATH in Unix format
-          GOPATH_UNIX=$(cygpath "${{ steps.gopath.outputs.gopath }}")
+          GOPATH_UNIX=$(cygpath "${{ steps.env-vars.outputs.gopath }}")
 
           # Set environment to use our mod cache location
           export GOMODCACHE=$(pwd)/goenv/.cache/mod
 
           # Add current spx source to mod cache so users can use offline
-          SPX_VERSION="v2.0.0-$(git rev-parse --short HEAD)"
+          SPX_VERSION="v2.0.0-${{ steps.env-vars.outputs.short_sha }}"
           DEST="$GOMODCACHE/github.com/goplus/spx/v2@$SPX_VERSION"
 
           echo "Installing spx source to mod cache: $SPX_VERSION"
@@ -109,7 +112,7 @@ jobs:
         shell: msys2 {0}
         run: |
           # Convert Windows GOPATH to Unix path for MSYS2
-          GOPATH_UNIX=$(cygpath "${{ steps.gopath.outputs.gopath }}")
+          GOPATH_UNIX=$(cygpath "${{ steps.env-vars.outputs.gopath }}")
 
           # Copy runtime files from GOPATH/bin
           mkdir -p goenv/go/bin
