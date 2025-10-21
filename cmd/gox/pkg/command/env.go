@@ -87,14 +87,6 @@ func main() {print(&spx.Game{})}
 	rawDir, _ := os.Getwd()
 	os.Chdir(pself.TargetDir)
 
-	// Explicitly download AI pack dependency if specified
-	// This ensures the module is downloaded even if go.mod already contains the require line
-	if pself.Args.AiPack != nil && *pself.Args.AiPack != "" {
-		aiPkg := fmt.Sprintf("github.com/goplus/builder/tools/ai@%s", *pself.Args.AiPack)
-		fmt.Printf("Ensuring AI pack is downloaded: %s\n", aiPkg)
-		util.RunGolang(nil, "get", aiPkg)
-	}
-
 	// Step 5: Run go mod tidy to clean up dependencies
 	util.RunGolang(nil, "mod", "tidy")
 
@@ -534,7 +526,6 @@ func (pself *CmdTool) addAiPackDependency(goModPath, version string) {
 		fmt.Printf("Warning: failed to write go.mod: %v\n", err)
 		return
 	}
-	fmt.Printf("✅ Added AI pack dependency: %s\n", version)
 }
 
 // addGopMod adds gop.mod file for AI pack support
