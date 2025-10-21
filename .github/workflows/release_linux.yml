@@ -34,11 +34,6 @@ jobs:
       - name: Setup go/xgo & engine
         uses: ./.github/actions/deps
 
-      - name: Replace version
-        uses: ./.github/actions/replace-version
-        with:
-          version: ${{ inputs.version }}
-
       - name: Download and extract Go toolchain
         run: |
           mkdir -p goenv/gotoolchain
@@ -90,6 +85,17 @@ jobs:
           echo "Module cache collection completed"
           ls -lah goenv/.cache/mod || true
           du -sh goenv/.cache/mod || true
+
+      - name: Replace version
+        uses: ./.github/actions/replace-version
+        with:
+          version: ${{ inputs.version }}
+
+      - name: Update spx binary with versioned build
+        run: |
+          # After replace-version rebuilds spx with the new version,
+          # update the binary in goenv to match
+          cp $HOME/go/bin/spx goenv/go/bin/spx
 
       - name: Package goenv
         run: |

@@ -78,6 +78,12 @@ jobs:
         with:
           version: ${{ inputs.version }}
 
+      - name: Update spx binary with versioned build
+        run: |
+          # After replace-version rebuilds spx with the new version,
+          # update the binary in goenv to match
+          cp $HOME/go/bin/spx goenv/go/bin/spx
+
       - name: Package goenv
         run: |
           # Remove build cache if it exists (users can rebuild locally)

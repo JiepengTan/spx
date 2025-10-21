@@ -42,11 +42,6 @@ jobs:
       - name: Setup go/xgo & engine
         uses: ./.github/actions/deps
 
-      - name: Replace version
-        uses: ./.github/actions/replace-version
-        with:
-          version: ${{ inputs.version }}
-
       - name: Download and extract Go toolchain
         shell: msys2 {0}
         run: |
@@ -114,6 +109,19 @@ jobs:
           echo "Module cache collection completed"
           ls -lah goenv/.cache/mod || true
           du -sh goenv/.cache/mod || true
+
+      - name: Replace version
+        uses: ./.github/actions/replace-version
+        with:
+          version: ${{ inputs.version }}
+
+      - name: Update spx binary with versioned build
+        shell: msys2 {0}
+        run: |
+          # After replace-version rebuilds spx with the new version,
+          # update the binary in goenv to match
+          GOPATH_UNIX=$(cygpath "${{ steps.env-vars.outputs.gopath }}")
+          cp "$GOPATH_UNIX"/bin/spx.exe goenv/go/bin/spx.exe
 
       - name: Package goenv
         shell: msys2 {0}
