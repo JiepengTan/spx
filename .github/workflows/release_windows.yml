@@ -77,6 +77,13 @@ jobs:
           # Get GOPATH in Unix format
           GOPATH_UNIX=$(cygpath "${{ steps.env-vars.outputs.gopath }}")
 
+          # IMPORTANT: Copy binaries BEFORE running spx to collect dependencies
+          # Without these, spx run will fail and won't download dependencies
+          mkdir -p goenv/go/bin
+          cp "$GOPATH_UNIX"/bin/gdspxrt* goenv/go/bin/ || true
+          cp "$GOPATH_UNIX"/bin/runtime.gdextension goenv/go/bin/ || true
+          cp "$GOPATH_UNIX"/bin/spx.exe goenv/go/bin/
+
           # Set environment to use our mod cache location
           export GOMODCACHE=$(pwd)/goenv/.cache/mod
 
@@ -111,17 +118,6 @@ jobs:
       - name: Package goenv
         shell: msys2 {0}
         run: |
-          # Convert Windows GOPATH to Unix path for MSYS2
-          GOPATH_UNIX=$(cygpath "${{ steps.env-vars.outputs.gopath }}")
-
-          # Copy runtime files from GOPATH/bin
-          mkdir -p goenv/go/bin
-          cp "$GOPATH_UNIX"/bin/gdspxrt* goenv/go/bin/ || true
-          cp "$GOPATH_UNIX"/bin/runtime.gdextension goenv/go/bin/ || true
-
-          # Copy spx executable from GOPATH/bin
-          cp "$GOPATH_UNIX"/bin/spx.exe goenv/go/bin/
-
           # Remove build cache if it exists (users can rebuild locally)
           rm -rf goenv/.cache/build
 

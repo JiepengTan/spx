@@ -43,6 +43,13 @@ jobs:
           # Set up mod cache directory (no build cache needed)
           mkdir -p goenv/.cache/mod
 
+          # IMPORTANT: Copy binaries BEFORE running spx to collect dependencies
+          # Without these, spx run will fail and won't download dependencies
+          mkdir -p goenv/go/bin
+          cp $HOME/go/bin/gdspxrt* goenv/go/bin/ || true
+          cp $HOME/go/bin/runtime.gdextension goenv/go/bin/ || true
+          cp $HOME/go/bin/spx goenv/go/bin/
+
           # Set environment to use our mod cache location
           export GOMODCACHE=$(pwd)/goenv/.cache/mod
 
@@ -73,11 +80,6 @@ jobs:
 
       - name: Package goenv
         run: |
-          mkdir -p goenv/go/bin
-          cp $HOME/go/bin/gdspxrt* goenv/go/bin/ || true
-          cp $HOME/go/bin/runtime.gdextension goenv/go/bin/ || true
-          cp $HOME/go/bin/spx goenv/go/bin/
-
           # Remove build cache if it exists (users can rebuild locally)
           rm -rf goenv/.cache/build
 
