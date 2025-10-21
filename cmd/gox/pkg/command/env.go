@@ -57,26 +57,16 @@ func (cmd *CmdTool) setupPaths(dstRelDir string) error {
 func (pself *CmdTool) PrepareEnv(fsRelDir, dstDir string) {
 	util.CopyDir(pself.ProjectFS, fsRelDir, dstDir, false)
 
-	// Handle go.mod file adaptively
-	pself.adaptGoMod()
-
-	// Add gop.mod for AI pack if specified
-	if pself.Args.AiPack != nil && *pself.Args.AiPack != "" {
-		pself.addGopMod()
-	}
-
-	// create a temp go file to run go mod tidy
+	// Step 1: Create temporary files first (before modifying go.mod)
+	// This ensures import references exist when go mod tidy runs
 	tempFile, _ := filepath.Abs(path.Join(pself.TargetDir, "xgo_autogen.go"))
-	if _, err := os.Stat(tempFile); os.IsNotExist(err) {
-		tmp := `
+	tmp := `
 package main
 import "github.com/goplus/spx/v2"
 func main() {print(&spx.Game{})}
 `
-		os.WriteFile(tempFile, []byte(tmp), 0644)
-	}
+	os.WriteFile(tempFile, []byte(tmp), 0644)
 
-	// Create temporary initai.go for AI pack (needed for go mod tidy)
 	var tempAiInitFile string
 	if pself.Args.AiPack != nil && *pself.Args.AiPack != "" {
 		tempAiInitFile, _ = filepath.Abs(path.Join(pself.TargetDir, "initai.go"))
@@ -85,11 +75,30 @@ func main() {print(&spx.Game{})}
 		}
 	}
 
+	// Step 2: Handle go.mod file adaptively
+	pself.adaptGoMod()
+
+	// Step 3: Add gop.mod for AI pack if specified
+	if pself.Args.AiPack != nil && *pself.Args.AiPack != "" {
+		pself.addGopMod()
+	}
+
+	// Step 4: Change to target directory and ensure dependencies are downloaded
 	rawDir, _ := os.Getwd()
 	os.Chdir(pself.TargetDir)
+
+	// Explicitly download AI pack dependency if specified
+	// This ensures the module is downloaded even if go.mod already contains the require line
+	if pself.Args.AiPack != nil && *pself.Args.AiPack != "" {
+		aiPkg := fmt.Sprintf("github.com/goplus/builder/tools/ai@%s", *pself.Args.AiPack)
+		fmt.Printf("Ensuring AI pack is downloaded: %s\n", aiPkg)
+		util.RunGolang(nil, "get", aiPkg)
+	}
+
+	// Step 5: Run go mod tidy to clean up dependencies
 	util.RunGolang(nil, "mod", "tidy")
 
-	// delete temp go files
+	// Step 6: Delete temporary files
 	os.Remove(tempFile)
 	if tempAiInitFile != "" {
 		os.Remove(tempAiInitFile)
@@ -502,6 +511,9 @@ func (pself *CmdTool) addAiPackDependency(goModPath, version string) {
 	// Check if AI pack dependency already exists
 	if strings.Contains(strContent, aiRequire) {
 		fmt.Println("AI pack dependency already exists in go.mod")
+		// Note: We don't return here. The explicit 'go get' in PrepareEnv will ensure
+		// the dependency is properly downloaded even if the require line exists but
+		// the module hasn't been downloaded yet.
 		return
 	}
 
@@ -520,9 +532,9 @@ func (pself *CmdTool) addAiPackDependency(goModPath, version string) {
 	// Write back the modified content
 	if err := os.WriteFile(goModPath, []byte(strContent), 0644); err != nil {
 		fmt.Printf("Warning: failed to write go.mod: %v\n", err)
-	} else {
-		fmt.Printf("✅ Added AI pack dependency: %s\n", version)
+		return
 	}
+	fmt.Printf("✅ Added AI pack dependency: %s\n", version)
 }
 
 // addGopMod adds gop.mod file for AI pack support
