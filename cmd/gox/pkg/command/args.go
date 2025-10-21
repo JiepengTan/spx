@@ -149,7 +149,6 @@ func (cmd *CmdTool) parseCommandLineArgs(help *bool, ext ...string) error {
 
 	if cmd.Args.AiPack != nil && *cmd.Args.AiPack == "default" {
 		cmd.Args.AiPack = &DefaultAiPackVersion
-		println("aaa cmd.Args.AiPack = ", *cmd.Args.AiPack)
 	}
 	return nil
 }
