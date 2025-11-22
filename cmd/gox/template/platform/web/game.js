@@ -230,7 +230,11 @@ class GameApp {
                 nonAssetFiles[path] = new Uint8Array(file.content);
             }
         });
-        window.ixgo_build(nonAssetFiles);
+        if (!this.workerMode) {
+            window.ixgo_build(nonAssetFiles);
+        }else{
+            this.nonAssetFiles = nonAssetFiles;
+        }
     }
 
     async startGame() {
@@ -388,7 +392,7 @@ class GameApp {
         if (this.workerMode) {
             let pthreads = game.getPThread()
             this.workerMessageManager.setPThreads(pthreads)
-            this.workerMessageManager.callWorkerProjectDataUpdate(this.projectData, this.assetURLs)
+            this.workerMessageManager.callWorkerProjectDataUpdate(this.nonAssetFiles, this.assetURLs)
         } else {
             // register global functions
             Module = game.rtenv;
