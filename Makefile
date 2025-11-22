@@ -98,10 +98,10 @@ endif
 # Build Commands
 # ============================================
 build-editor: ## Build editor mode engine
-	make install && ./pkg/gdspx/tools/build_engine.sh -e
+	./pkg/gdspx/tools/build_engine.sh -e
 
 build-desktop: ## Build desktop engine
-	make install && ./pkg/gdspx/tools/build_engine.sh && \
+	./pkg/gdspx/tools/build_engine.sh && \
 	./pkg/gdspx/tools/make_util.sh exportpack 
 
 build-web: ## Build web engine template
@@ -173,7 +173,14 @@ endif
 	make stop && make build-wasm && \
 	cd $$DEMO && spx clear && spx runweb -serveraddr=":$(PORT)"
 
-
+run-web-worker: ## Run demo on web: make run-web DEMO_INDEX=N
+ifndef DEMO_INDEX
+	$(error DEMO_INDEX is not set! Usage: make run-web DEMO_INDEX=N)
+endif
+	@DEMO=$(GET_DEMO); \
+	echo "Running web demo #$(DEMO_INDEX): $$DEMO"; \
+	make stop && make build-wasm && \
+	cd $$DEMO && spx clear && spx runwebworker -serveraddr=":$(PORT)"
 # ============================================
 # Utility Commands
 # ============================================

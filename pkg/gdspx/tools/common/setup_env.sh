@@ -252,7 +252,7 @@ ensure_emsdk() {
     if [ ! -d "$EMSDK_DIR/emsdk" ]; then
         echo "emsdk not found in global location, installing emsdk..."
         cd "$EMSDK_DIR" || exit
-        git clone git@github.com:emscripten-core/emsdk.git
+        git clone https://github.com/emscripten-core/emsdk.git
         cd emsdk || exit
         ./emsdk install $EMSDK_VERSION
         ./emsdk activate $EMSDK_VERSION
