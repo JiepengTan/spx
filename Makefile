@@ -60,6 +60,12 @@ setup: ## Initialize the user environment
 	./pkg/gdspx/tools/make_util.sh extrawebtemplate && \
 	echo "===> setup done"
 
+setup-web-worker: ## Download and install web worker engine from godot releases
+	@echo "===> Setting up web worker engine..."
+	@make install
+	@./pkg/gdspx/tools/download_web_worker.sh
+	@echo "===> Web worker engine setup complete"
+
 setup-dev: ## Initialize development environment (full)
 	chmod +x ./pkg/gdspx/tools/*.sh && \
 	echo "===> Step 1/6: Install spx" && \
@@ -197,6 +203,12 @@ export-pack: ## Export runtime pck file
 export-web: ## Export web engine
 	cd ./cmd/gox && ./install.sh --web --opt && cd $(CURRENT_PATH) && \
 	./pkg/gdspx/tools/make_util.sh exportweb && cd $(CURRENT_PATH)
+
+export-web-worker: ## Export web worker engine package
+	@echo "===> Exporting web worker package..."
+	@cd ./cmd/gox && ./install.sh --web --opt && cd $(CURRENT_PATH) && \
+	./pkg/gdspx/tools/make_util.sh exportwebworker && cd $(CURRENT_PATH)
+	@echo "===> Web worker export complete - spx_web_worker.zip created"
 
 stop: ## Stop running processes
 	@echo "Stopping running processes..."
