@@ -60,6 +60,7 @@ setup: ## Initialize the user environment
 	./pkg/gdspx/tools/make_util.sh extrawebtemplate && \
 	echo "===> setup done"
 
+
 setup-dev: ## Initialize development environment (full)
 	chmod +x ./pkg/gdspx/tools/*.sh && \
 	echo "===> Step 1/6: Install spx" && \
@@ -76,6 +77,20 @@ setup-dev: ## Initialize development environment (full)
 	make build-web && \
 	echo "===> setup-dev done, use 'make run DEMO_INDEX=N' to run demo"
 
+setup-web: ## Download and install web engine from godot releases. Usage: make setup-web MODE=normal (MODE: normal|worker|minigame|miniprogram)
+ifndef MODE
+	$(error MODE is not set! Usage: make setup-web MODE=normal or MODE=worker or MODE=minigame or MODE=miniprogram)
+endif
+	@if [ "$(MODE)" != "normal" ] && [ "$(MODE)" != "worker" ] && [ "$(MODE)" != "minigame" ] && [ "$(MODE)" != "miniprogram" ]; then \
+		echo "Error: Invalid MODE '$(MODE)'. Supported modes: normal, worker, minigame, miniprogram"; \
+		exit 1; \
+	fi
+	echo "===> Setting up web $(MODE) engine..."
+	make build-wasm && \
+	./pkg/gdspx/tools/build_engine.sh -g -p web -m $(MODE) && \
+	./pkg/gdspx/tools/make_util.sh extrawebtemplate $(MODE) && \
+	echo "===> Web $(MODE) engine setup complete"
+
 
 # ============================================
 # Install & Download
@@ -86,12 +101,20 @@ install: ## Install spx command
 download: ## Download engines
 	make install && ./pkg/gdspx/tools/build_engine.sh -e -d
 
-download-engine: ## Download engine templates for specific platform (android/ios). Usage: make download-engine PLATFORM=android
+download-engine: ## Download engine templates for specific platform. Usage: make download-engine PLATFORM=android|ios|web [MODE=normal|worker|minigame|miniprogram]
 ifndef PLATFORM
-	$(error PLATFORM is not set! Usage: make download-engine PLATFORM=android or PLATFORM=ios)
+	$(error PLATFORM is not set! Usage: make download-engine PLATFORM=android or PLATFORM=ios or PLATFORM=web [MODE=mode])
 endif
 	@echo "Downloading engine templates for platform: $(PLATFORM)"
-	./pkg/gdspx/tools/build_engine.sh -p $(PLATFORM) -g 
+	@if [ "$(PLATFORM)" = "web" ]; then \
+		if [ -n "$(MODE)" ]; then \
+			./pkg/gdspx/tools/build_engine.sh -p $(PLATFORM) -g -m $(MODE); \
+		else \
+			./pkg/gdspx/tools/build_engine.sh -p $(PLATFORM) -g; \
+		fi \
+	else \
+		./pkg/gdspx/tools/build_engine.sh -p $(PLATFORM) -g; \
+	fi 
 
 
 # ============================================
@@ -194,9 +217,18 @@ generate: ## Generate code
 export-pack: ## Export runtime pck file
 	./pkg/gdspx/tools/make_util.sh exportpack && cd $(CURRENT_PATH)
 
-export-web: ## Export web engine
+export-web: ## Export web engine. Usage: make export-web MODE=normal (MODE: normal|worker|minigame|miniprogram)
+	@if [ -z "$(MODE)" ]; then \
+		EXPORT_MODE=normal; \
+	else \
+		EXPORT_MODE=$(MODE); \
+	fi; \
+	if [ "$$EXPORT_MODE" != "normal" ] && [ "$$EXPORT_MODE" != "worker" ] && [ "$$EXPORT_MODE" != "minigame" ] && [ "$$EXPORT_MODE" != "miniprogram" ]; then \
+		echo "Error: Invalid MODE '$$EXPORT_MODE'. Supported modes: normal, worker, minigame, miniprogram"; \
+		exit 1; \
+	fi; \
 	cd ./cmd/gox && ./install.sh --web --opt && cd $(CURRENT_PATH) && \
-	./pkg/gdspx/tools/make_util.sh exportweb && cd $(CURRENT_PATH)
+	./pkg/gdspx/tools/make_util.sh exportweb $$EXPORT_MODE && cd $(CURRENT_PATH)
 
 stop: ## Stop running processes
 	@echo "Stopping running processes..."
