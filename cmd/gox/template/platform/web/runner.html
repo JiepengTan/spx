@@ -118,11 +118,13 @@
 				}
 
 				window.onWasmLoaded = function () {
+					console.log("==>window.onWasmLoaded")
 					if (_onSpxReady != null) {
 						_onSpxReady()
 					}
 				}
 				window.onGameStarted = function () {
+					console.log("==>window.onGameStarted")
 				}
 			}
 			const config = {

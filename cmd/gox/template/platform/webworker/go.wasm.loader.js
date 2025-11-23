@@ -23,6 +23,7 @@ function handleGameAppMessage(data) {
 }
 
 async function handleProjectDataUpdate(data) {
+  console.log("==>handleProjectDataUpdate")
   Module["gameProjectData"] = data.data;
   Module["gameAssetURLs"] = data.gameAssetURLs;
   initExtensionWasm()
@@ -98,6 +99,7 @@ function createMainThreadCallbackProxy(callbackName) {
 }
 
 function tryRunGoWasm() {
+  console.log("==>tryRunGoWasm")
   const workerId = (typeof Module !== 'undefined' && Module['workerID']) || 'unknown';
   if (!Module["FFI"]) {
     return;
@@ -105,20 +107,22 @@ function tryRunGoWasm() {
   if (!Module["gameProjectData"]) {
     return;
   }
-  
+
   const spxfuncs = new GdspxFuncs();
   const methodNames = Object.getOwnPropertyNames(Object.getPrototypeOf(spxfuncs));
   methodNames.forEach(key => {
-      if (key.startsWith('gdspx_') && typeof spxfuncs[key] === 'function') {
-          self[key] = spxfuncs[key].bind(spxfuncs);
-      }
+    if (key.startsWith('gdspx_') && typeof spxfuncs[key] === 'function') {
+      self[key] = spxfuncs[key].bind(spxfuncs);
+    }
   });
   self.Module = Module;
 
   if (self.goBridge && self.goBridge.isReady) {
     try {
       // If Go WASM is ready, can call related functions to process data
+      console.log("==>tryRunGoWasm: callGoFunctionSafe::goLoadData")
       self.goBridge.callGoFunctionSafe('goLoadData', Module["gameProjectData"]);
+      console.log("==>tryRunGoWasm: callMainThread::onGameStarted")
       callMainThread('onGameStarted');
     } catch (error) {
       console.error(`[Worker ${workerId}] Error calling Go function to process project data:`, error);
@@ -131,6 +135,7 @@ function tryRunGoWasm() {
  * This function will be called on godot_js_spx_on_engine_start callback
  */
 async function initExtensionWasm() {
+  console.log("==>initExtensionWasm")
   if (Module["gameAssetURLs"] == undefined) {
     return;
   }

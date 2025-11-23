@@ -200,8 +200,8 @@ export-web: ## Export web engine
 stop: ## Stop running processes
 	@echo "Stopping running processes..."
 	@if [ "$$OS" = "Windows_NT" ]; then \
-		taskkill /F /FI "IMAGENAME eq python.exe" 2>/NUL || true; \
-		taskkill /F /FI "IMAGENAME eq python3.exe" 2>/NUL || true; \
+		taskkill /F /FI "IMAGENAME eq python.exe" 2>NUL || true; \
+		taskkill /F /FI "IMAGENAME eq python3.exe" 2>NUL || true; \
 	else \
 		PIDS=$$(pgrep -f gdspx_web_server.py || true); \
 		if [ -n "$$PIDS" ]; then kill -9 $$PIDS; fi \

@@ -278,6 +278,7 @@ class GameApp {
         if (this.workerMode) {
             let pthreads = game.getPThread()
             this.workerMessageManager.setPThreads(pthreads)
+            console.log("==>onRunAfterStart: callWorkerProjectDataUpdate")
             this.workerMessageManager.callWorkerProjectDataUpdate(this.projectData, this.assetURLs)
         } else {
             // register global functions
