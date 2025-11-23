@@ -49,3 +49,41 @@ jobs:
           tag_name: ${{ github.event.release.tag_name }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  web-build-worker:
+    name: 🌐 Web Worker Release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Get dependencies
+        run: sudo apt-get update && sudo apt-get install gcc libgl1-mesa-dev libegl1-mesa-dev libgles2-mesa-dev libx11-dev xorg-dev libasound2-dev libopenal-dev binaryen
+        if: ${{ runner.os == 'Linux' }}
+
+      - name: Setup go/xgo & engine
+        uses: ./.github/actions/deps
+
+      - name: Build worker release pack
+        run: |
+          make setup-web MODE=worker
+          make export-web MODE=worker
+          if [ ! -f "spx_web_worker.zip" ]; then
+            echo "spx_web_worker.zip not found"
+            exit 1
+          fi
+
+      - name: Upload Web Worker Build Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-worker-release
+          path: spx_web_worker.zip
+          retention-days: 14
+
+      - name: Publish to GitHub Release
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: spx_web_worker.zip
+          tag_name: ${{ github.event.release.tag_name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

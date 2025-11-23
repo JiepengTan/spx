@@ -12,7 +12,7 @@ import (
 )
 
 func downloadPack(dstDir, tagName, postfix string) error {
-	urlHeader := "https://github.com/JiepengTan/godot/releases/download/"
+	urlHeader := "https://github.com/goplus/godot/releases/download/"
 	fileName := tagName + postfix
 	url := urlHeader + tagName + "/" + fileName
 	// download pc
