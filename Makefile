@@ -170,7 +170,7 @@ ifndef DEMO_INDEX
 endif
 	@DEMO=$(GET_DEMO); \
 	echo "Running web demo #$(DEMO_INDEX): $$DEMO"; \
-	make stop && make build-wasm && \
+	make stop &&  \
 	cd $$DEMO && spx clear && spx runweb -serveraddr=":$(PORT)"
 
 run-web-worker: ## Run demo on web: make run-web DEMO_INDEX=N
@@ -179,7 +179,7 @@ ifndef DEMO_INDEX
 endif
 	@DEMO=$(GET_DEMO); \
 	echo "Running web demo #$(DEMO_INDEX): $$DEMO"; \
-	make stop && make build-wasm && \
+	make stop &&  \
 	cd $$DEMO && spx clear && spx runwebworker -serveraddr=":$(PORT)"
 # ============================================
 # Utility Commands
