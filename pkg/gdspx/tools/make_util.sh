@@ -88,28 +88,56 @@ CURRENT_PATH="$PROJ_DIR"
 # Define a function for the release web functionality
 do_exportweb() {
     echo "Starting exportweb..."
-    
+
     # Create temporary directory
     mkdir -p "$CURRENT_PATH/.tmp/web"
-    
+
     # Execute the exportweb commands
-    (cd "$CURRENT_PATH/.tmp/web" 
-     mkdir -p assets 
-     echo '{"map":{"width":480,"height":360}}' > assets/index.json 
-     echo "" > main.spx 
+    (cd "$CURRENT_PATH/.tmp/web"
+     mkdir -p assets
+     echo '{"map":{"width":480,"height":360}}' > assets/index.json
+     echo "" > main.spx
      rm -rf ./project/.builds/*web
-     spx exportweb 
-     cd ./project/.builds/web 
-     rm -f game.zip 
-     zip -r "$CURRENT_PATH/spx_web.zip" * 
+     spx exportweb
+     cd ./project/.builds/web
+     rm -f game.zip
+     zip -r "$CURRENT_PATH/spx_web.zip" *
      echo "$CURRENT_PATH/spx_web.zip has been created") || {
         echo "Error: Failed to create web export"
         return 1
     }
-    
+
     # Clean up
     rm -rf "$CURRENT_PATH/.tmp"
     echo "exportweb completed successfully"
+    return 0
+}
+
+# Define a function for the release web worker functionality
+do_exportwebworker() {
+    echo "Starting exportwebworker..."
+
+    # Create temporary directory
+    mkdir -p "$CURRENT_PATH/.tmp/webworker"
+
+    # Execute the exportweb commands for worker mode
+    (cd "$CURRENT_PATH/.tmp/webworker"
+     mkdir -p assets
+     echo '{"map":{"width":480,"height":360}}' > assets/index.json
+     echo "" > main.spx
+     rm -rf ./project/.builds/*webworker
+     spx exportweb
+     cd ./project/.builds/web
+     rm -f game_worker.zip
+     zip -r "$CURRENT_PATH/spx_web_worker.zip" *
+     echo "$CURRENT_PATH/spx_web_worker.zip has been created") || {
+        echo "Error: Failed to create web worker export"
+        return 1
+    }
+
+    # Clean up
+    rm -rf "$CURRENT_PATH/.tmp"
+    echo "exportwebworker completed successfully"
     return 0
 }
 do_prepare_export() {
@@ -156,7 +184,7 @@ do_extra_webtemplate() {
     local mode="${1:-normal}"
     do_prepare_export
     dstdir="$GOPATH/bin/gdspxrt"$TEMP_VERSION"_web"$mode
-    echo "exporting web runtime..."
+    echo "exporting web runtime..." $mode
     
     spx exporttemplateweb 
 
@@ -220,8 +248,9 @@ main() {
         echo "Usage: $0 [command] [options]"
         echo "Commands:"
         echo "  exportweb - Create a web release package"
+        echo "  exportwebworker - Create a web worker release package"
         echo "  exportpack  - Set up and package the application"
-        echo "  extrawebtemplate [mode] - Export web runtime template (mode: worker|main|default)"
+        echo "  extrawebtemplate [mode] - Export web runtime template (mode: worker|minigame|miniprogram|normal)"
         echo "  compresswasm - Compress WASM files with brotli"
         echo "  runweb [path] [port] - Run a web server (default path: tutorial/01-Weather, default port: 8106)"
         return 1
@@ -233,6 +262,9 @@ main() {
     case "$command" in
         exportweb)
             do_exportweb
+            ;;
+        exportwebworker)
+            do_exportwebworker
             ;;
         exportpack)
             do_exportpack
@@ -246,7 +278,7 @@ main() {
             ;;
         *)
             echo "Unknown command: $command"
-            echo "Available commands: exportweb, exportpack, extrawebtemplate, compresswasm, runweb"
+            echo "Available commands: exportweb, exportwebworker, exportpack, extrawebtemplate, compresswasm, runweb"
             return 1
             ;;
     esac
