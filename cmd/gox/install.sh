@@ -18,7 +18,7 @@ target_font_dir=./template/project/engine/fonts/
 mkdir -p $target_font_dir
 font_path=$target_font_dir/CnFont.ttf
 if [ ! -f "$font_path" ]; then
-    curl -L https://github.com/jiepengtan/godot/releases/download/spx2.0.14/CnFont.ttf -o "$font_path"
+    curl -L https://github.com/goplus/godot/releases/download/spx2.0.14/CnFont.ttf -o "$font_path"
 fi
 
 if [ ! -f "$font_path" ]; then
