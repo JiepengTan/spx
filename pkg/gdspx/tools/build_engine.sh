@@ -350,9 +350,86 @@ download_engine() {
             exit 1
         fi
 
+    elif [ "$platform" = "web" ]; then
+        # Get mode parameter (default: normal)
+        local web_mode="${MODE:-normal}"
+
+        # Validate mode
+        if [[ "$web_mode" != "normal" && "$web_mode" != "worker" && "$web_mode" != "minigame" && "$web_mode" != "miniprogram" ]]; then
+            echo "Error: Invalid mode '$web_mode'. Supported modes: normal, worker, minigame, miniprogram"
+            echo "Usage: $0 -g -p web [-m mode]"
+            exit 1
+        fi
+
+        # Template package names from godot CI based on mode
+        local template_name=""
+        case "$web_mode" in
+            normal)
+                template_name="web.zip"
+                ;;
+            worker)
+                template_name="web-worker.zip"
+                ;;
+            minigame)
+                template_name="web-minigame.zip"
+                ;;
+            miniprogram)
+                template_name="web-miniprogram.zip"
+                ;;
+        esac
+
+        local dst_dir="$GOPATH/bin"
+        mkdir -p "$dst_dir"
+        mkdir -p "$template_dir"
+
+        echo "===> Setting up web $web_mode templates..."
+        echo "Mode: $web_mode"
+        echo "Version: $VERSION"
+        echo "URL Prefix: $url_prefix"
+        echo "Template Name: $template_name"
+        echo "Template Directory: $template_dir"
+
+        # Download template if not exists
+        # For normal mode, use webpack.zip to match download_editor naming convention
+        if [ "$web_mode" = "normal" ]; then
+            local template_file="$dst_dir/gdspx${VERSION}_webpack.zip"
+        else
+            local template_file="$dst_dir/gdspx${VERSION}_web${web_mode}.zip"
+        fi
+        if [ -f "$template_file" ]; then
+            echo "Web $web_mode template already exists, skipping download"
+        else
+            echo "Downloading web $web_mode template..."
+            echo "URL: ${url_prefix}${template_name}"
+            if curl -L -o "$template_file" "${url_prefix}${template_name}"; then
+                echo "Download successful: $template_file"
+            else
+                echo "Error: Failed to download web $web_mode template"
+                echo "Make sure the godot release contains: $template_name"
+                exit 1
+            fi
+        fi
+
+        # Setup template directory structure with mode-specific templates
+        echo "===> Setting up template directory structure..." "$template_file" "$template_dir"
+
+        cp -f "$template_file" "$template_dir/web_dlink_nothreads_debug.zip"
+        cp -f "$template_file" "$template_dir/web_dlink_nothreads_release.zip"
+        cp -f "$template_file" "$template_dir/web_nothreads_debug.zip"
+        cp -f "$template_file" "$template_dir/web_nothreads_release.zip"
+        cp -f "$template_file" "$template_dir/web_dlink_debug.zip"
+        cp -f "$template_file" "$template_dir/web_dlink_release.zip"
+        cp -f "$template_file" "$template_dir/web_debug.zip"
+        cp -f "$template_file" "$template_dir/web_release.zip"
+
+        echo "===> Web $web_mode setup complete"
+        echo "  - Template downloaded: $template_file"
+        echo "  - Templates installed to: $template_dir"
+        echo "  - Mode: $web_mode"
+
     else
         echo "Error: Unsupported platform for download_engine: $platform"
-        echo "Supported platforms: android, ios"
+        echo "Supported platforms: android, ios, web"
         exit 1
     fi
 
