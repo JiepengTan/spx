@@ -43,8 +43,8 @@ if [ -f "$WORKER_TEMPLATE_FILE" ]; then
     echo "Web worker template already exists, skipping download"
 else
     echo "Downloading web worker template..."
-    echo "URL: ${URL_PREFIX}${WORKER_TEMPLATE}"
-    if curl -L -o "$WORKER_TEMPLATE_FILE" "${URL_PREFIX}${WORKER_TEMPLATE}"; then
+    echo "URL: ${URL_PREFIX}web-worker.zip"
+    if curl -L -o "$WORKER_TEMPLATE_FILE" "${URL_PREFIX}web-worker.zip"; then
         echo "Download successful: $WORKER_TEMPLATE_FILE"
     else
         echo "Error: Failed to download web worker template"
@@ -54,13 +54,16 @@ else
 fi
 
 # Setup template directory structure with worker mode templates
-echo "===> Setting up template directory structure..."
-cp -f "$WORKER_TEMPLATE_FILE" "$TEMPLATE_DIR/web_worker_debug.zip"
-cp -f "$WORKER_TEMPLATE_FILE" "$TEMPLATE_DIR/web_worker_release.zip"
+echo "===> Setting up template directory structure..." "$WORKER_TEMPLATE_FILE" "$TEMPLATE_DIR"
 
-# Also copy as standard web templates for worker mode usage
-cp -f "$WORKER_TEMPLATE_FILE" "$TEMPLATE_DIR/web_dlink_worker_debug.zip"
-cp -f "$WORKER_TEMPLATE_FILE" "$TEMPLATE_DIR/web_dlink_worker_release.zip"
+cp -f "$WORKER_TEMPLATE_FILE" "$TEMPLATE_DIR/web_dlink_nothreads_debug.zip"
+cp -f "$WORKER_TEMPLATE_FILE" "$TEMPLATE_DIR/web_dlink_nothreads_release.zip"
+cp -f "$WORKER_TEMPLATE_FILE" "$TEMPLATE_DIR/web_nothreads_debug.zip"
+cp -f "$WORKER_TEMPLATE_FILE" "$TEMPLATE_DIR/web_nothreads_release.zip"
+cp -f "$WORKER_TEMPLATE_FILE" "$TEMPLATE_DIR/web_dlink_debug.zip"
+cp -f "$WORKER_TEMPLATE_FILE" "$TEMPLATE_DIR/web_dlink_release.zip"
+cp -f "$WORKER_TEMPLATE_FILE" "$TEMPLATE_DIR/web_debug.zip"
+cp -f "$WORKER_TEMPLATE_FILE" "$TEMPLATE_DIR/web_release.zip"
 
 echo "===> Web worker setup complete"
 echo "  - Template downloaded: $WORKER_TEMPLATE_FILE"

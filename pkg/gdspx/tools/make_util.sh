@@ -184,7 +184,7 @@ do_extra_webtemplate() {
     local mode="${1:-normal}"
     do_prepare_export
     dstdir="$GOPATH/bin/gdspxrt"$TEMP_VERSION"_web"$mode
-    echo "exporting web runtime..."
+    echo "exporting web runtime..." $mode
     
     spx exporttemplateweb 
 
