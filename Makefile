@@ -77,17 +77,17 @@ setup-dev: ## Initialize development environment (full)
 	make build-web && \
 	echo "===> setup-dev done, use 'make run DEMO_INDEX=N' to run demo"
 
-setup-web: ## Download and install web engine from godot releases. Usage: make setup-web MODE=worker (MODE: worker|minigame|miniprogram)
+setup-web: ## Download and install web engine from godot releases. Usage: make setup-web MODE=normal (MODE: normal|worker|minigame|miniprogram)
 ifndef MODE
-	$(error MODE is not set! Usage: make setup-web MODE=worker or MODE=minigame or MODE=miniprogram)
+	$(error MODE is not set! Usage: make setup-web MODE=normal or MODE=worker or MODE=minigame or MODE=miniprogram)
 endif
-	@if [ "$(MODE)" != "worker" ] && [ "$(MODE)" != "minigame" ] && [ "$(MODE)" != "miniprogram" ]; then \
-		echo "Error: Invalid MODE '$(MODE)'. Supported modes: worker, minigame, miniprogram"; \
+	@if [ "$(MODE)" != "normal" ] && [ "$(MODE)" != "worker" ] && [ "$(MODE)" != "minigame" ] && [ "$(MODE)" != "miniprogram" ]; then \
+		echo "Error: Invalid MODE '$(MODE)'. Supported modes: normal, worker, minigame, miniprogram"; \
 		exit 1; \
 	fi
 	echo "===> Setting up web $(MODE) engine..."
 	make build-wasm && \
-	./pkg/gdspx/tools/download_web.sh $(MODE) && \
+	./pkg/gdspx/tools/build_engine.sh -g -p web -m $(MODE) && \
 	./pkg/gdspx/tools/make_util.sh extrawebtemplate $(MODE) && \
 	echo "===> Web $(MODE) engine setup complete"
 
@@ -104,12 +104,20 @@ install: ## Install spx command
 download: ## Download engines
 	make install && ./pkg/gdspx/tools/build_engine.sh -e -d
 
-download-engine: ## Download engine templates for specific platform (android/ios). Usage: make download-engine PLATFORM=android
+download-engine: ## Download engine templates for specific platform. Usage: make download-engine PLATFORM=android|ios|web [MODE=normal|worker|minigame|miniprogram]
 ifndef PLATFORM
-	$(error PLATFORM is not set! Usage: make download-engine PLATFORM=android or PLATFORM=ios)
+	$(error PLATFORM is not set! Usage: make download-engine PLATFORM=android or PLATFORM=ios or PLATFORM=web [MODE=mode])
 endif
 	@echo "Downloading engine templates for platform: $(PLATFORM)"
-	./pkg/gdspx/tools/build_engine.sh -p $(PLATFORM) -g 
+	@if [ "$(PLATFORM)" = "web" ]; then \
+		if [ -n "$(MODE)" ]; then \
+			./pkg/gdspx/tools/build_engine.sh -p $(PLATFORM) -g -m $(MODE); \
+		else \
+			./pkg/gdspx/tools/build_engine.sh -p $(PLATFORM) -g; \
+		fi \
+	else \
+		./pkg/gdspx/tools/build_engine.sh -p $(PLATFORM) -g; \
+	fi 
 
 
 # ============================================
