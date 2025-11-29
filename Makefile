@@ -60,11 +60,6 @@ setup: ## Initialize the user environment
 	./pkg/gdspx/tools/make_util.sh extrawebtemplate && \
 	echo "===> setup done"
 
-setup-web-worker: ## Download and install web worker engine from godot releases
-	echo "===> Setting up web worker engine..."
-	./pkg/gdspx/tools/download_web_worker.sh && \
-	./pkg/gdspx/tools/make_util.sh extrawebtemplate worker && \
-	echo "===> Web worker engine setup complete"
 
 setup-dev: ## Initialize development environment (full)
 	chmod +x ./pkg/gdspx/tools/*.sh && \
@@ -82,6 +77,12 @@ setup-dev: ## Initialize development environment (full)
 	make build-web && \
 	echo "===> setup-dev done, use 'make run DEMO_INDEX=N' to run demo"
 
+setup-web-worker: ## Download and install web worker engine from godot releases
+	echo "===> Setting up web worker engine..."
+	make build-wasm && \
+	./pkg/gdspx/tools/download_web_worker.sh && \
+	./pkg/gdspx/tools/make_util.sh extrawebtemplate worker && \
+	echo "===> Web worker engine setup complete"
 
 # ============================================
 # Install & Download
