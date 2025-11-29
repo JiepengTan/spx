@@ -218,19 +218,17 @@ export-pack: ## Export runtime pck file
 	./pkg/gdspx/tools/make_util.sh exportpack && cd $(CURRENT_PATH)
 
 export-web: ## Export web engine. Usage: make export-web MODE=normal (MODE: normal|worker|minigame|miniprogram)
-	@MODE=$(or $(MODE),normal)
-	@if [ "$(MODE)" != "normal" ] && [ "$(MODE)" != "worker" ] && [ "$(MODE)" != "minigame" ] && [ "$(MODE)" != "miniprogram" ]; then \
-		echo "Error: Invalid MODE '$(MODE)'. Supported modes: normal, worker, minigame, miniprogram"; \
+	@if [ -z "$(MODE)" ]; then \
+		EXPORT_MODE=normal; \
+	else \
+		EXPORT_MODE=$(MODE); \
+	fi; \
+	if [ "$$EXPORT_MODE" != "normal" ] && [ "$$EXPORT_MODE" != "worker" ] && [ "$$EXPORT_MODE" != "minigame" ] && [ "$$EXPORT_MODE" != "miniprogram" ]; then \
+		echo "Error: Invalid MODE '$$EXPORT_MODE'. Supported modes: normal, worker, minigame, miniprogram"; \
 		exit 1; \
-	fi
+	fi; \
 	cd ./cmd/gox && ./install.sh --web --opt && cd $(CURRENT_PATH) && \
-	./pkg/gdspx/tools/make_util.sh exportweb $(MODE) && cd $(CURRENT_PATH)
-
-export-web-worker: ## Export web worker engine package (deprecated, use make export-web MODE=worker)
-	@echo "===> Exporting web worker package..."
-	@cd ./cmd/gox && ./install.sh --web --opt && cd $(CURRENT_PATH) && \
-	./pkg/gdspx/tools/make_util.sh exportweb worker && cd $(CURRENT_PATH)
-	@echo "===> Web worker export complete - spx_web_worker.zip created"
+	./pkg/gdspx/tools/make_util.sh exportweb $$EXPORT_MODE && cd $(CURRENT_PATH)
 
 stop: ## Stop running processes
 	@echo "Stopping running processes..."

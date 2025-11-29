@@ -66,7 +66,7 @@ jobs:
       - name: Build worker release pack
         run: |
           make setup-web MODE=worker
-          make export-web-worker
+          make export-web MODE=worker
           if [ ! -f "spx_web_worker.zip" ]; then
             echo "spx_web_worker.zip not found"
             exit 1
