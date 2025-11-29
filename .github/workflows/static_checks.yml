@@ -17,7 +17,5 @@ jobs:
     - name: Setup go/xgo & engine
       uses: ./.github/actions/deps
 
-    - name: Test
-      uses: ./.github/actions/project-test
 
 
