@@ -77,12 +77,23 @@ setup-dev: ## Initialize development environment (full)
 	make build-web && \
 	echo "===> setup-dev done, use 'make run DEMO_INDEX=N' to run demo"
 
-setup-web-worker: ## Download and install web worker engine from godot releases
-	echo "===> Setting up web worker engine..."
+setup-web: ## Download and install web engine from godot releases. Usage: make setup-web MODE=worker (MODE: worker|minigame|miniprogram)
+ifndef MODE
+	$(error MODE is not set! Usage: make setup-web MODE=worker or MODE=minigame or MODE=miniprogram)
+endif
+	@if [ "$(MODE)" != "worker" ] && [ "$(MODE)" != "minigame" ] && [ "$(MODE)" != "miniprogram" ]; then \
+		echo "Error: Invalid MODE '$(MODE)'. Supported modes: worker, minigame, miniprogram"; \
+		exit 1; \
+	fi
+	echo "===> Setting up web $(MODE) engine..."
 	make build-wasm && \
-	./pkg/gdspx/tools/download_web_worker.sh && \
-	./pkg/gdspx/tools/make_util.sh extrawebtemplate worker && \
-	echo "===> Web worker engine setup complete"
+	./pkg/gdspx/tools/download_web.sh $(MODE) && \
+	./pkg/gdspx/tools/make_util.sh extrawebtemplate $(MODE) && \
+	echo "===> Web $(MODE) engine setup complete"
+
+setup-web-worker: ## [Deprecated] Use 'make setup-web MODE=worker' instead. Download and install web worker engine from godot releases
+	@echo "Warning: 'make setup-web-worker' is deprecated. Use 'make setup-web MODE=worker' instead."
+	@$(MAKE) setup-web MODE=worker
 
 # ============================================
 # Install & Download

@@ -250,7 +250,7 @@ main() {
         echo "  exportweb - Create a web release package"
         echo "  exportwebworker - Create a web worker release package"
         echo "  exportpack  - Set up and package the application"
-        echo "  extrawebtemplate [mode] - Export web runtime template (mode: worker|main|default)"
+        echo "  extrawebtemplate [mode] - Export web runtime template (mode: worker|minigame|miniprogram|normal)"
         echo "  compresswasm - Compress WASM files with brotli"
         echo "  runweb [path] [port] - Run a web server (default path: tutorial/01-Weather, default port: 8106)"
         return 1
