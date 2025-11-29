@@ -149,7 +149,7 @@ download_editor() {
     local arch=$ARCH
     local tmp_dir=$SCRIPT_DIR/bin
     local dst_dir=$GOPATH/bin
-    local url_prefix="https://github.com/goplus/godot/releases/download/spx$VERSION/"
+    local url_prefix="https://github.com/jiepengtan/godot/releases/download/spx$VERSION/"
     mkdir -p "$tmp_dir"
     mkdir -p "$dst_dir"
     echo "download to $dst_dir"
@@ -282,7 +282,7 @@ download_engine() {
     setup_global_variables
     local platform=$PLATFORM
     local template_dir="$TEMPLATE_DIR"
-    local url_prefix="https://github.com/goplus/godot/releases/download/spx$VERSION/"
+    local url_prefix="https://github.com/jiepengtan/godot/releases/download/spx$VERSION/"
 
     mkdir -p "$template_dir"
     echo "Downloading engine templates for platform: $platform"

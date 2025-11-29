@@ -6,7 +6,7 @@ setup_global_variables
 
 # Download URLs based on godot release pattern
 VERSION=$(cat $SCRIPT_DIR/version)
-URL_PREFIX="https://github.com/goplus/godot/releases/download/spx${VERSION}/"
+URL_PREFIX="https://github.com/jiepengtan/godot/releases/download/spx${VERSION}/"
 
 # Worker mode package names from godot CI
 WORKER_TEMPLATE="web-template-worker.zip"  # Based on our CI artifact name
