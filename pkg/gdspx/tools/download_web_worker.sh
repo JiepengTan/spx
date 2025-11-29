@@ -9,8 +9,7 @@ VERSION=$(cat $SCRIPT_DIR/version)
 URL_PREFIX="https://github.com/jiepengtan/godot/releases/download/spx${VERSION}/"
 
 # Worker mode package names from godot CI
-WORKER_TEMPLATE="web-template-worker.zip"  # Based on our CI artifact name
-WORKER_EDITOR="editor-web-worker.zip"      # If available in future
+WORKER_TEMPLATE="web-worker.zip"  # Based on our CI artifact name
 
 # Download paths
 DST_DIR="$GOPATH/bin"
@@ -43,8 +42,8 @@ if [ -f "$WORKER_TEMPLATE_FILE" ]; then
     echo "Web worker template already exists, skipping download"
 else
     echo "Downloading web worker template..."
-    echo "URL: ${URL_PREFIX}web-worker.zip"
-    if curl -L -o "$WORKER_TEMPLATE_FILE" "${URL_PREFIX}web-worker.zip"; then
+    echo "URL: ${URL_PREFIX}${WORKER_TEMPLATE}"
+    if curl -L -o "$WORKER_TEMPLATE_FILE" "${URL_PREFIX}${WORKER_TEMPLATE}"; then
         echo "Download successful: $WORKER_TEMPLATE_FILE"
     else
         echo "Error: Failed to download web worker template"
