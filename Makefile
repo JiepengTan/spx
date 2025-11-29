@@ -91,9 +91,6 @@ endif
 	./pkg/gdspx/tools/make_util.sh extrawebtemplate $(MODE) && \
 	echo "===> Web $(MODE) engine setup complete"
 
-setup-web-worker: ## [Deprecated] Use 'make setup-web MODE=worker' instead. Download and install web worker engine from godot releases
-	@echo "Warning: 'make setup-web-worker' is deprecated. Use 'make setup-web MODE=worker' instead."
-	@$(MAKE) setup-web MODE=worker
 
 # ============================================
 # Install & Download
@@ -220,14 +217,19 @@ generate: ## Generate code
 export-pack: ## Export runtime pck file
 	./pkg/gdspx/tools/make_util.sh exportpack && cd $(CURRENT_PATH)
 
-export-web: ## Export web engine
+export-web: ## Export web engine. Usage: make export-web MODE=normal (MODE: normal|worker|minigame|miniprogram)
+	@MODE=$(or $(MODE),normal)
+	@if [ "$(MODE)" != "normal" ] && [ "$(MODE)" != "worker" ] && [ "$(MODE)" != "minigame" ] && [ "$(MODE)" != "miniprogram" ]; then \
+		echo "Error: Invalid MODE '$(MODE)'. Supported modes: normal, worker, minigame, miniprogram"; \
+		exit 1; \
+	fi
 	cd ./cmd/gox && ./install.sh --web --opt && cd $(CURRENT_PATH) && \
-	./pkg/gdspx/tools/make_util.sh exportweb && cd $(CURRENT_PATH)
+	./pkg/gdspx/tools/make_util.sh exportweb $(MODE) && cd $(CURRENT_PATH)
 
-export-web-worker: ## Export web worker engine package
+export-web-worker: ## Export web worker engine package (deprecated, use make export-web MODE=worker)
 	@echo "===> Exporting web worker package..."
 	@cd ./cmd/gox && ./install.sh --web --opt && cd $(CURRENT_PATH) && \
-	./pkg/gdspx/tools/make_util.sh exportwebworker && cd $(CURRENT_PATH)
+	./pkg/gdspx/tools/make_util.sh exportweb worker && cd $(CURRENT_PATH)
 	@echo "===> Web worker export complete - spx_web_worker.zip created"
 
 stop: ## Stop running processes

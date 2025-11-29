@@ -87,7 +87,36 @@ compress_with_brotli() {
 CURRENT_PATH="$PROJ_DIR"
 # Define a function for the release web functionality
 do_exportweb() {
-    echo "Starting exportweb..."
+    local mode="${1:-normal}"
+    echo "Starting exportweb (mode: $mode)..."
+
+    # Validate mode
+    if [ "$mode" != "normal" ] && [ "$mode" != "worker" ] && [ "$mode" != "minigame" ] && [ "$mode" != "miniprogram" ]; then
+        echo "Error: Invalid mode '$mode'. Supported modes: normal, worker, minigame, miniprogram"
+        return 1
+    fi
+
+    # Determine the spx command based on mode
+    local spx_cmd="exportweb"
+    local output_zip="spx_web.zip"
+    case "$mode" in
+        normal)
+            spx_cmd="exportweb"
+            output_zip="spx_web.zip"
+            ;;
+        worker)
+            spx_cmd="exportwebworker"
+            output_zip="spx_web_worker.zip"
+            ;;
+        minigame)
+            spx_cmd="exportminigame"
+            output_zip="spx_web_minigame.zip"
+            ;;
+        miniprogram)
+            spx_cmd="exportminiprogram"
+            output_zip="spx_web_miniprogram.zip"
+            ;;
+    esac
 
     # Create temporary directory
     mkdir -p "$CURRENT_PATH/.tmp/web"
@@ -98,48 +127,22 @@ do_exportweb() {
      echo '{"map":{"width":480,"height":360}}' > assets/index.json
      echo "" > main.spx
      rm -rf ./project/.builds/*web
-     spx exportweb
+     spx $spx_cmd
      cd ./project/.builds/web
      rm -f game.zip
-     zip -r "$CURRENT_PATH/spx_web.zip" *
-     echo "$CURRENT_PATH/spx_web.zip has been created") || {
-        echo "Error: Failed to create web export"
+     zip -r "$CURRENT_PATH/$output_zip" *
+     echo "$CURRENT_PATH/$output_zip has been created") || {
+        echo "Error: Failed to create web export (mode: $mode)"
         return 1
     }
 
     # Clean up
     rm -rf "$CURRENT_PATH/.tmp"
-    echo "exportweb completed successfully"
+    echo "exportweb (mode: $mode) completed successfully"
     return 0
 }
 
-# Define a function for the release web worker functionality
-do_exportwebworker() {
-    echo "Starting exportwebworker..."
 
-    # Create temporary directory
-    mkdir -p "$CURRENT_PATH/.tmp/webworker"
-
-    # Execute the exportweb commands for worker mode
-    (cd "$CURRENT_PATH/.tmp/webworker"
-     mkdir -p assets
-     echo '{"map":{"width":480,"height":360}}' > assets/index.json
-     echo "" > main.spx
-     rm -rf ./project/.builds/*webworker
-     spx exportweb
-     cd ./project/.builds/web
-     rm -f game_worker.zip
-     zip -r "$CURRENT_PATH/spx_web_worker.zip" *
-     echo "$CURRENT_PATH/spx_web_worker.zip has been created") || {
-        echo "Error: Failed to create web worker export"
-        return 1
-    }
-
-    # Clean up
-    rm -rf "$CURRENT_PATH/.tmp"
-    echo "exportwebworker completed successfully"
-    return 0
-}
 do_prepare_export() {
     # Check GOPATH
     if [ -z "$GOPATH" ]; then
@@ -247,8 +250,8 @@ main() {
     if [ $# -eq 0 ]; then
         echo "Usage: $0 [command] [options]"
         echo "Commands:"
-        echo "  exportweb - Create a web release package"
-        echo "  exportwebworker - Create a web worker release package"
+        echo "  exportweb [mode] - Create a web release package (mode: normal|worker|minigame|miniprogram, default: normal)"
+        echo "  exportwebworker - Create a web worker release package (deprecated, use exportweb worker)"
         echo "  exportpack  - Set up and package the application"
         echo "  extrawebtemplate [mode] - Export web runtime template (mode: worker|minigame|miniprogram|normal)"
         echo "  compresswasm - Compress WASM files with brotli"
@@ -261,10 +264,11 @@ main() {
 
     case "$command" in
         exportweb)
-            do_exportweb
+            mode="$1"
+            do_exportweb "$mode"
             ;;
         exportwebworker)
-            do_exportwebworker
+            do_exportweb "worker"
             ;;
         exportpack)
             do_exportpack
@@ -278,7 +282,7 @@ main() {
             ;;
         *)
             echo "Unknown command: $command"
-            echo "Available commands: exportweb, exportwebworker, exportpack, extrawebtemplate, compresswasm, runweb"
+            echo "Available commands: exportweb [mode], exportwebworker, exportpack, extrawebtemplate, compresswasm, runweb"
             return 1
             ;;
     esac
