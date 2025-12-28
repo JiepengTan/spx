@@ -18,6 +18,7 @@ package spx
 
 import (
 	"fmt"
+	"path"
 	"sort"
 
 	spxfs "github.com/goplus/spx/v2/fs"
@@ -27,27 +28,81 @@ import (
 	"github.com/goplus/spbase/mathf"
 )
 
-type gameTilemapMgr struct {
-	g     *Game
-	datas *tm.TscnMapData
+// DecoratorJSON represents the structure of decorator.json file (new format)
+type DecoratorJSON struct {
+	Version    int                `json:"version"`
+	Decorators []tm.DecoratorNode `json:"decorators"`
 }
 
-func (p *gameTilemapMgr) init(g *Game, fs spxfs.Dir, path string) {
+type gameTilemapMgr struct {
+	g              *Game
+	datas          *tm.TscnMapData
+	decoratorDatas *DecoratorJSON
+	useNewLoader   bool   // true if using C++ TileMapParser (new format)
+	tilemapPath    string // path to tilemap.json
+	tilemapDir     string // directory containing tilemap.json
+}
+
+func (p *gameTilemapMgr) init(g *Game, fs spxfs.Dir, tilemapPath string) {
 	p.g = g
-	if path == "" {
+	p.tilemapPath = tilemapPath
+	if tilemapPath == "" {
 		return
 	}
+
+	// Get directory containing tilemap.json
+	p.tilemapDir = path.Dir(tilemapPath)
+
+	// Check if JSON is in new format (version >= 1)
+	if p.isNewFormat(fs, tilemapPath) {
+		// New format: use C++ TileMapParser for loading tilemap
+		enginePath := engine.ToAssetPath(tilemapPath)
+		fmt.Printf("[TILEMAP] Using C++ TileMapParser for: %s\n", enginePath)
+		tilemapparserMgr.LoadTilemap(enginePath)
+		p.useNewLoader = true
+
+		// Load decorator.json from the same directory
+		decoratorPath := path.Join(p.tilemapDir, "decorator.json")
+		p.loadDecoratorJSON(fs, decoratorPath)
+		return
+	}
+
+	// Old format: use existing Go loader
 	var data tm.TscnMapData
-	err := loadJson(&data, fs, path)
+	err := loadJson(&data, fs, tilemapPath)
 	if err != nil {
-		panic(fmt.Sprintf("Failed to load tilemap JSON file %s: %v", path, err))
+		panic(fmt.Sprintf("Failed to load tilemap JSON file %s: %v", tilemapPath, err))
 	}
 	p.datas = &data
 	tm.ConvertData(&data)
 }
 
+// loadDecoratorJSON loads decorator data from a separate decorator.json file
+func (p *gameTilemapMgr) loadDecoratorJSON(fs spxfs.Dir, decoratorPath string) {
+	var data DecoratorJSON
+	err := loadJson(&data, fs, decoratorPath)
+	if err != nil {
+		fmt.Printf("[TILEMAP] No decorator.json found at %s (this is OK if no decorators)\n", decoratorPath)
+		return
+	}
+	p.decoratorDatas = &data
+	fmt.Printf("[TILEMAP] Loaded %d decorators from %s\n", len(data.Decorators), decoratorPath)
+}
+
 func (p *gameTilemapMgr) hasData() bool {
-	return p.datas != nil
+	return p.datas != nil || p.useNewLoader
+}
+
+// isNewFormat checks if the tilemap JSON is in the new format (version >= 1)
+// New format uses C++ TileMapParser with Base64 encoded tile_map_data
+func (p *gameTilemapMgr) isNewFormat(fs spxfs.Dir, path string) bool {
+	var versionCheck struct {
+		Version int `json:"version"`
+	}
+	if err := loadJson(&versionCheck, fs, path); err != nil {
+		return false
+	}
+	return versionCheck.Version >= 1
 }
 
 func (p *gameTilemapMgr) loadTilemaps(datas *tm.TscnMapData) {
@@ -55,17 +110,31 @@ func (p *gameTilemapMgr) loadTilemaps(datas *tm.TscnMapData) {
 }
 
 func (p *gameTilemapMgr) loadDecorators(datas *tm.TscnMapData) {
+	p.loadDecoratorNodes(datas.Decorators, "tilemaps")
+}
+
+func (p *gameTilemapMgr) loadDecoratorNodes(decorators []tm.DecoratorNode, tilemapDir string) {
 	const headingOffset = -90.0
-	for _, item := range datas.Decorators {
+	for _, item := range decorators {
 		position := item.Position.ToVec2()
 		pivot := item.Pivot.ToVec2()
-		assetPath := engine.ToAssetPath("tilemaps/" + item.Path)
+		relativePath := path.Join(tilemapDir, item.Path)
+		assetPath := engine.ToAssetPath(relativePath)
 		texSize := resMgr.GetImageSize(assetPath)
 		colliderPivot := item.ColliderPivot.ToVec2().Add(pivot)
 		pivot = pivot.Sub(texSize.Divf(2))
-		p.g.createStaticSprite("tilemaps/"+item.Path, position, item.Ratation+headingOffset,
+		p.g.createStaticSprite(relativePath, position, item.Ratation+headingOffset,
 			item.Scale.ToVec2(), int64(item.ZIndex), pivot, item.ColliderType, colliderPivot, item.ColliderParams)
 	}
+}
+
+// loadDecoratorsFromJSON loads decorators from the separate decorator.json file (new format)
+func (p *gameTilemapMgr) loadDecoratorsFromJSON() {
+	if p.decoratorDatas == nil || len(p.decoratorDatas.Decorators) == 0 {
+		return
+	}
+	p.loadDecoratorNodes(p.decoratorDatas.Decorators, p.tilemapDir)
+	fmt.Printf("====>[TILEMAP] Created %d decorator sprites\n", len(p.decoratorDatas.Decorators))
 }
 
 func (p *gameTilemapMgr) loadSprites(datas *tm.TscnMapData) {
@@ -87,6 +156,13 @@ func (p *gameTilemapMgr) loadSprites(datas *tm.TscnMapData) {
 }
 
 func (p *gameTilemapMgr) parseTilemap() {
+	// Handle new format: load decorators from separate JSON file
+	if p.useNewLoader {
+		p.loadDecoratorsFromJSON()
+		return
+	}
+
+	// Old format: load from combined TscnMapData
 	if p.datas == nil {
 		return
 	}
