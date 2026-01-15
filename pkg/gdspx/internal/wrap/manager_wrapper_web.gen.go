@@ -57,6 +57,9 @@ func BindMgr(mgrs []IManager) {
 		case ISceneMgr:
 			SceneMgr = v
 
+		case ISpineMgr:
+			SpineMgr = v
+
 		case ISpriteMgr:
 			SpriteMgr = v
 
@@ -105,6 +108,9 @@ type resMgr struct {
 type sceneMgr struct {
 	baseMgr
 }
+type spineMgr struct {
+	baseMgr
+}
 type spriteMgr struct {
 	baseMgr
 }
@@ -127,6 +133,7 @@ func createMgrs() []IManager {
 	addManager(&platformMgr{})
 	addManager(&resMgr{})
 	addManager(&sceneMgr{})
+	addManager(&spineMgr{})
 	addManager(&spriteMgr{})
 	addManager(&tilemapMgr{})
 	addManager(&uiMgr{})
@@ -688,6 +695,9 @@ func (pself *sceneMgr) CreateStaticSprite(texture_path string, pos Vec2, degree 
 	_retValue := API.SpxSceneCreateStaticSprite.Invoke(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8)
 	return JsToGdObject(_retValue)
 }
+func (pself *spineMgr) ClearAllCaches() {
+	API.SpxSpineClearAllCaches.Invoke()
+}
 func (pself *spriteMgr) SetDontDestroyOnLoad(obj Object) {
 	arg0 := JsFromGdObj(obj)
 	API.SpxSpriteSetDontDestroyOnLoad.Invoke(arg0)
@@ -1051,6 +1061,17 @@ func (pself *spriteMgr) GetCurrentAnimName(obj Object) string {
 	arg0 := JsFromGdObj(obj)
 	_retValue := API.SpxSpriteGetCurrentAnimName.Invoke(arg0)
 	return JsToGdString(_retValue)
+}
+func (pself *spriteMgr) SetSpineSkeleton(obj Object, atlas_path string, skeleton_path string, default_mix float64) {
+	arg0 := JsFromGdObj(obj)
+	arg1 := JsFromGdString(atlas_path)
+	arg2 := JsFromGdString(skeleton_path)
+	arg3 := JsFromGdFloat(default_mix)
+	API.SpxSpriteSetSpineSkeleton.Invoke(arg0, arg1, arg2, arg3)
+}
+func (pself *spriteMgr) ClearSpineSkeleton(obj Object) {
+	arg0 := JsFromGdObj(obj)
+	API.SpxSpriteClearSpineSkeleton.Invoke(arg0)
 }
 func (pself *spriteMgr) SetVelocity(obj Object, velocity Vec2) {
 	arg0 := JsFromGdObj(obj)

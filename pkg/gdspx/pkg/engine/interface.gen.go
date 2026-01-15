@@ -26,6 +26,7 @@ var (
 	PlatformMgr   IPlatformMgr
 	ResMgr        IResMgr
 	SceneMgr      ISceneMgr
+	SpineMgr      ISpineMgr
 	SpriteMgr     ISpriteMgr
 	TilemapMgr    ITilemapMgr
 	UiMgr         IUiMgr
@@ -179,6 +180,10 @@ type ISceneMgr interface {
 	CreateStaticSprite(texture_path string, pos Vec2, degree float64, scale Vec2, zindex int64, pivot Vec2, collider_type int64, collider_pivot Vec2, collider_params Array) Object
 }
 
+type ISpineMgr interface {
+	ClearAllCaches()
+}
+
 type ISpriteMgr interface {
 	SetDontDestroyOnLoad(obj Object)
 	SetProcess(obj Object, is_on bool)
@@ -248,6 +253,8 @@ type ISpriteMgr interface {
 	SetAnimFlipV(obj Object, p_flip bool)
 	IsAnimFlippedV(obj Object) bool
 	GetCurrentAnimName(obj Object) string
+	SetSpineSkeleton(obj Object, atlas_path string, skeleton_path string, default_mix float64)
+	ClearSpineSkeleton(obj Object)
 	SetVelocity(obj Object, velocity Vec2)
 	GetVelocity(obj Object) Vec2
 	IsOnFloor(obj Object) bool

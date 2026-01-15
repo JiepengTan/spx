@@ -28,6 +28,7 @@ physicMgr enginewrap.PhysicMgrImpl
 platformMgr enginewrap.PlatformMgrImpl
 resMgr enginewrap.ResMgrImpl
 sceneMgr enginewrap.SceneMgrImpl
+spineMgr enginewrap.SpineMgrImpl
 spriteMgr enginewrap.SpriteMgrImpl
 tilemapMgr enginewrap.TilemapMgrImpl
 uiMgr enginewrap.UiMgrImpl
@@ -47,6 +48,7 @@ var (
 	platformMgr   PlatformMgrImpl
 	resMgr        ResMgrImpl
 	sceneMgr      SceneMgrImpl
+	spineMgr      SpineMgrImpl
 	spriteMgr     SpriteMgrImpl
 	tilemapMgr    TilemapMgrImpl
 	uiMgr         UiMgrImpl
@@ -106,6 +108,11 @@ type sceneMgrImpl struct {
 }
 type SceneMgrImpl struct {
 	sceneMgrImpl
+}
+type spineMgrImpl struct {
+}
+type SpineMgrImpl struct {
+	spineMgrImpl
 }
 type spriteMgrImpl struct {
 }
@@ -412,6 +419,9 @@ func (pself *sceneMgrImpl) CreateStaticSprite(texture_path string, pos Vec2, deg
 	return _ret1
 }
 
+// ISpineMgr
+func (pself *spineMgrImpl) ClearAllCaches() {}
+
 // ISpriteMgr
 func (pself *spriteMgrImpl) SetDontDestroyOnLoad(obj gdx.Object)          {}
 func (pself *spriteMgrImpl) SetProcess(obj gdx.Object, is_on bool)        {}
@@ -582,6 +592,9 @@ func (pself *spriteMgrImpl) GetCurrentAnimName(obj gdx.Object) string {
 	var _ret1 string
 	return _ret1
 }
+func (pself *spriteMgrImpl) SetSpineSkeleton(obj gdx.Object, atlas_path string, skeleton_path string, default_mix float64) {
+}
+func (pself *spriteMgrImpl) ClearSpineSkeleton(obj gdx.Object)         {}
 func (pself *spriteMgrImpl) SetVelocity(obj gdx.Object, velocity Vec2) {}
 func (pself *spriteMgrImpl) GetVelocity(obj gdx.Object) Vec2 {
 	var _ret1 Vec2

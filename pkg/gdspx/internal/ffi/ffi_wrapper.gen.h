@@ -357,6 +357,9 @@ void cgo_callfn_GDExtensionSpxSceneCreateRenderSprite(const GDExtensionSpxSceneC
 void cgo_callfn_GDExtensionSpxSceneCreateStaticSprite(const GDExtensionSpxSceneCreateStaticSprite fn, GdString texture_path, GdVec2 pos, GdFloat degree, GdVec2 scale, GdInt zindex, GdVec2 pivot, GdInt collider_type, GdVec2 collider_pivot, GdArray collider_params, GdObj* ret_val) {
 	fn(texture_path, pos, degree, scale, zindex, pivot, collider_type, collider_pivot, collider_params,ret_val);
 }
+void cgo_callfn_GDExtensionSpxSpineClearAllCaches(const GDExtensionSpxSpineClearAllCaches fn) {
+	fn();
+}
 void cgo_callfn_GDExtensionSpxSpriteSetDontDestroyOnLoad(const GDExtensionSpxSpriteSetDontDestroyOnLoad fn, GdObj obj) {
 	fn(obj);
 }
@@ -560,6 +563,12 @@ void cgo_callfn_GDExtensionSpxSpriteIsAnimFlippedV(const GDExtensionSpxSpriteIsA
 }
 void cgo_callfn_GDExtensionSpxSpriteGetCurrentAnimName(const GDExtensionSpxSpriteGetCurrentAnimName fn, GdObj obj, GdString* ret_val) {
 	fn(obj,ret_val);
+}
+void cgo_callfn_GDExtensionSpxSpriteSetSpineSkeleton(const GDExtensionSpxSpriteSetSpineSkeleton fn, GdObj obj, GdString atlas_path, GdString skeleton_path, GdFloat default_mix) {
+	fn(obj, atlas_path, skeleton_path, default_mix);
+}
+void cgo_callfn_GDExtensionSpxSpriteClearSpineSkeleton(const GDExtensionSpxSpriteClearSpineSkeleton fn, GdObj obj) {
+	fn(obj);
 }
 void cgo_callfn_GDExtensionSpxSpriteSetVelocity(const GDExtensionSpxSpriteSetVelocity fn, GdObj obj, GdVec2 velocity) {
 	fn(obj, velocity);

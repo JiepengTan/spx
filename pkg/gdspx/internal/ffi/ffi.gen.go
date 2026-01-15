@@ -133,6 +133,7 @@ type GDExtensionInterface struct {
 	SpxSceneDestroyPureSprite                GDExtensionSpxSceneDestroyPureSprite
 	SpxSceneCreateRenderSprite               GDExtensionSpxSceneCreateRenderSprite
 	SpxSceneCreateStaticSprite               GDExtensionSpxSceneCreateStaticSprite
+	SpxSpineClearAllCaches                   GDExtensionSpxSpineClearAllCaches
 	SpxSpriteSetDontDestroyOnLoad            GDExtensionSpxSpriteSetDontDestroyOnLoad
 	SpxSpriteSetProcess                      GDExtensionSpxSpriteSetProcess
 	SpxSpriteSetPhysicProcess                GDExtensionSpxSpriteSetPhysicProcess
@@ -201,6 +202,8 @@ type GDExtensionInterface struct {
 	SpxSpriteSetAnimFlipV                    GDExtensionSpxSpriteSetAnimFlipV
 	SpxSpriteIsAnimFlippedV                  GDExtensionSpxSpriteIsAnimFlippedV
 	SpxSpriteGetCurrentAnimName              GDExtensionSpxSpriteGetCurrentAnimName
+	SpxSpriteSetSpineSkeleton                GDExtensionSpxSpriteSetSpineSkeleton
+	SpxSpriteClearSpineSkeleton              GDExtensionSpxSpriteClearSpineSkeleton
 	SpxSpriteSetVelocity                     GDExtensionSpxSpriteSetVelocity
 	SpxSpriteGetVelocity                     GDExtensionSpxSpriteGetVelocity
 	SpxSpriteIsOnFloor                       GDExtensionSpxSpriteIsOnFloor
@@ -429,6 +432,7 @@ func (x *GDExtensionInterface) loadProcAddresses() {
 	x.SpxSceneDestroyPureSprite = (GDExtensionSpxSceneDestroyPureSprite)(dlsymGD("spx_scene_destroy_pure_sprite"))
 	x.SpxSceneCreateRenderSprite = (GDExtensionSpxSceneCreateRenderSprite)(dlsymGD("spx_scene_create_render_sprite"))
 	x.SpxSceneCreateStaticSprite = (GDExtensionSpxSceneCreateStaticSprite)(dlsymGD("spx_scene_create_static_sprite"))
+	x.SpxSpineClearAllCaches = (GDExtensionSpxSpineClearAllCaches)(dlsymGD("spx_spine_clear_all_caches"))
 	x.SpxSpriteSetDontDestroyOnLoad = (GDExtensionSpxSpriteSetDontDestroyOnLoad)(dlsymGD("spx_sprite_set_dont_destroy_on_load"))
 	x.SpxSpriteSetProcess = (GDExtensionSpxSpriteSetProcess)(dlsymGD("spx_sprite_set_process"))
 	x.SpxSpriteSetPhysicProcess = (GDExtensionSpxSpriteSetPhysicProcess)(dlsymGD("spx_sprite_set_physic_process"))
@@ -497,6 +501,8 @@ func (x *GDExtensionInterface) loadProcAddresses() {
 	x.SpxSpriteSetAnimFlipV = (GDExtensionSpxSpriteSetAnimFlipV)(dlsymGD("spx_sprite_set_anim_flip_v"))
 	x.SpxSpriteIsAnimFlippedV = (GDExtensionSpxSpriteIsAnimFlippedV)(dlsymGD("spx_sprite_is_anim_flipped_v"))
 	x.SpxSpriteGetCurrentAnimName = (GDExtensionSpxSpriteGetCurrentAnimName)(dlsymGD("spx_sprite_get_current_anim_name"))
+	x.SpxSpriteSetSpineSkeleton = (GDExtensionSpxSpriteSetSpineSkeleton)(dlsymGD("spx_sprite_set_spine_skeleton"))
+	x.SpxSpriteClearSpineSkeleton = (GDExtensionSpxSpriteClearSpineSkeleton)(dlsymGD("spx_sprite_clear_spine_skeleton"))
 	x.SpxSpriteSetVelocity = (GDExtensionSpxSpriteSetVelocity)(dlsymGD("spx_sprite_set_velocity"))
 	x.SpxSpriteGetVelocity = (GDExtensionSpxSpriteGetVelocity)(dlsymGD("spx_sprite_get_velocity"))
 	x.SpxSpriteIsOnFloor = (GDExtensionSpxSpriteIsOnFloor)(dlsymGD("spx_sprite_is_on_floor"))

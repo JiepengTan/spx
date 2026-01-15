@@ -137,6 +137,7 @@ type GDExtensionInterface struct {
 	SpxSceneDestroyPureSprite                js.Value
 	SpxSceneCreateRenderSprite               js.Value
 	SpxSceneCreateStaticSprite               js.Value
+	SpxSpineClearAllCaches                   js.Value
 	SpxSpriteSetDontDestroyOnLoad            js.Value
 	SpxSpriteSetProcess                      js.Value
 	SpxSpriteSetPhysicProcess                js.Value
@@ -205,6 +206,8 @@ type GDExtensionInterface struct {
 	SpxSpriteSetAnimFlipV                    js.Value
 	SpxSpriteIsAnimFlippedV                  js.Value
 	SpxSpriteGetCurrentAnimName              js.Value
+	SpxSpriteSetSpineSkeleton                js.Value
+	SpxSpriteClearSpineSkeleton              js.Value
 	SpxSpriteSetVelocity                     js.Value
 	SpxSpriteGetVelocity                     js.Value
 	SpxSpriteIsOnFloor                       js.Value
@@ -433,6 +436,7 @@ func (x *GDExtensionInterface) loadProcAddresses() {
 	x.SpxSceneDestroyPureSprite = dlsymGD("gdspx_scene_destroy_pure_sprite")
 	x.SpxSceneCreateRenderSprite = dlsymGD("gdspx_scene_create_render_sprite")
 	x.SpxSceneCreateStaticSprite = dlsymGD("gdspx_scene_create_static_sprite")
+	x.SpxSpineClearAllCaches = dlsymGD("gdspx_spine_clear_all_caches")
 	x.SpxSpriteSetDontDestroyOnLoad = dlsymGD("gdspx_sprite_set_dont_destroy_on_load")
 	x.SpxSpriteSetProcess = dlsymGD("gdspx_sprite_set_process")
 	x.SpxSpriteSetPhysicProcess = dlsymGD("gdspx_sprite_set_physic_process")
@@ -501,6 +505,8 @@ func (x *GDExtensionInterface) loadProcAddresses() {
 	x.SpxSpriteSetAnimFlipV = dlsymGD("gdspx_sprite_set_anim_flip_v")
 	x.SpxSpriteIsAnimFlippedV = dlsymGD("gdspx_sprite_is_anim_flipped_v")
 	x.SpxSpriteGetCurrentAnimName = dlsymGD("gdspx_sprite_get_current_anim_name")
+	x.SpxSpriteSetSpineSkeleton = dlsymGD("gdspx_sprite_set_spine_skeleton")
+	x.SpxSpriteClearSpineSkeleton = dlsymGD("gdspx_sprite_clear_spine_skeleton")
 	x.SpxSpriteSetVelocity = dlsymGD("gdspx_sprite_set_velocity")
 	x.SpxSpriteGetVelocity = dlsymGD("gdspx_sprite_get_velocity")
 	x.SpxSpriteIsOnFloor = dlsymGD("gdspx_sprite_is_on_floor")

@@ -44,6 +44,10 @@ func (pself *Sprite) CheckCollisionWithSpriteByAlpha(obj_b Object, alpha_thresho
 	return SpriteMgr.CheckCollisionWithSpriteByAlpha(pself.Id, obj_b, alpha_threshold)
 }
 
+func (pself *Sprite) ClearSpineSkeleton() {
+	SpriteMgr.ClearSpineSkeleton(pself.Id)
+}
+
 func (pself *Sprite) CloneSprite() Object {
 	return SpriteMgr.CloneSprite(pself.Id)
 }
@@ -426,6 +430,10 @@ func (pself *Sprite) SetRotation(rot float64) {
 
 func (pself *Sprite) SetScale(scale Vec2) {
 	SpriteMgr.SetScale(pself.Id, scale)
+}
+
+func (pself *Sprite) SetSpineSkeleton(atlas_path string, skeleton_path string, default_mix float64) {
+	SpriteMgr.SetSpineSkeleton(pself.Id, atlas_path, skeleton_path, default_mix)
 }
 
 func (pself *Sprite) SetTexture(path string) {

@@ -28,6 +28,7 @@ physicMgr enginewrap.PhysicMgrImpl
 platformMgr enginewrap.PlatformMgrImpl
 resMgr enginewrap.ResMgrImpl
 sceneMgr enginewrap.SceneMgrImpl
+spineMgr enginewrap.SpineMgrImpl
 spriteMgr enginewrap.SpriteMgrImpl
 tilemapMgr enginewrap.TilemapMgrImpl
 uiMgr enginewrap.UiMgrImpl
@@ -47,6 +48,7 @@ var (
 	platformMgr   PlatformMgrImpl
 	resMgr        ResMgrImpl
 	sceneMgr      SceneMgrImpl
+	spineMgr      SpineMgrImpl
 	spriteMgr     SpriteMgrImpl
 	tilemapMgr    TilemapMgrImpl
 	uiMgr         UiMgrImpl
@@ -106,6 +108,11 @@ type sceneMgrImpl struct {
 }
 type SceneMgrImpl struct {
 	sceneMgrImpl
+}
+type spineMgrImpl struct {
+}
+type SpineMgrImpl struct {
+	spineMgrImpl
 }
 type spriteMgrImpl struct {
 }
@@ -820,6 +827,13 @@ func (pself *sceneMgrImpl) CreateStaticSprite(texture_path string, pos Vec2, deg
 	return _ret1
 }
 
+// ISpineMgr
+func (pself *spineMgrImpl) ClearAllCaches() {
+	callInMainThread(func() {
+		gdx.SpineMgr.ClearAllCaches()
+	})
+}
+
 // ISpriteMgr
 func (pself *spriteMgrImpl) SetDontDestroyOnLoad(obj gdx.Object) {
 	callInMainThread(func() {
@@ -1226,6 +1240,16 @@ func (pself *spriteMgrImpl) GetCurrentAnimName(obj gdx.Object) string {
 		_ret1 = gdx.SpriteMgr.GetCurrentAnimName(obj)
 	})
 	return _ret1
+}
+func (pself *spriteMgrImpl) SetSpineSkeleton(obj gdx.Object, atlas_path string, skeleton_path string, default_mix float64) {
+	callInMainThread(func() {
+		gdx.SpriteMgr.SetSpineSkeleton(obj, atlas_path, skeleton_path, default_mix)
+	})
+}
+func (pself *spriteMgrImpl) ClearSpineSkeleton(obj gdx.Object) {
+	callInMainThread(func() {
+		gdx.SpriteMgr.ClearSpineSkeleton(obj)
+	})
 }
 func (pself *spriteMgrImpl) SetVelocity(obj gdx.Object, velocity Vec2) {
 	callInMainThread(func() {

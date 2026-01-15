@@ -62,6 +62,9 @@ func BindMgr(mgrs []IManager) {
 		case ISceneMgr:
 			SceneMgr = v
 
+		case ISpineMgr:
+			SpineMgr = v
+
 		case ISpriteMgr:
 			SpriteMgr = v
 
@@ -110,6 +113,9 @@ type resMgr struct {
 type sceneMgr struct {
 	baseMgr
 }
+type spineMgr struct {
+	baseMgr
+}
 type spriteMgr struct {
 	baseMgr
 }
@@ -132,6 +138,7 @@ func createMgrs() []IManager {
 	addManager(&platformMgr{})
 	addManager(&resMgr{})
 	addManager(&sceneMgr{})
+	addManager(&spineMgr{})
 	addManager(&spriteMgr{})
 	addManager(&tilemapMgr{})
 	addManager(&uiMgr{})
@@ -745,6 +752,9 @@ func (pself *sceneMgr) CreateStaticSprite(texture_path string, pos Vec2, degree 
 	retValue := CallSceneCreateStaticSprite(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8)
 	return ToObject(retValue)
 }
+func (pself *spineMgr) ClearAllCaches() {
+	CallSpineClearAllCaches()
+}
 func (pself *spriteMgr) SetDontDestroyOnLoad(obj Object) {
 	arg0 := ToGdObj(obj)
 	CallSpriteSetDontDestroyOnLoad(arg0)
@@ -1156,6 +1166,21 @@ func (pself *spriteMgr) GetCurrentAnimName(obj Object) string {
 	arg0 := ToGdObj(obj)
 	retValue := CallSpriteGetCurrentAnimName(arg0)
 	return ToString(retValue)
+}
+func (pself *spriteMgr) SetSpineSkeleton(obj Object, atlas_path string, skeleton_path string, default_mix float64) {
+	arg0 := ToGdObj(obj)
+	arg1Str := C.CString(atlas_path)
+	arg1 := (GdString)(arg1Str)
+	defer C.free(unsafe.Pointer(arg1Str))
+	arg2Str := C.CString(skeleton_path)
+	arg2 := (GdString)(arg2Str)
+	defer C.free(unsafe.Pointer(arg2Str))
+	arg3 := ToGdFloat(default_mix)
+	CallSpriteSetSpineSkeleton(arg0, arg1, arg2, arg3)
+}
+func (pself *spriteMgr) ClearSpineSkeleton(obj Object) {
+	arg0 := ToGdObj(obj)
+	CallSpriteClearSpineSkeleton(arg0)
 }
 func (pself *spriteMgr) SetVelocity(obj Object, velocity Vec2) {
 	arg0 := ToGdObj(obj)
