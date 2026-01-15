@@ -22,6 +22,7 @@ import (
 	"log"
 	"maps"
 	"math"
+	"path"
 	"reflect"
 
 	"github.com/goplus/spbase/mathf"
@@ -56,6 +57,7 @@ type SpriteImpl struct {
 	animBindings      map[string]string
 	defaultAnimation  SpriteAnimationName
 	animationWrappers map[SpriteAnimationName]*animationWrapper // lazy load
+	spineConfig       *spineAnimConfig                          // Spine 动画配置（nil 表示非 Spine 模式）
 
 	// Pen properties
 	penColor        mathf.Color
@@ -122,6 +124,42 @@ func (p *SpriteImpl) setDying() { // dying: visible but can't be touched
 
 func (p *SpriteImpl) getAllShapes() []Shape {
 	return p.g.getAllShapes()
+}
+
+// ============================================================================
+// Spine Animation Helper Methods
+// ============================================================================
+
+// isSpineMode 判断是否为 Spine 动画模式
+func (p *SpriteImpl) isSpineMode() bool {
+	return p.spineConfig != nil
+}
+
+// getSpineAnimName 获取 Spine 动画名
+// 如果在 animMap 中有映射则返回映射值，否则返回原动画名
+func (p *SpriteImpl) getSpineAnimName(animName string) string {
+	if p.spineConfig == nil {
+		return animName
+	}
+	if spineAnimName, ok := p.spineConfig.AnimMap[animName]; ok {
+		return spineAnimName
+	}
+	return animName // 回退到原名
+}
+
+// hasAnimation 检查动画是否存在（统一支持 Spine 和帧动画两种模式）
+func (p *SpriteImpl) hasAnimation(name string) bool {
+	// Spine 模式：检查 animMap
+	if p.isSpineMode() {
+		if _, ok := p.spineConfig.AnimMap[name]; ok {
+			return true
+		}
+	}
+	// 帧动画模式（或 Spine 模式下的 fAnimations）
+	if _, ok := p.animations[name]; ok {
+		return true
+	}
+	return false
 }
 
 // ============================================================================
@@ -219,6 +257,11 @@ func (p *SpriteImpl) init(
 		p.animationWrappers[animName] = &animationWrapper{spr: p, ani: ani}
 	}
 
+	// Spine 模式初始化
+	if spriteCfg.SpineAnim != nil {
+		p.initSpineConfig(base, spriteCfg.SpineAnim)
+	}
+
 	p.pendingAudios = make([]string, 0)
 	// create engine object
 	p.syncSprite = nil
@@ -229,6 +272,29 @@ func (p *SpriteImpl) init(
 
 func (p *SpriteImpl) awake() {
 	p.playDefaultAnim()
+}
+
+func (p *SpriteImpl) initSpineConfig(baseDir string, cfg *spineAnimConfig) {
+	if cfg.Atlas == "" || cfg.Skeleton == "" {
+		log.Printf("Warning: Spine config incomplete for sprite %s", p.name)
+		return
+	}
+
+	// 创建运行时配置（处理路径和默认值）
+	p.spineConfig = &spineAnimConfig{
+		Atlas:      path.Join(baseDir, cfg.Atlas),
+		Skeleton:   path.Join(baseDir, cfg.Skeleton),
+		DefaultMix: cfg.DefaultMix,
+		AnimMap:    cfg.AnimMap,
+	}
+
+	// 设置默认值
+	if p.spineConfig.DefaultMix <= 0 {
+		p.spineConfig.DefaultMix = 0.1
+	}
+	if p.spineConfig.AnimMap == nil {
+		p.spineConfig.AnimMap = make(map[string]string)
+	}
 }
 
 func (p *SpriteImpl) initCollisionParams() {
@@ -260,6 +326,8 @@ func (p *SpriteImpl) InitFrom(src *SpriteImpl) {
 	for animName, ani := range p.animations {
 		p.animationWrappers[animName] = &animationWrapper{spr: p, ani: ani}
 	}
+	// Spine 配置复制（共享引用即可，配置不会被修改）
+	p.spineConfig = src.spineConfig
 	// clone effect params
 	p.greffUniforms = maps.Clone(src.greffUniforms)
 

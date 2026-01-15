@@ -132,13 +132,26 @@ func (sprite *SpriteImpl) syncCheckInitProxy() {
 	// bind syncSprite
 	if sprite.syncSprite == nil && !sprite.HasDestroyed {
 		sprite.syncSprite = engine.SyncNewSprite(sprite, mathf.NewVec2(sprite.x, sprite.y))
-		syncInitSpritePhysicInfo(sprite, sprite.syncSprite)
 		sprite.syncSprite.Name = sprite.name
 		sprite.syncSprite.SetTypeName(sprite.name)
 		sprite.syncSprite.SetVisible(sprite.isVisible)
 		sprite.applyGraphicEffects(true)
 		sprite.syncSprite.RegisterOnAnimationLooped(sprite.syncOnAnimationLooped)
 		sprite.syncSprite.RegisterOnAnimationFinished(sprite.syncOnAnimationFinished)
+
+		// Spine 模式：先设置骨骼，然后设置 renderScale（C++ 会计算正确的碰撞框）
+		if sprite.isSpineMode() {
+			atlasPath := engine.ToAssetPath(sprite.spineConfig.Atlas)
+			skeletonPath := engine.ToAssetPath(sprite.spineConfig.Skeleton)
+			sprite.syncSprite.SetSpineSkeleton(atlasPath, skeletonPath, sprite.spineConfig.DefaultMix)
+			// Spine 模式下需要设置 renderScale，这会触发 C++ 侧更新碰撞框
+			renderScale := sprite.getCostumeRenderScale()
+			sprite.syncSprite.SetRenderScale(mathf.NewVec2(renderScale, renderScale))
+		}
+
+		// 物理配置初始化（Spine 模式下 C++ 已经设置了碰撞框）
+		syncInitSpritePhysicInfo(sprite, sprite.syncSprite)
+
 		sprite.updateProxyTransform(true)
 	}
 }

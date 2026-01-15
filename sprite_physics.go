@@ -164,13 +164,20 @@ func (cfg *physicConfig) syncShape(syncProxy *engine.Sprite, isTrigger bool, spr
 		cfg.PivotOffset = center.Divf(scale)
 	}
 	if cfg.Type == physicsColliderAuto {
-		pivot, autoSize := syncGetCostumeBoundByAlpha(sprite, 1.0)
-		if isTrigger {
-			autoSize.X += TriggerExtraPixel
-			autoSize.Y += TriggerExtraPixel
+		// Spine 模式下跳过 Go 侧自动碰撞框计算
+		// C++ 侧会在 _calculate_spine_collision_shape() 中设置正确的碰撞框
+		if sprite.isSpineMode() {
+			cfg.Pivot = mathf.NewVec2(0, 0)
+			cfg.Params = []float64{1, 1} // 临时占位值
+		} else {
+			pivot, autoSize := syncGetCostumeBoundByAlpha(sprite, 1.0)
+			if isTrigger {
+				autoSize.X += TriggerExtraPixel
+				autoSize.Y += TriggerExtraPixel
+			}
+			cfg.Pivot = pivot
+			cfg.Params = []float64{autoSize.X, autoSize.Y}
 		}
-		cfg.Pivot = pivot
-		cfg.Params = []float64{autoSize.X, autoSize.Y}
 	}
 	cfg.applyShape(syncProxy, isTrigger, scale)
 }

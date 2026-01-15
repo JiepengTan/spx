@@ -166,10 +166,16 @@ func (p *SpriteImpl) doAnimation(animName SpriteAnimationName, ani *aniConfig, l
 		p.playAnimAudio(ani, info)
 	}
 
-	syncCheckUpdateCostume(&p.baseObj)
-	p.animationWrappers[animName].ensureRegistered(animName)
+	// 获取实际要播放的动画名
+	actualAnimName := p.getSpineAnimName(animName)
 
-	spriteMgr.PlayAnim(p.syncSprite.GetId(), animName, speed, loop, false)
+	// Spine 模式不需要注册帧动画资源
+	if !p.isSpineMode() {
+		syncCheckUpdateCostume(&p.baseObj)
+		p.animationWrappers[animName].ensureRegistered(animName)
+	}
+
+	spriteMgr.PlayAnim(p.syncSprite.GetId(), actualAnimName, speed, loop, false)
 	if isBlocking {
 		p.isAnimating = true
 		for spriteMgr.IsPlayingAnim(p.syncSprite.GetId()) {
@@ -274,12 +280,21 @@ func (p *SpriteImpl) playDefaultAnim() {
 		animName = p.defaultAnimation
 	}
 
-	if _, ok := p.animations[animName]; ok {
-		p.animationWrappers[animName].ensureRegistered(animName)
-		spriteMgr.PlayAnim(p.syncSprite.GetId(), animName, speed, true, false)
-	} else {
+	// 检查动画是否存在
+	if !p.hasAnimation(animName) {
 		p.goSetCostume(p.defaultCostumeIndex)
+		return
 	}
+
+	// 获取实际要播放的动画名
+	actualAnimName := p.getSpineAnimName(animName)
+
+	// Spine 模式不需要注册帧动画资源
+	if !p.isSpineMode() {
+		p.animationWrappers[animName].ensureRegistered(animName)
+	}
+
+	spriteMgr.PlayAnim(p.syncSprite.GetId(), actualAnimName, speed, true, false)
 }
 
 // -----------------------------------------------------------------------------
@@ -294,22 +309,38 @@ func (p *SpriteImpl) Animate__1(name SpriteAnimationName, loop bool) {
 	if debugInstr {
 		log.Println("==> Animation", name)
 	}
-	if ani, ok := p.animations[name]; ok {
-		p.doAnimation(name, ani, loop, 1, false, true)
-	} else {
+
+	// 统一检查动画是否存在（支持 Spine 和帧动画）
+	if !p.hasAnimation(name) {
 		log.Println("Animation not found:", name)
+		return
 	}
+
+	// 获取动画配置（可能为 nil，用于纯 Spine 动画）
+	ani := p.animations[name]
+	if ani == nil {
+		ani = &aniConfig{}
+	}
+	p.doAnimation(name, ani, loop, 1, false, true)
 }
 
 func (p *SpriteImpl) AnimateAndWait(name SpriteAnimationName) {
 	if debugInstr {
 		log.Println("==> AnimateAndWait", name)
 	}
-	if ani, ok := p.animations[name]; ok {
-		p.doAnimation(name, ani, false, 1, true, true)
-	} else {
+
+	// 统一检查动画是否存在（支持 Spine 和帧动画）
+	if !p.hasAnimation(name) {
 		log.Println("Animation not found:", name)
+		return
 	}
+
+	// 获取动画配置（可能为 nil，用于纯 Spine 动画）
+	ani := p.animations[name]
+	if ani == nil {
+		ani = &aniConfig{}
+	}
+	p.doAnimation(name, ani, false, 1, true, true)
 }
 
 func (p *SpriteImpl) StopAnimation(name SpriteAnimationName) {
