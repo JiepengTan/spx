@@ -292,6 +292,7 @@ typedef void (*GDExtensionSpxPhysicRaycast)(GdVec2 from, GdVec2 to, GdInt collis
 typedef void (*GDExtensionSpxPhysicCheckCollision)(GdVec2 from, GdVec2 to, GdInt collision_mask, GdBool collide_with_areas, GdBool collide_with_bodies, GdBool *ret_value);
 typedef void (*GDExtensionSpxPhysicCheckTouchedCameraBoundaries)(GdObj obj, GdInt *ret_value);
 typedef void (*GDExtensionSpxPhysicCheckTouchedCameraBoundary)(GdObj obj, GdInt board_type, GdBool *ret_value);
+typedef void (*GDExtensionSpxPhysicCheckNearestTouchedCameraBoundary)(GdObj obj, GdInt *ret_value);
 typedef void (*GDExtensionSpxPhysicSetCollisionSystemType)(GdBool is_collision_by_alpha);
 typedef void (*GDExtensionSpxPhysicSetGlobalGravity)(GdFloat gravity);
 typedef void (*GDExtensionSpxPhysicGetGlobalGravity)(GdFloat *ret_value);
@@ -465,7 +466,9 @@ typedef void (*GDExtensionSpxSpriteSetTriggerEnabled)(GdObj obj, GdBool trigger)
 typedef void (*GDExtensionSpxSpriteIsTriggerEnabled)(GdObj obj, GdBool *ret_value);
 typedef void (*GDExtensionSpxSpriteCheckCollisionByColor)(GdObj obj, GdColor color, GdFloat color_threshold, GdFloat alpha_threshold, GdBool *ret_value);
 typedef void (*GDExtensionSpxSpriteCheckCollisionByAlpha)(GdObj obj, GdFloat alpha_threshold, GdBool *ret_value);
-typedef void (*GDExtensionSpxSpriteCheckCollisionWithSpriteByAlpha)(GdObj obj, GdObj obj_b, GdFloat alpha_threshold, GdBool *ret_value);
+typedef void (*GDExtensionSpxSpriteCheckCollisionWithSprite)(GdObj obj, GdObj obj_b, GdFloat alpha_threshold, GdBool use_pixel_perfect, GdBool *ret_value);
+typedef void (*GDExtensionSpxSpriteBatchUpdateTransforms)(GdArray buffer);
+typedef void (*GDExtensionSpxSpriteBatchUpdatePositions)(GdArray objs, GdArray *ret_value);
 // SpxTilemap
 typedef void (*GDExtensionSpxTilemapOpenDrawTilesWithSize)(GdInt tile_size);
 typedef void (*GDExtensionSpxTilemapOpenDrawTiles)();
@@ -484,6 +487,12 @@ typedef void (*GDExtensionSpxTilemapGetTile)(GdVec2 pos, GdString *ret_value);
 typedef void (*GDExtensionSpxTilemapGetTileWithLayer)(GdVec2 pos, GdInt layer_index, GdString *ret_value);
 typedef void (*GDExtensionSpxTilemapCloseDrawTiles)();
 typedef void (*GDExtensionSpxTilemapExitTilemapEditorMode)();
+// SpxTilemapparser
+typedef void (*GDExtensionSpxTilemapparserLoadTilemap)(GdString json_path);
+typedef void (*GDExtensionSpxTilemapparserUnloadTilemap)(GdString name);
+typedef void (*GDExtensionSpxTilemapparserDestroyAllTilemaps)();
+typedef void (*GDExtensionSpxTilemapparserHasTilemap)(GdString name, GdBool *ret_value);
+typedef void (*GDExtensionSpxTilemapparserGetTilemapLayerCount)(GdString name, GdInt *ret_value);
 // SpxUi
 typedef void (*GDExtensionSpxUiBindNode)(GdObj obj, GdString rel_path, GdObj *ret_value);
 typedef void (*GDExtensionSpxUiCreateNode)(GdString path, GdObj *ret_value);

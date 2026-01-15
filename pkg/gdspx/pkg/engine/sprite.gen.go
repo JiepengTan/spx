@@ -24,6 +24,14 @@ func (pself *Sprite) AddImpulse(impulse Vec2) {
 	SpriteMgr.AddImpulse(pself.Id, impulse)
 }
 
+func (pself *Sprite) BatchUpdatePositions(objs Array) Array {
+	return SpriteMgr.BatchUpdatePositions(pself.Id, objs)
+}
+
+func (pself *Sprite) BatchUpdateTransforms(buffer Array) {
+	SpriteMgr.BatchUpdateTransforms(pself.Id, buffer)
+}
+
 func (pself *Sprite) CheckCollision(target Object, is_src_trigger bool, is_dst_trigger bool) bool {
 	return SpriteMgr.CheckCollision(pself.Id, target, is_src_trigger, is_dst_trigger)
 }
@@ -40,8 +48,8 @@ func (pself *Sprite) CheckCollisionWithPoint(point Vec2, is_trigger bool) bool {
 	return SpriteMgr.CheckCollisionWithPoint(pself.Id, point, is_trigger)
 }
 
-func (pself *Sprite) CheckCollisionWithSpriteByAlpha(obj_b Object, alpha_threshold float64) bool {
-	return SpriteMgr.CheckCollisionWithSpriteByAlpha(pself.Id, obj_b, alpha_threshold)
+func (pself *Sprite) CheckCollisionWithSprite(obj_b Object, alpha_threshold float64, use_pixel_perfect bool) bool {
+	return SpriteMgr.CheckCollisionWithSprite(pself.Id, obj_b, alpha_threshold, use_pixel_perfect)
 }
 
 func (pself *Sprite) ClearSpineSkeleton() {

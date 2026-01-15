@@ -15,21 +15,22 @@ import (
 )
 
 var (
-	AudioMgr      IAudioMgr
-	CameraMgr     ICameraMgr
-	DebugMgr      IDebugMgr
-	ExtMgr        IExtMgr
-	InputMgr      IInputMgr
-	NavigationMgr INavigationMgr
-	PenMgr        IPenMgr
-	PhysicMgr     IPhysicMgr
-	PlatformMgr   IPlatformMgr
-	ResMgr        IResMgr
-	SceneMgr      ISceneMgr
-	SpineMgr      ISpineMgr
-	SpriteMgr     ISpriteMgr
-	TilemapMgr    ITilemapMgr
-	UiMgr         IUiMgr
+	AudioMgr         IAudioMgr
+	CameraMgr        ICameraMgr
+	DebugMgr         IDebugMgr
+	ExtMgr           IExtMgr
+	InputMgr         IInputMgr
+	NavigationMgr    INavigationMgr
+	PenMgr           IPenMgr
+	PhysicMgr        IPhysicMgr
+	PlatformMgr      IPlatformMgr
+	ResMgr           IResMgr
+	SceneMgr         ISceneMgr
+	SpineMgr         ISpineMgr
+	SpriteMgr        ISpriteMgr
+	TilemapMgr       ITilemapMgr
+	TilemapparserMgr ITilemapparserMgr
+	UiMgr            IUiMgr
 )
 
 type IAudioMgr interface {
@@ -122,6 +123,7 @@ type IPhysicMgr interface {
 	CheckCollision(from Vec2, to Vec2, collision_mask int64, collide_with_areas bool, collide_with_bodies bool) bool
 	CheckTouchedCameraBoundaries(obj Object) int64
 	CheckTouchedCameraBoundary(obj Object, board_type int64) bool
+	CheckNearestTouchedCameraBoundary(obj Object) int64
 	SetCollisionSystemType(is_collision_by_alpha bool)
 	SetGlobalGravity(gravity float64)
 	GetGlobalGravity() float64
@@ -305,7 +307,9 @@ type ISpriteMgr interface {
 	IsTriggerEnabled(obj Object) bool
 	CheckCollisionByColor(obj Object, color Color, color_threshold float64, alpha_threshold float64) bool
 	CheckCollisionByAlpha(obj Object, alpha_threshold float64) bool
-	CheckCollisionWithSpriteByAlpha(obj Object, obj_b Object, alpha_threshold float64) bool
+	CheckCollisionWithSprite(obj Object, obj_b Object, alpha_threshold float64, use_pixel_perfect bool) bool
+	BatchUpdateTransforms(buffer Array)
+	BatchUpdatePositions(objs Array) Array
 }
 
 type ITilemapMgr interface {
@@ -326,6 +330,19 @@ type ITilemapMgr interface {
 	GetTileWithLayer(pos Vec2, layer_index int64) string
 	CloseDrawTiles()
 	ExitTilemapEditorMode()
+	LoadTilemap(json_path string)
+	UnloadTilemap(name string)
+	DestroyAllTilemaps()
+	HasTilemap(name string) bool
+	GetTilemapLayerCount(name string) int64
+}
+
+type ITilemapparserMgr interface {
+	LoadTilemap(json_path string)
+	UnloadTilemap(name string)
+	DestroyAllTilemaps()
+	HasTilemap(name string) bool
+	GetTilemapLayerCount(name string) int64
 }
 
 type IUiMgr interface {

@@ -153,6 +153,7 @@ type GDExtensionSpxPhysicRaycast C.GDExtensionSpxPhysicRaycast
 type GDExtensionSpxPhysicCheckCollision C.GDExtensionSpxPhysicCheckCollision
 type GDExtensionSpxPhysicCheckTouchedCameraBoundaries C.GDExtensionSpxPhysicCheckTouchedCameraBoundaries
 type GDExtensionSpxPhysicCheckTouchedCameraBoundary C.GDExtensionSpxPhysicCheckTouchedCameraBoundary
+type GDExtensionSpxPhysicCheckNearestTouchedCameraBoundary C.GDExtensionSpxPhysicCheckNearestTouchedCameraBoundary
 type GDExtensionSpxPhysicSetCollisionSystemType C.GDExtensionSpxPhysicSetCollisionSystemType
 type GDExtensionSpxPhysicSetGlobalGravity C.GDExtensionSpxPhysicSetGlobalGravity
 type GDExtensionSpxPhysicGetGlobalGravity C.GDExtensionSpxPhysicGetGlobalGravity
@@ -321,7 +322,9 @@ type GDExtensionSpxSpriteSetTriggerEnabled C.GDExtensionSpxSpriteSetTriggerEnabl
 type GDExtensionSpxSpriteIsTriggerEnabled C.GDExtensionSpxSpriteIsTriggerEnabled
 type GDExtensionSpxSpriteCheckCollisionByColor C.GDExtensionSpxSpriteCheckCollisionByColor
 type GDExtensionSpxSpriteCheckCollisionByAlpha C.GDExtensionSpxSpriteCheckCollisionByAlpha
-type GDExtensionSpxSpriteCheckCollisionWithSpriteByAlpha C.GDExtensionSpxSpriteCheckCollisionWithSpriteByAlpha
+type GDExtensionSpxSpriteCheckCollisionWithSprite C.GDExtensionSpxSpriteCheckCollisionWithSprite
+type GDExtensionSpxSpriteBatchUpdateTransforms C.GDExtensionSpxSpriteBatchUpdateTransforms
+type GDExtensionSpxSpriteBatchUpdatePositions C.GDExtensionSpxSpriteBatchUpdatePositions
 type GDExtensionSpxTilemapOpenDrawTilesWithSize C.GDExtensionSpxTilemapOpenDrawTilesWithSize
 type GDExtensionSpxTilemapOpenDrawTiles C.GDExtensionSpxTilemapOpenDrawTiles
 type GDExtensionSpxTilemapSetLayerIndex C.GDExtensionSpxTilemapSetLayerIndex
@@ -339,6 +342,11 @@ type GDExtensionSpxTilemapGetTile C.GDExtensionSpxTilemapGetTile
 type GDExtensionSpxTilemapGetTileWithLayer C.GDExtensionSpxTilemapGetTileWithLayer
 type GDExtensionSpxTilemapCloseDrawTiles C.GDExtensionSpxTilemapCloseDrawTiles
 type GDExtensionSpxTilemapExitTilemapEditorMode C.GDExtensionSpxTilemapExitTilemapEditorMode
+type GDExtensionSpxTilemapparserLoadTilemap C.GDExtensionSpxTilemapparserLoadTilemap
+type GDExtensionSpxTilemapparserUnloadTilemap C.GDExtensionSpxTilemapparserUnloadTilemap
+type GDExtensionSpxTilemapparserDestroyAllTilemaps C.GDExtensionSpxTilemapparserDestroyAllTilemaps
+type GDExtensionSpxTilemapparserHasTilemap C.GDExtensionSpxTilemapparserHasTilemap
+type GDExtensionSpxTilemapparserGetTilemapLayerCount C.GDExtensionSpxTilemapparserGetTilemapLayerCount
 type GDExtensionSpxUiBindNode C.GDExtensionSpxUiBindNode
 type GDExtensionSpxUiCreateNode C.GDExtensionSpxUiCreateNode
 type GDExtensionSpxUiCreateButton C.GDExtensionSpxUiCreateButton
@@ -1048,6 +1056,16 @@ func CallPhysicCheckTouchedCameraBoundary(
 	C.cgo_callfn_GDExtensionSpxPhysicCheckTouchedCameraBoundary(arg0, arg1GdObj, arg2GdInt, &ret_val)
 
 	return (GdBool)(ret_val)
+}
+func CallPhysicCheckNearestTouchedCameraBoundary(
+	obj GdObj,
+) GdInt {
+	arg0 := (C.GDExtensionSpxPhysicCheckNearestTouchedCameraBoundary)(api.SpxPhysicCheckNearestTouchedCameraBoundary)
+	arg1GdObj := (C.GdObj)(obj)
+	var ret_val C.GdInt
+	C.cgo_callfn_GDExtensionSpxPhysicCheckNearestTouchedCameraBoundary(arg0, arg1GdObj, &ret_val)
+
+	return (GdInt)(ret_val)
 }
 func CallPhysicSetCollisionSystemType(
 	is_collision_by_alpha GdBool,
@@ -2829,19 +2847,40 @@ func CallSpriteCheckCollisionByAlpha(
 
 	return (GdBool)(ret_val)
 }
-func CallSpriteCheckCollisionWithSpriteByAlpha(
+func CallSpriteCheckCollisionWithSprite(
 	obj GdObj,
 	obj_b GdObj,
 	alpha_threshold GdFloat,
+	use_pixel_perfect GdBool,
 ) GdBool {
-	arg0 := (C.GDExtensionSpxSpriteCheckCollisionWithSpriteByAlpha)(api.SpxSpriteCheckCollisionWithSpriteByAlpha)
+	arg0 := (C.GDExtensionSpxSpriteCheckCollisionWithSprite)(api.SpxSpriteCheckCollisionWithSprite)
 	arg1GdObj := (C.GdObj)(obj)
 	arg2GdObj := (C.GdObj)(obj_b)
 	arg3GdFloat := (C.GdFloat)(alpha_threshold)
+	arg4GdBool := (C.GdBool)(use_pixel_perfect)
 	var ret_val C.GdBool
-	C.cgo_callfn_GDExtensionSpxSpriteCheckCollisionWithSpriteByAlpha(arg0, arg1GdObj, arg2GdObj, arg3GdFloat, &ret_val)
+	C.cgo_callfn_GDExtensionSpxSpriteCheckCollisionWithSprite(arg0, arg1GdObj, arg2GdObj, arg3GdFloat, arg4GdBool, &ret_val)
 
 	return (GdBool)(ret_val)
+}
+func CallSpriteBatchUpdateTransforms(
+	buffer GdArray,
+) {
+	arg0 := (C.GDExtensionSpxSpriteBatchUpdateTransforms)(api.SpxSpriteBatchUpdateTransforms)
+	arg1GdArray := (C.GdArray)(buffer)
+
+	C.cgo_callfn_GDExtensionSpxSpriteBatchUpdateTransforms(arg0, arg1GdArray)
+
+}
+func CallSpriteBatchUpdatePositions(
+	objs GdArray,
+) GdArray {
+	arg0 := (C.GDExtensionSpxSpriteBatchUpdatePositions)(api.SpxSpriteBatchUpdatePositions)
+	arg1GdArray := (C.GdArray)(objs)
+	var ret_val C.GdArray
+	C.cgo_callfn_GDExtensionSpxSpriteBatchUpdatePositions(arg0, arg1GdArray, &ret_val)
+
+	return GdArray(ret_val)
 }
 func CallTilemapOpenDrawTilesWithSize(
 	tile_size GdInt,
@@ -3008,6 +3047,49 @@ func CallTilemapExitTilemapEditorMode() {
 	arg0 := (C.GDExtensionSpxTilemapExitTilemapEditorMode)(api.SpxTilemapExitTilemapEditorMode)
 
 	C.cgo_callfn_GDExtensionSpxTilemapExitTilemapEditorMode(arg0)
+}
+func CallTilemapparserLoadTilemap(
+	json_path GdString,
+) {
+	arg0 := (C.GDExtensionSpxTilemapparserLoadTilemap)(api.SpxTilemapparserLoadTilemap)
+	arg1GdString := (C.GdString)(json_path)
+
+	C.cgo_callfn_GDExtensionSpxTilemapparserLoadTilemap(arg0, arg1GdString)
+
+}
+func CallTilemapparserUnloadTilemap(
+	name GdString,
+) {
+	arg0 := (C.GDExtensionSpxTilemapparserUnloadTilemap)(api.SpxTilemapparserUnloadTilemap)
+	arg1GdString := (C.GdString)(name)
+
+	C.cgo_callfn_GDExtensionSpxTilemapparserUnloadTilemap(arg0, arg1GdString)
+
+}
+func CallTilemapparserDestroyAllTilemaps() {
+	arg0 := (C.GDExtensionSpxTilemapparserDestroyAllTilemaps)(api.SpxTilemapparserDestroyAllTilemaps)
+
+	C.cgo_callfn_GDExtensionSpxTilemapparserDestroyAllTilemaps(arg0)
+}
+func CallTilemapparserHasTilemap(
+	name GdString,
+) GdBool {
+	arg0 := (C.GDExtensionSpxTilemapparserHasTilemap)(api.SpxTilemapparserHasTilemap)
+	arg1GdString := (C.GdString)(name)
+	var ret_val C.GdBool
+	C.cgo_callfn_GDExtensionSpxTilemapparserHasTilemap(arg0, arg1GdString, &ret_val)
+
+	return (GdBool)(ret_val)
+}
+func CallTilemapparserGetTilemapLayerCount(
+	name GdString,
+) GdInt {
+	arg0 := (C.GDExtensionSpxTilemapparserGetTilemapLayerCount)(api.SpxTilemapparserGetTilemapLayerCount)
+	arg1GdString := (C.GdString)(name)
+	var ret_val C.GdInt
+	C.cgo_callfn_GDExtensionSpxTilemapparserGetTilemapLayerCount(arg0, arg1GdString, &ret_val)
+
+	return (GdInt)(ret_val)
 }
 func CallUiBindNode(
 	obj GdObj,

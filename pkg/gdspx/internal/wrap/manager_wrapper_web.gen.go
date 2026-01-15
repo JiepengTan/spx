@@ -66,6 +66,9 @@ func BindMgr(mgrs []IManager) {
 		case ITilemapMgr:
 			TilemapMgr = v
 
+		case ITilemapparserMgr:
+			TilemapparserMgr = v
+
 		case IUiMgr:
 			UiMgr = v
 
@@ -117,6 +120,9 @@ type spriteMgr struct {
 type tilemapMgr struct {
 	baseMgr
 }
+type tilemapparserMgr struct {
+	baseMgr
+}
 type uiMgr struct {
 	baseMgr
 }
@@ -136,6 +142,7 @@ func createMgrs() []IManager {
 	addManager(&spineMgr{})
 	addManager(&spriteMgr{})
 	addManager(&tilemapMgr{})
+	addManager(&tilemapparserMgr{})
 	addManager(&uiMgr{})
 	return mgrs
 }
@@ -468,6 +475,11 @@ func (pself *physicMgr) CheckTouchedCameraBoundary(obj Object, board_type int64)
 	arg1 := JsFromGdInt(board_type)
 	_retValue := API.SpxPhysicCheckTouchedCameraBoundary.Invoke(arg0, arg1)
 	return JsToGdBool(_retValue)
+}
+func (pself *physicMgr) CheckNearestTouchedCameraBoundary(obj Object) int64 {
+	arg0 := JsFromGdObj(obj)
+	_retValue := API.SpxPhysicCheckNearestTouchedCameraBoundary.Invoke(arg0)
+	return JsToGdInt(_retValue)
 }
 func (pself *physicMgr) SetCollisionSystemType(is_collision_by_alpha bool) {
 	arg0 := JsFromGdBool(is_collision_by_alpha)
@@ -1332,12 +1344,22 @@ func (pself *spriteMgr) CheckCollisionByAlpha(obj Object, alpha_threshold float6
 	_retValue := API.SpxSpriteCheckCollisionByAlpha.Invoke(arg0, arg1)
 	return JsToGdBool(_retValue)
 }
-func (pself *spriteMgr) CheckCollisionWithSpriteByAlpha(obj Object, obj_b Object, alpha_threshold float64) bool {
+func (pself *spriteMgr) CheckCollisionWithSprite(obj Object, obj_b Object, alpha_threshold float64, use_pixel_perfect bool) bool {
 	arg0 := JsFromGdObj(obj)
 	arg1 := JsFromGdObj(obj_b)
 	arg2 := JsFromGdFloat(alpha_threshold)
-	_retValue := API.SpxSpriteCheckCollisionWithSpriteByAlpha.Invoke(arg0, arg1, arg2)
+	arg3 := JsFromGdBool(use_pixel_perfect)
+	_retValue := API.SpxSpriteCheckCollisionWithSprite.Invoke(arg0, arg1, arg2, arg3)
 	return JsToGdBool(_retValue)
+}
+func (pself *spriteMgr) BatchUpdateTransforms(buffer Array) {
+	arg0 := JsFromGdArray(buffer)
+	API.SpxSpriteBatchUpdateTransforms.Invoke(arg0)
+}
+func (pself *spriteMgr) BatchUpdatePositions(objs Array) Array {
+	arg0 := JsFromGdArray(objs)
+	_retValue := API.SpxSpriteBatchUpdatePositions.Invoke(arg0)
+	return JsToGdArray(_retValue)
 }
 func (pself *tilemapMgr) OpenDrawTilesWithSize(tile_size int64) {
 	arg0 := JsFromGdInt(tile_size)
@@ -1417,6 +1439,27 @@ func (pself *tilemapMgr) CloseDrawTiles() {
 }
 func (pself *tilemapMgr) ExitTilemapEditorMode() {
 	API.SpxTilemapExitTilemapEditorMode.Invoke()
+}
+func (pself *tilemapparserMgr) LoadTilemap(json_path string) {
+	arg0 := JsFromGdString(json_path)
+	API.SpxTilemapparserLoadTilemap.Invoke(arg0)
+}
+func (pself *tilemapparserMgr) UnloadTilemap(name string) {
+	arg0 := JsFromGdString(name)
+	API.SpxTilemapparserUnloadTilemap.Invoke(arg0)
+}
+func (pself *tilemapparserMgr) DestroyAllTilemaps() {
+	API.SpxTilemapparserDestroyAllTilemaps.Invoke()
+}
+func (pself *tilemapparserMgr) HasTilemap(name string) bool {
+	arg0 := JsFromGdString(name)
+	_retValue := API.SpxTilemapparserHasTilemap.Invoke(arg0)
+	return JsToGdBool(_retValue)
+}
+func (pself *tilemapparserMgr) GetTilemapLayerCount(name string) int64 {
+	arg0 := JsFromGdString(name)
+	_retValue := API.SpxTilemapparserGetTilemapLayerCount.Invoke(arg0)
+	return JsToGdInt(_retValue)
 }
 func (pself *uiMgr) BindNode(obj Object, rel_path string) Object {
 	arg0 := JsFromGdObj(obj)

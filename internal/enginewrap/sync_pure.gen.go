@@ -31,27 +31,29 @@ sceneMgr enginewrap.SceneMgrImpl
 spineMgr enginewrap.SpineMgrImpl
 spriteMgr enginewrap.SpriteMgrImpl
 tilemapMgr enginewrap.TilemapMgrImpl
+tilemapparserMgr enginewrap.TilemapparserMgrImpl
 uiMgr enginewrap.UiMgrImpl
 
 )
 */
 
 var (
-	audioMgr      AudioMgrImpl
-	cameraMgr     CameraMgrImpl
-	debugMgr      DebugMgrImpl
-	extMgr        ExtMgrImpl
-	inputMgr      InputMgrImpl
-	navigationMgr NavigationMgrImpl
-	penMgr        PenMgrImpl
-	physicMgr     PhysicMgrImpl
-	platformMgr   PlatformMgrImpl
-	resMgr        ResMgrImpl
-	sceneMgr      SceneMgrImpl
-	spineMgr      SpineMgrImpl
-	spriteMgr     SpriteMgrImpl
-	tilemapMgr    TilemapMgrImpl
-	uiMgr         UiMgrImpl
+	audioMgr         AudioMgrImpl
+	cameraMgr        CameraMgrImpl
+	debugMgr         DebugMgrImpl
+	extMgr           ExtMgrImpl
+	inputMgr         InputMgrImpl
+	navigationMgr    NavigationMgrImpl
+	penMgr           PenMgrImpl
+	physicMgr        PhysicMgrImpl
+	platformMgr      PlatformMgrImpl
+	resMgr           ResMgrImpl
+	sceneMgr         SceneMgrImpl
+	spineMgr         SpineMgrImpl
+	spriteMgr        SpriteMgrImpl
+	tilemapMgr       TilemapMgrImpl
+	tilemapparserMgr TilemapparserMgrImpl
+	uiMgr            UiMgrImpl
 )
 
 type audioMgrImpl struct {
@@ -123,6 +125,11 @@ type tilemapMgrImpl struct {
 }
 type TilemapMgrImpl struct {
 	tilemapMgrImpl
+}
+type tilemapparserMgrImpl struct {
+}
+type TilemapparserMgrImpl struct {
+	tilemapparserMgrImpl
 }
 type uiMgrImpl struct {
 }
@@ -296,6 +303,10 @@ func (pself *physicMgrImpl) CheckTouchedCameraBoundaries(obj gdx.Object) int64 {
 }
 func (pself *physicMgrImpl) CheckTouchedCameraBoundary(obj gdx.Object, board_type int64) bool {
 	var _ret1 bool
+	return _ret1
+}
+func (pself *physicMgrImpl) CheckNearestTouchedCameraBoundary(obj gdx.Object) int64 {
+	var _ret1 int64
 	return _ret1
 }
 func (pself *physicMgrImpl) SetCollisionSystemType(is_collision_by_alpha bool) {}
@@ -726,8 +737,13 @@ func (pself *spriteMgrImpl) CheckCollisionByAlpha(obj gdx.Object, alpha_threshol
 	var _ret1 bool
 	return _ret1
 }
-func (pself *spriteMgrImpl) CheckCollisionWithSpriteByAlpha(obj gdx.Object, obj_b gdx.Object, alpha_threshold float64) bool {
+func (pself *spriteMgrImpl) CheckCollisionWithSprite(obj gdx.Object, obj_b gdx.Object, alpha_threshold float64, use_pixel_perfect bool) bool {
 	var _ret1 bool
+	return _ret1
+}
+func (pself *spriteMgrImpl) BatchUpdateTransforms(buffer gdx.Array) {}
+func (pself *spriteMgrImpl) BatchUpdatePositions(objs gdx.Array) gdx.Array {
+	var _ret1 gdx.Array
 	return _ret1
 }
 
@@ -758,8 +774,32 @@ func (pself *tilemapMgrImpl) GetTileWithLayer(pos Vec2, layer_index int64) strin
 	var _ret1 string
 	return _ret1
 }
-func (pself *tilemapMgrImpl) CloseDrawTiles()        {}
-func (pself *tilemapMgrImpl) ExitTilemapEditorMode() {}
+func (pself *tilemapMgrImpl) CloseDrawTiles()                    {}
+func (pself *tilemapMgrImpl) ExitTilemapEditorMode()             {}
+func (pself *tilemapparserMgrImpl) LoadTilemap(json_path string) {}
+func (pself *tilemapparserMgrImpl) UnloadTilemap(name string)    {}
+func (pself *tilemapparserMgrImpl) DestroyAllTilemaps()          {}
+func (pself *tilemapparserMgrImpl) HasTilemap(name string) bool {
+	var _ret1 bool
+	return _ret1
+}
+func (pself *tilemapparserMgrImpl) GetTilemapLayerCount(name string) int64 {
+	var _ret1 int64
+	return _ret1
+}
+
+// ITilemapparserMgr
+func (pself *tilemapparserMgrImpl) LoadTilemap(json_path string) {}
+func (pself *tilemapparserMgrImpl) UnloadTilemap(name string)    {}
+func (pself *tilemapparserMgrImpl) DestroyAllTilemaps()          {}
+func (pself *tilemapparserMgrImpl) HasTilemap(name string) bool {
+	var _ret1 bool
+	return _ret1
+}
+func (pself *tilemapparserMgrImpl) GetTilemapLayerCount(name string) int64 {
+	var _ret1 int64
+	return _ret1
+}
 
 // IUiMgr
 func (pself *uiMgrImpl) BindNode(obj gdx.Object, rel_path string) gdx.Object {
