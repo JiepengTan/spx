@@ -289,6 +289,14 @@ type animPayload struct {
 	MaxBitmap int64  `json:"max_bitmap"`
 }
 
+// Spine 动画配置
+type spineAnimConfig struct {
+	Atlas      string            `json:"atlas"`      // atlas 文件路径，如 "spine/spineboy.atlas"
+	Skeleton   string            `json:"skeleton"`   // skeleton 文件路径，如 "spine/spineboy-pro.skel"
+	DefaultMix float64           `json:"defaultMix"` // 动画混合时间，默认 0.1
+	AnimMap    map[string]string `json:"animMap"`    // SPX 动画名 -> Spine 动画名映射
+}
+
 // -------------------------------------------------------------------------------------
 
 type spriteConfig struct {
@@ -305,6 +313,7 @@ type spriteConfig struct {
 	FAnimations         map[string]*aniConfig `json:"fAnimations"`
 	MAnimations         map[string]*aniConfig `json:"mAnimations"`
 	TAnimations         map[string]*aniConfig `json:"tAnimations"`
+	SpineAnim           *spineAnimConfig      `json:"spineAnim"` // Spine 动画配置（可选）
 	Visible             bool                  `json:"visible"`
 	IsDraggable         bool                  `json:"isDraggable"`
 	Pivot               mathf.Vec2            `json:"pivot"`
